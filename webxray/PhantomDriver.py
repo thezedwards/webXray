@@ -28,7 +28,7 @@ class PhantomDriver:
 			self.die('you are running phantomjs version %s, webXray requires at least 1.9' % phantomjs_version)
 		
 		# looks good, build the command_string
-		self.command_string = "phantomjs "+phantom_args+" "+os.path.join(os.path.dirname(__file__))+"/resources/phantomjs_scripts/"+script_name
+		self.command_string = "phantomjs "+phantom_args+" ./webxray/resources/phantomjs_scripts/"+script_name
 	# end __init__
 
 	def die(self, msg):
