@@ -65,7 +65,6 @@ class Reporter:
 		print('\t=====================')
 		print('\t\tProcessing...')
 		self.top_tlds = self.get_top_tlds(self.num_tlds)
-		print(self.top_tlds)
 		print('\t\tSuccess!')
 		print('\t\tThe top tlds are:')
 		for (tld, pages) in self.top_tlds:
