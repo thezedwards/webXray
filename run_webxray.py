@@ -128,7 +128,7 @@ def interaction():
 			while True:
 				new_db_name = input('\tEnter new database name: ').lower()
 
-				if len(new_db_name) <= 20 and re.search('^[a-zA-Z0-9_]*$', new_db_name):
+				if len(new_db_name) <= 40 and re.search('^[a-zA-Z0-9_]*$', new_db_name):
 					print('\tNew db name is "%s"' % new_db_name)
 					break
 				else:
