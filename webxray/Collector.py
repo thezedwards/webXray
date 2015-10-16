@@ -74,6 +74,11 @@ class Collector:
 		
 			count += 1
 		
+			# only do lines starting with https?://
+			if not (re.match('^https?://.+', uri)):
+				print("\t\t%s | %-50s Not a valid address, Skipping." % (count, uri[:50]))
+				continue
+		
 			# drop trailing '/, clean off white space, make lower, create cli-safe uri
 			# with parse.quote, but exclude :/ b/c of http://
 			uri = re.sub('/$', '', urllib.parse.quote(uri.strip(), safe=":/").lower())
@@ -96,7 +101,7 @@ class Collector:
 				print("\t\t%s | %-50s Already queued, Skipping." % (count, uri[:50]))
 
 		print('\t----------------------------------')
-		print('\t%s pages will now be webXray\'d'  % len(uris_to_process))
+		print('\t%s addresses will now be webXray\'d'  % len(uris_to_process))
 		print('\t\t...you can go take a walk. ;-)')
 		print('\t----------------------------------')
 
