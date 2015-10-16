@@ -160,11 +160,15 @@ def interaction():
 		#	'page_lists' directory.  this function shows all available page lists and returns
 		#	the name of the selected list.
 		files = os.listdir(path='./page_lists')
+		
 		if len(files) is 0:
 			print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			print('ERROR: No page lists found, check page_lists directory.')
 			print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			quit()
+
+		# alpha sort file list for easier selection
+		files.sort()
 
 		# print out options
 		print('\tPage Lists Available:')
