@@ -408,7 +408,7 @@
 	{
 		"organization"	:	"Cloudflare",
 		"notes"			:	"CDN",
-		"country"		:	"",
+		"country"		:	"US",
 		"domains"		:	[
 			"cloudflare.com"
 		]
