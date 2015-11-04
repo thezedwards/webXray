@@ -140,6 +140,7 @@
 			"alipay.com",
 			"alipayobjects.com",
 			"aliunicorn.com",
+			"aliyun.com",
 			"aliyuncdn.com",
 			"aliyuncs.com",
 			"atpanel.com",
@@ -167,7 +168,9 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"allyes.com",
-			"allyes.com.cn"
+			"allyes.com.cn",
+			"qtmojo.cn",
+			"qtmojo.com"
 		]
 	},
 	{
@@ -405,7 +408,7 @@
 	{
 		"organization"	:	"Cloudflare",
 		"notes"			:	"CDN",
-		"country"		:	"US",
+		"country"		:	"",
 		"domains"		:	[
 			"cloudflare.com"
 		]
@@ -1023,6 +1026,7 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"adsafeprotected.com",
+			"iasds01.com",
 			"integralads.com"
 		]
 	},
@@ -1080,6 +1084,7 @@
 		"notes"			:	"",
 		"country"		:	"CN",
 		"domains"		:	[
+			"3.cn",
 			"360buy.com",
 			"360buyimg.com",
 			"jd.com"
