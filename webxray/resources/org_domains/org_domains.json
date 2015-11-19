@@ -326,12 +326,13 @@
 	},
 	{
 		"organization"	:	"Blinkx",
-		"notes"			:	"Owns burstmedia.",
+		"notes"			:	"Owns many properties, this could likely be greatly expanded with detective work.",
 		"country"		:	"UK",
 		"domains"		:	[
 			"blinkx.com",
 			"burstmedia.com",
-			"burstnet.com"
+			"burstnet.com",
+			"rhythmxchange.com"
 		]
 	},
 	{
@@ -408,7 +409,7 @@
 	{
 		"organization"	:	"Cloudflare",
 		"notes"			:	"CDN",
-		"country"		:	"US",
+		"country"		:	"",
 		"domains"		:	[
 			"cloudflare.com"
 		]
@@ -468,7 +469,8 @@
 		"notes"			:	"",
 		"country"		:	"FR",
 		"domains"		:	[
-			"criteo.com"
+			"criteo.com",
+			"criteo.net"
 		]
 	},
 	{
@@ -513,6 +515,15 @@
 		"domains"		:	[
 			"dratio.com",
 			"wrating.com"
+		]
+	},
+	{
+		"organization"	:	"Drawbridge",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"adsymptotic.com",
+			"drawbrid.ge"
 		]
 	},
 	{
@@ -1167,6 +1178,15 @@
 		]
 	},
 	{
+		"organization"	:	"Magnetic Media Online",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"domdex.com",
+			"magnetic.com"
+		]
+	},
+	{
 		"organization"	:	"Market Supervision Administration of Shenzhen Municipality",
 		"notes"			:	"Government agency.",
 		"country"		:	"CN",
@@ -1384,6 +1404,7 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"quantcast.com",
+			"quantcount.com",
 			"quantserve.com"
 		]
 	},
@@ -1520,6 +1541,7 @@
 		"notes"			:	"",
 		"country"		:	"US",
 		"domains"		:	[
+			"spotxcdn.com",
 			"spotxchange.com"
 		]
 	},
@@ -1703,6 +1725,14 @@
 		"domains"		:	[
 			"ru4.com",
 			"xplusone.net"
+		]
+	},
+	{
+		"organization"	:	"Yadro",
+		"notes"			:	"Widely classified as malware",
+		"country"		:	"RU",
+		"domains"		:	[
+			"yadro.ru"
 		]
 	},
 	{
