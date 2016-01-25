@@ -60,15 +60,23 @@ class Reporter:
 		self.patch_org_data()
 		print('\t\tSuccess!')
 		
-		print('\t=====================')
-		print('\t Getting top %s tlds' % self.num_tlds)
-		print('\t=====================')
-		print('\t\tProcessing...')
-		self.top_tlds = self.get_top_tlds(self.num_tlds)
-		print('\t\tSuccess!')
-		print('\t\tThe top tlds are:')
-		for (tld, pages) in self.top_tlds:
-			print('\t\t |- %s (%s)' % (tld,pages))
+		# if num_tlds is 0 we don't care about sub-analysis on the tlds (which takes time)
+		# so we just push in the wildcard with the total page count
+		# note that this is the *default* behavior
+		if self.num_tlds == 0:
+			self.top_tlds = []
+			self.top_tlds.append(('*',self.pages_ok_count))
+		# otherwise, we *do* care about the tlds, so get them
+		else:
+			print('\t=====================')
+			print('\t Getting top %s tlds' % self.num_tlds)
+			print('\t=====================')
+			print('\t\tProcessing...')
+			self.top_tlds = self.get_top_tlds(self.num_tlds)
+			print('\t\tSuccess!')
+			print('\t\tThe top tlds are:')
+			for (tld, pages) in self.top_tlds:
+				print('\t\t |- %s (%s)' % (tld,pages))
 
 		# SPECIAL SAUCE, FOR EXPERTS: tracker domains!
 		#
@@ -105,7 +113,7 @@ class Reporter:
 	def setup_report_dir(self):
 		# create directory for where the reports go if not exist
 		if os.path.exists('./reports') == False:
-			print('\tMaking reporting directory.')
+			print('\t\tMaking global reports directory at ./reports.')
 			os.makedirs('./reports')
 		
 		# set global report_path, trim off the wbxr_ prefix
@@ -113,11 +121,11 @@ class Reporter:
 	
 		# set up subdir for this database analysis
 		if os.path.exists(self.report_path) == False:
-			print('\tMaking subdirectory for reports.')
+			print('\t\tMaking subdirectory for reports at %s' % self.report_path)
 			os.makedirs(self.report_path)
 
 		# just a notice
-		print('\t\tWriting output to %s' % self.report_path)
+		print('\t\tStoring output in %s' % self.report_path)
 	# setup_report_dir
 
 	# reuse this a lot
@@ -303,19 +311,30 @@ class Reporter:
 	# header
 
 	def get_network_ties(self):
+		# this report generates data necessary for graph/network analysis by
+		#	outputting a list of page domains and the elements/orgs they connect to
+
 		print('\t=============================')
 		print('\t Processing Network Ties ')
 		print('\t=============================')
+
+		# put output here
 		output_for_csv = []
 		
-		# can also include the page_org in the report, but commented out for now
-		# at a later date this could be an option
+		# header row for csv		
+		output_for_csv.append('"page_domain","3p_org","3p_domain"\n')
 		
-# 		output_for_csv.append('"page_domain","page_org","3p_domain","3p_org"\n')
-		output_for_csv.append('"page_domain","3p_domain","3p_org"\n')
+		# sql_driver.get_network_ties returns a set of tuples in the format
+		#	(page domain, page org, element domain, element org)
+		#	we just go through this data to produce the report
+		# note: the report is currently omitting page org, but it can be altered easily
+		
 		for edge in self.sql_driver.get_network_ties():
-# 			output_for_csv.append('"%s","%s","%s","%s"\n' % (edge[0],edge[1],edge[2],edge[3]))
-			output_for_csv.append('"%s","%s","%s",\n' % (edge[0],edge[2],edge[3]))
+			# if a page has no elements, edge[2] will be 'None' so we skip it
+			#	an alternate approach would be to include as orphan nodes
+			if edge[2]: output_for_csv.append('"%s","%s","%s",\n' % (edge[0],edge[3],edge[2]))
+
+		# done!
 		self.write_csv('network.csv', output_for_csv)
 		print('\t'+'-'*80+'\n')
 	# get_network_ties		
