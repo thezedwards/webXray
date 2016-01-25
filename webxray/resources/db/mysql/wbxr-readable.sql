@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS page;
 DROP TABLE IF EXISTS domain;
 DROP TABLE IF EXISTS org;
 
--- create tables, seed with default org data
+-- create tables, seed with Unknown org data
 CREATE TABLE IF NOT EXISTS org(
 	id INTEGER NOT NULL AUTO_INCREMENT,
   	name MEDIUMTEXT,
@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS org(
 	PRIMARY KEY(id)
 );
 
--- 1 --> default
-INSERT INTO org (id, name, notes, country) VALUES (1, 'Default', 'Default', 'Default');
+-- 1 --> Unknown
+INSERT INTO org (id, name, notes, country) VALUES (1, 'Unknown', 'Unknown', 'Unknown');
 
 
 CREATE TABLE IF NOT EXISTS domain(
