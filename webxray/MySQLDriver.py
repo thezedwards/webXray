@@ -561,9 +561,12 @@ class MySQLDriver:
 		return self.db.fetchall()
 	# end get_page_element_domain_pairs
 	
-	def get_network_ties(self):
+	def get_network_ties(self, org_is_known = False):
 		# returns all of the unique pairings between the domain of a page and that
 		#	of an element
+		#
+		# paramater org_is_known is to only return those elements where we have
+		#	identified the org
 		query = '''
 				SELECT DISTINCT page_domain.domain, page_org.name, element_domain.domain, element_org.name
 				FROM page
@@ -575,25 +578,13 @@ class MySQLDriver:
 				LEFT JOIN org page_org ON page_domain.org_id = page_org.id
 		'''
 		
-		# to limit analysis to domains who we know the owner add following to above query		
-		# WHERE element_org.id != 1
+		# to limit analysis to domains who we know the owner add following to above query
+		if org_is_known:
+			query += " WHERE element_org.id != 1 "
+		
+		query += " ORDER BY page_domain.domain, element_org.name, element_domain.domain "
 		
 		self.db.execute(query)
-		results = self.db.fetchall()
-		return_list = []
-		
-		# should consider moving this to the Reporter class and keep this simple db calls
-		for result in results:
-			# add in a link from the page to itself if we don't have yet
-			# probably a way more efficient way to do this, but want to catch the bus
-			if (result[0], result[1], result[0], result[1]) not in return_list:
-				return_list.append((result[0], result[1], result[0], result[1]))
-
-			# only return those that don't have 'None' values
-			if result[2]:
-				return_list.append(result)
-
-		# sort up here to be nice
-		return sorted(return_list)
+		return self.db.fetchall()
 	# end get_network_ties
 # end class MySQLDriver
