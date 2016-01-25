@@ -45,15 +45,6 @@
 		]
 	},
 	{
-		"organization"	:	"Add This",
-		"notes"			:	"",
-		"country"		:	"US",
-		"domains"		:	[
-			"addthis.com",
-			"addthisedge.com"
-		]
-	},
-	{
 		"organization"	:	"AdMaster",
 		"notes"			:	"",
 		"country"		:	"CN",
@@ -1354,9 +1345,11 @@
 	},
 	{
 		"organization"	:	"Oracle",
-		"notes"			:	"Blue Kai was acquired by Oracle",
+		"notes"			:	"Blue Kai was acquired by Oracle; 20160125: AddThis goes to Oracle",
 		"country"		:	"US",
 		"domains"		:	[
+			"addthis.com",
+			"addthisedge.com",
 			"bkrtx.com",
 			"bluekai.com"
 		]
