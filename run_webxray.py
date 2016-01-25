@@ -269,22 +269,22 @@ def report(db_name):
 	
 	# set how many tlds you want to examine and how many results
 	# see Reporter.py for info on tracker_threshold - don't change until you read docs
-	num_tlds	= 10
+	num_tlds	= 0
 	num_results	= 100
 	tracker_threshold = 0
-		
+
 	# set up a new reporter
 	Reporter	= Reporter(db_name, num_tlds, num_results, tracker_threshold)
 
 	# now get the reports
 	Reporter.header()
 	Reporter.get_summary_by_tld()
-	Reporter.get_network_ties()
 	Reporter.get_reports_by_tld('orgs')
 	Reporter.get_reports_by_tld('domains')
 	Reporter.get_reports_by_tld('elements')
 	Reporter.get_reports_by_tld('elements', 'javascript')
 	Reporter.get_reports_by_tld('elements', 'image')
+	Reporter.get_network_ties()
 	Reporter.print_runtime()
 # end report
 
