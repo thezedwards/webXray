@@ -102,7 +102,8 @@ class Reporter:
 			self.tracker_domains = self.get_tracker_domains(self.tracker_threshold)
 			print('\t\tSuccess!')
 		else:
-			self.tracker_domains = []
+			# set to False so various downstream operations get skipped
+			self.tracker_domains = False
 
 	# end __init__
 
@@ -211,17 +212,19 @@ class Reporter:
 		return top_tlds
 	# end get_top_tlds
 
-	def get_tracker_domains(self, threshold = 0):
-		# first finds all pairings of page domains and element domains
-		#	note this is then unique on SITE, not on PAGE
-		# returns the list of domains which appear on at least the threshold number
-	
-		domains = []
+	def get_tracker_domains(self, threshold):
+		# NOTE: first determines all pairings of page domains and element domains
+		#	note this is then unique on SITES, not on PAGES
+		#	e.g. if you have several pages from the same site these links only
+		#	count once
+		#
+		# RETURNS: list of domains which link at least the threshold number of sites
+		all_domains = []
 		for page_domain_element_domain in self.sql_driver.get_page_domain_element_domain_pairs():
-			domains.append(page_domain_element_domain[1])
+			all_domains.append(page_domain_element_domain[1])
 
 		# count up all the pairs, convert to items() so can process as tuples
-		domain_counts = collections.Counter(domains).items()
+		domain_counts = collections.Counter(all_domains).items()
 
 		# put the return values here
 		tracker_domains = []
@@ -230,6 +233,15 @@ class Reporter:
 		for domain_count in domain_counts:
 			if domain_count[1] >= threshold:
 				tracker_domains.append(domain_count[0])
+
+		# EDGE CASE
+		# 	likely due to a large threshold we have no tracker domains,
+		#	so we throw warning and log error
+		if len(tracker_domains) == 0:
+			self.sql_driver.log_error('Analaysis Warning', 'Tracker Threshold of %s resulted in no tracking domains.' % threshold)
+			print('\t\t-----------WARNING-----------')
+			print('\t\tTracker Threshold of %s resulted in no tracking domains.' % threshold)
+			print('\t\t-----------------------------')
 
 		return tracker_domains
 	# get_tracker_domains
@@ -296,7 +308,7 @@ class Reporter:
 
 		percent_element_received = int((total_elements_received/total_elements)*100)
 		print('\t\t%% Elements Received:\t\t%s%%' % percent_element_received)
-		output_for_csv.append('"%% Elements Received", "%s"\n' % percent_element_received)
+		output_for_csv.append('"%% Elements Received","%s"\n' % percent_element_received)
 
 		total_pages_with_elements = self.sql_driver.pages_w_element_count()
 		print("\t\tPages with Elements:\t\t%s" % total_pages_with_elements)
@@ -344,7 +356,7 @@ class Reporter:
 		print('\t Processing Summaries by TLD ')
 		print('\t=============================')
 		output_for_csv = []
-		output_for_csv.append('"TLD","N","% TOTAL","N W/3PE","% W/3PE","N W/COOKIE","% W/COOKIE","N W/JS","% W/JS","3P DOMAIN MEAN","3P DOMAIN MEDIAN","3P DOMAIN MODE" \n')
+		output_for_csv.append('"TLD","N","% TOTAL","N W/3PE","% W/3PE","N W/COOKIE","% W/COOKIE","N W/JS","% W/JS","3P DOMAIN MEAN","3P DOMAIN MEDIAN","3P DOMAIN MODE","TRACKER FILTER DEPTH"\n')
 
 		# now do per-tld numbers
 		for tld in self.top_tlds:
@@ -363,13 +375,18 @@ class Reporter:
 			percent_with_cookies 	= (total_pages_cookies/total_pages)*100
 			total_pages_js 			= self.sql_driver.get_complex_page_count(tld_filter, 'javascript', self.tracker_domains)
 			percent_with_js 		= (total_pages_js/total_pages)*100
-			
+
+			if self.tracker_threshold:
+				filter_depth = self.tracker_threshold
+			else:
+				filter_depth = 'No Tracker Filter Used'
+
 			stats 	= self.get_page_3p_stats(tld[0])
 			mean 	= stats[0]
 			median 	= stats[1]
 			mode 	= stats[2]
 
-			output_for_csv.append('"%s","%s","%.2f","%s","%.2f","%s","%.2f","%s","%.2f","%.2f","%s","%s"\n' % (
+			output_for_csv.append('"%s","%s","%.2f","%s","%.2f","%s","%.2f","%s","%.2f","%.2f","%s","%s","%s"\n' % (
 				tld[0], 
 				total_pages, 
 				total_pages_percent, 
@@ -381,7 +398,8 @@ class Reporter:
 				percent_with_js,
 				mean,
 				median,
-				mode))		
+				mode,
+				filter_depth))		
 	
 		self.write_csv('summary_by_tld.csv', output_for_csv)
 	# end get_summary_by_tld

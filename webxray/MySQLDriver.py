@@ -382,19 +382,32 @@ class MySQLDriver:
 		return self.db.fetchone()[0]
 	# end pages_w_element_count
 	
-	def get_complex_page_count(self, tld_filter = '', type = '', tracker_domains = ''):
-		# see if we have a list of tracker domain ids, if so make a filter
-		# DON'T USE THIS UNLESS YOU KNOW HOW
-		if tracker_domains:
+	def get_complex_page_count(self, tld_filter = '', type = '', tracker_domains = False):
+		# given various types of analyses we may want to count how many pages meet
+		#	certain criteria, this function handles creating complex mysql queries
+		#
+		# while it is better to have logic in Reporter.py, some logic has to be here
+		#	as building the queries this way is mysql-specific
+		#
+		# FOR EXPERTS:
+		# if we define 'tracker_domains' to be those domains which link X number of 
+		#	sites, we can change our reports to be bounded by those domains. note the 
+		#	list of domains comes 'get_tracker_domains' in Reporter.py
+
+		if tracker_domains != False:
+			# if we set a very high threshold it is possible we have no tracking domains
+			#	in this case our count will be zero, so we do that and return
+			if len(tracker_domains) == 0:
+				return 0
+			# otherwise we build the query with a super long conditional as 
+			#	we have tracker domains
 			tracker_filter = '('
 			for tracker_domain_name in tracker_domains:
 				tracker_filter += "element_domain.domain = '%s' OR " % tracker_domain_name
 			tracker_filter = tracker_filter[:-3]
 			tracker_filter += ')'
 		else:
-			# if no filter, empty var
-			tracker_filter = ''
-
+			tracker_filter = False
 
 		# if filtering on tld set up the query param
 		if tld_filter:
@@ -432,8 +445,10 @@ class MySQLDriver:
 				JOIN domain page_domain ON page_domain.id = page.domain_id
 			'''
 
-		# this still feels ugly, should be fixed/refactored
-		if type is 'elements' or type is 'cookies':
+		# building the mysql queries is complicated by the fact that the above js query
+		#	already has a 'where' in it, so we must do below 
+		
+		if type is 'elements' or type is 'cookies' or type is '':
 			if tld_filter and tracker_filter:
 				query += ' WHERE '+tld_filter+' AND '+tracker_filter
 			elif tld_filter:
@@ -447,9 +462,6 @@ class MySQLDriver:
 				query += ' AND '+tld_filter
 			elif tracker_filter:
 				query += ' AND '+tracker_filter
-		else:
-			if tld_filter:
-				query += ' WHERE '+tld_filter
 
 		self.db.execute(query)
 		return self.db.fetchone()[0]
@@ -532,7 +544,7 @@ class MySQLDriver:
 				LEFT JOIN element ON page_element_junction.element_id = element.id
 				LEFT JOIN domain element_domain ON element_domain.id = element.domain_id
 				LEFT JOIN domain page_domain ON page_domain.id = page.domain_id
-		'''		
+		'''	
 		self.db.execute(query)
 		return self.db.fetchall()
 	# end get_page_domain_element_domain_pairs

@@ -274,10 +274,11 @@ def report(db_name):
 	from webxray.Reporter import Reporter
 	
 	# set how many tlds you want to examine and how many results
-	# see Reporter.py for info on tracker_threshold - don't change until you read docs
 	num_tlds	= 0
 	num_results	= 100
-	tracker_threshold = 0
+
+	# see Reporter.py for info on tracker_threshold - don't change until you read docs
+	tracker_threshold = False
 
 	# set up a new reporter
 	Reporter	= Reporter(db_name, num_tlds, num_results, tracker_threshold)
