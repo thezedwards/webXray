@@ -476,7 +476,7 @@ class MySQLDriver:
 			LEFT JOIN domain element_domain ON element_domain.id = element.domain_id
 			LEFT JOIN domain page_domain ON page_domain.id = page.domain_id
 			LEFT JOIN org on org.id = element_domain.org_id
-			WHERE org.name != 'Default'
+			WHERE org.id != 1
 		'''
 		
 		# if filtering on tld set up the query param
