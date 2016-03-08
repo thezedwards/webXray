@@ -351,9 +351,10 @@ class MySQLDriver:
 
 	def pages_noload_count(self):
 		# to get all pages that haven't loaded we first pull the errors, then check
-		#	if they exist in the main page_db, in the event we have tried one or more
-		#	attempts thee may both be an error and a success, so we don't count errors
-		#	for items that make it into the page table
+		#	if they exist in the main page table; in the event we have tried one or more
+		#	attempts there may both be an error message from a first attempt, but on
+		#	an additional attempt, the page is loaded - this function makes sure we only
+		#	count pages that didn't subsequently get loaded
 		
 		noload_count = 0
 		self.db.execute('SELECT DISTINCT uri FROM error WHERE msg LIKE "%FAIL to load the address%"')
