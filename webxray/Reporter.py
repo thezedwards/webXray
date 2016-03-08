@@ -262,14 +262,14 @@ class Reporter:
 		#write csv header
 		output_for_csv.append('"Item","Value"\n')
 
-		total_pages = self.sql_driver.pages_ok_count()
+		total_pages_ok = self.sql_driver.pages_ok_count()
 
-		print("\t\tTotal Pages OK:\t\t\t%s" % total_pages)
+		print("\t\tTotal Pages OK:\t\t\t%s" % total_pages_ok)
 	
-		output_for_csv.append('"Total Pages OK","%s"\n' % total_pages)
+		output_for_csv.append('"Total Pages OK","%s"\n' % total_pages_ok)
 	
 		total_pages_noload = self.sql_driver.pages_noload_count()
-		total_pages_attempted = total_pages + total_pages_noload
+		total_pages_attempted = total_pages_ok + total_pages_noload
 	
 		print("\t\tTotal Pages FAIL:\t\t%s" % total_pages_noload)
 		output_for_csv.append('"Total Pages FAIL","%s"\n' % total_pages_noload)
@@ -277,7 +277,7 @@ class Reporter:
 		print("\t\tTotal Pages Attempted:\t\t%s" % total_pages_attempted)
 		output_for_csv.append('"Total Pages Attempted","%s"\n' % total_pages_attempted)
 	
-		percent_pages_OK = int((total_pages/total_pages_attempted)*100)
+		percent_pages_OK = int((total_pages_ok/total_pages_attempted)*100)
 	
 		print("\t\t%% Pages OK:\t\t\t%s%%" % percent_pages_OK)
 		output_for_csv.append('"%% Pages OK","%s"\n' % percent_pages_OK)
@@ -294,7 +294,7 @@ class Reporter:
 		print("\t\tPages with Cookies:\t\t%s" % total_pages_with_cookies)
 		output_for_csv.append('"Pages with Cookies","%s"\n' % total_pages_with_cookies)
 
-		percent_with_cookies = (total_pages_with_cookies/total_pages)*100
+		percent_with_cookies = (total_pages_with_cookies/total_pages_ok)*100
 		print("\t\t%% Pages with Cookies:\t\t%s%%" % int(percent_with_cookies))
 		output_for_csv.append('"%% Pages with Cookies","%s"\n' % int(percent_with_cookies))
 	
@@ -314,7 +314,7 @@ class Reporter:
 		print("\t\tPages with Elements:\t\t%s" % total_pages_with_elements)
 		output_for_csv.append('"Pages with Elements","%s"\n' % total_pages_with_elements)
 
-		percent_with_elements = (total_pages_with_elements/total_pages)*100
+		percent_with_elements = (total_pages_with_elements/total_pages_ok)*100
 		print("\t\t%% Pages with Elements:\t\t%s%%" % int(percent_with_elements))
 		output_for_csv.append('"%% Pages With Elements","%s"\n' % int(percent_with_elements))
 		
