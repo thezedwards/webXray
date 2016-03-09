@@ -26,12 +26,30 @@
 		]
 	},
 	{
+		"organization"	:	"Actua Corporation",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"actua.com",
+			"govdelivery.com"
+		]
+	},
+	{
 		"organization"	:	"Acxiom",
 		"notes"			:	"",
 		"country"		:	"US",
 		"domains"		:	[
 			"acxiom-online.com",
 			"acxiom.com"
+		]
+	},
+	{
+		"organization"	:	"AdBrain",
+		"notes"			:	"",
+		"country"		:	"UK",
+		"domains"		:	[
+			"adbrain.com",
+			"adbrn.com"
 		]
 	},
 	{
@@ -93,6 +111,19 @@
 		"domains"		:	[
 			"adsocial.cn",
 			"jiathis.com"
+		]
+	},
+	{
+		"organization"	:	"AFCV",
+		"notes"			:	"Acquired Answers, which had previously acquired ForeSee",
+		"country"		:	"US",
+		"domains"		:	[
+			"4seeresults.com",
+			"afcv.com",
+			"answers.com",
+			"answerscloud.com",
+			"dsply.com",
+			"foresee.com"
 		]
 	},
 	{
@@ -327,6 +358,23 @@
 		]
 	},
 	{
+		"organization"	:	"Brightcove",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"brightcove.com"
+		]
+	},
+	{
+		"organization"	:	"CallRail",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"callrail.com",
+			"calltrk.com"
+		]
+	},
+	{
 		"organization"	:	"Casale Media",
 		"notes"			:	"",
 		"country"		:	"CA",
@@ -423,6 +471,24 @@
 		]
 	},
 	{
+		"organization"	:	"Collective",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"collective-media.net",
+			"collective.com"
+		]
+	},
+	{
+		"organization"	:	"Community Health Systems, Inc.",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"chs.net",
+			"g2gtoolkit.com"
+		]
+	},
+	{
 		"organization"	:	"comScore",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -453,6 +519,14 @@
 			"afy11.net",
 			"coxdigitalsolutions.com",
 			"coxreps.com"
+		]
+	},
+	{
+		"organization"	:	"Crazy Egg",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"crazyegg.com"
 		]
 	},
 	{
@@ -636,6 +710,15 @@
 		"domains"		:	[
 			"farlex.com",
 			"tfd.com"
+		]
+	},
+	{
+		"organization"	:	"Fast Health",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"fasthealth.com",
+			"helenkeller.com"
 		]
 	},
 	{
@@ -985,6 +1068,27 @@
 		]
 	},
 	{
+		"organization"	:	"Hi Media Group",
+		"notes"			:	"Acquired WebTrends, Adlinkgroup, Sedo",
+		"country"		:	"FR",
+		"domains"		:	[
+			"adlinkgroup.net",
+			"himediagroup.com",
+			"sedo.com",
+			"sedoparking.com"
+		]
+	},
+	{
+		"organization"	:	"Hospital Corporation of America",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"ehc.com",
+			"hcahealthcare.com",
+			"medcity.net"
+		]
+	},
+	{
 		"organization"	:	"IAC",
 		"notes"			:	"more @ http://iac.com/brands",
 		"country"		:	"US",
@@ -1041,6 +1145,14 @@
 			"coremetrics.com",
 			"ibm.com",
 			"unica.com"
+		]
+	},
+	{
+		"organization"	:	"iPerceptions",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"iperceptions.com"
 		]
 	},
 	{
@@ -1115,6 +1227,15 @@
 		]
 	},
 	{
+		"organization"	:	"Kindred Healthcare",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"kindred.com",
+			"kindredhealthcare.com"
+		]
+	},
+	{
 		"organization"	:	"Knet",
 		"notes"			:	"",
 		"country"		:	"CN",
@@ -1186,6 +1307,16 @@
 		]
 	},
 	{
+		"organization"	:	"Marketo",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"marketo.com",
+			"marketo.net",
+			"mktoresp.com"
+		]
+	},
+	{
 		"organization"	:	"MaxCDN",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -1209,6 +1340,15 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"mediav.com"
+		]
+	},
+	{
+		"organization"	:	"Medseek",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"influencehealth.com",
+			"medseek.com"
 		]
 	},
 	{
@@ -1264,6 +1404,17 @@
 		]
 	},
 	{
+		"organization"	:	"Monotype Imaging",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"fonts.com",
+			"fonts.net",
+			"monotype.com",
+			"monotypeimaging.com"
+		]
+	},
+	{
 		"organization"	:	"Mozilla",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -1283,6 +1434,16 @@
 			"lofter.com",
 			"netease.com",
 			"youdao.com"
+		]
+	},
+	{
+		"organization"	:	"NetIQ",
+		"notes"			:	"Acquired WebTrends",
+		"country"		:	"US",
+		"domains"		:	[
+			"netiq.com",
+			"webtrends.com",
+			"webtrendslive.com"
 		]
 	},
 	{
@@ -1375,6 +1536,16 @@
 		]
 	},
 	{
+		"organization"	:	"Progress Software",
+		"notes"			:	"Acquired Telerik",
+		"country"		:	"US",
+		"domains"		:	[
+			"progress.com",
+			"telerik.com",
+			"telerikstatic.com"
+		]
+	},
+	{
 		"organization"	:	"PubMatic",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -1388,6 +1559,15 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"contextweb.com",
+			"pulsepoint.com"
+		]
+	},
+	{
+		"organization"	:	"Pulsepoint",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"displaymarketplace.com",
 			"pulsepoint.com"
 		]
 	},
@@ -1445,6 +1625,24 @@
 		]
 	},
 	{
+		"organization"	:	"Scorpion Internet Marketing",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"scorpioncms.com",
+			"scorpiondesign.com"
+		]
+	},
+	{
+		"organization"	:	"Sellpoints",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"sellpoint.net",
+			"sellpoints.com"
+		]
+	},
+	{
 		"organization"	:	"Shanghai 2345 Network Technology",
 		"notes"			:	"",
 		"country"		:	"CN",
@@ -1490,6 +1688,15 @@
 			"sinajs.cn",
 			"sinajs.cn",
 			"weibo.com"
+		]
+	},
+	{
+		"organization"	:	"Siteimprove",
+		"notes"			:	"",
+		"country"		:	"DK",
+		"domains"		:	[
+			"siteimprove.com",
+			"siteimproveanalytics.com"
 		]
 	},
 	{
@@ -1544,6 +1751,15 @@
 		"country"		:	"IE",
 		"domains"		:	[
 			"statcounter.com"
+		]
+	},
+	{
+		"organization"	:	"Stericycle",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"inquicker.com",
+			"stericycle.com"
 		]
 	},
 	{
@@ -1698,6 +1914,16 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"wikimedia.org"
+		]
+	},
+	{
+		"organization"	:	"Wingify",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"visualwebsiteoptimizer.com",
+			"vwo.com",
+			"wingify.com"
 		]
 	},
 	{
