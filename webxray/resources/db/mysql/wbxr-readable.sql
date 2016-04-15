@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS element(
 	full_uri MEDIUMTEXT,
 	element_uri_md5 VARCHAR(32),
 	element_uri MEDIUMTEXT,
+	received BOOLEAN,
 	extension VARCHAR(32),
 	type VARCHAR(32),
 	args MEDIUMTEXT,
