@@ -53,7 +53,7 @@ class ParseURI:
 
 	def get_pubsuffix_list(self):
 		# get the file from the local dir
-		pubsuffix_raw_list = open(os.path.join(os.path.dirname(__file__), './resources/pubsuffix/patchedPublicSuffixList-20150514.txt'), 'r')
+		pubsuffix_raw_list = open(os.path.join(os.path.dirname(__file__), './resources/pubsuffix/wbxrPubSuffixList.txt'), 'r')
 		pubsuffix_list = []
 
 		for line in pubsuffix_raw_list:
