@@ -63,6 +63,16 @@
 		]
 	},
 	{
+		"organization"	:	"AdGear Technologies",
+		"notes"			:	"",
+		"country"		:	"CA",
+		"domains"		:	[
+			"adgear.com",
+			"adgrx.com",
+			"bloom-hq.com"
+		]
+	},
+	{
 		"organization"	:	"AdMaster",
 		"notes"			:	"",
 		"country"		:	"CN",
@@ -349,8 +359,9 @@
 	{
 		"organization"	:	"Blinkx",
 		"notes"			:	"Owns many properties, this could likely be greatly expanded with detective work.",
-		"country"		:	"UK",
+		"country"		:	"US",
 		"domains"		:	[
+			"1rx.io",
 			"blinkx.com",
 			"burstmedia.com",
 			"burstnet.com",
@@ -402,9 +413,10 @@
 	},
 	{
 		"organization"	:	"Centro",
-		"notes"			:	"",
+		"notes"			:	"brand-server.com per cookiepedia, was very difficult to find info on!",
 		"country"		:	"US",
 		"domains"		:	[
+			"brand-server.com",
 			"centro.net",
 			"sitescout.com"
 		]
@@ -700,7 +712,8 @@
 			"facebook.net",
 			"fbcdn.com",
 			"fbcdn.net",
-			"liverail.com"
+			"liverail.com",
+			"lrcdn.net"
 		]
 	},
 	{
@@ -728,6 +741,17 @@
 		"domains"		:	[
 			"federatedmedia.net",
 			"lijit.com"
+		]
+	},
+	{
+		"organization"	:	"Flipp",
+		"notes"			:	"",
+		"country"		:	"CA",
+		"domains"		:	[
+			"circularhub.com",
+			"flipp.com",
+			"wishabi.com",
+			"wishabi.net"
 		]
 	},
 	{
@@ -765,6 +789,7 @@
 			"2mdn.net",
 			"466453.com",
 			"admeld.com",
+			"adometry.com",
 			"adsense.com",
 			"adwords.com",
 			"android.com",
@@ -772,6 +797,7 @@
 			"blogger.com",
 			"blogspot.com",
 			"chromium.org",
+			"dmtry.com",
 			"doubleclick.com",
 			"doubleclick.net",
 			"feedburner.com",
@@ -1119,6 +1145,17 @@
 		]
 	},
 	{
+		"organization"	:	"Inform",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"helloreverb.com",
+			"inform.com",
+			"mochila.com",
+			"newsinc.com"
+		]
+	},
+	{
 		"organization"	:	"Insight Express",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -1294,8 +1331,11 @@
 		"notes"			:	"",
 		"country"		:	"US",
 		"domains"		:	[
+			"cognitivematch.com",
 			"domdex.com",
-			"magnetic.com"
+			"magnetic.com",
+			"mybuys.com",
+			"veruta.com"
 		]
 	},
 	{
@@ -1323,6 +1363,16 @@
 		"domains"		:	[
 			"bootstrapcdn.com",
 			"maxcdn.com"
+		]
+	},
+	{
+		"organization"	:	"MaxPoint Interactive",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"maxpointinteractive.com",
+			"maxusglobal.com",
+			"mxptint.net"
 		]
 	},
 	{
@@ -1424,6 +1474,15 @@
 		]
 	},
 	{
+		"organization"	:	"Nativo",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"nativo.net",
+			"postrelease.com"
+		]
+	},
+	{
 		"organization"	:	"NetEase",
 		"notes"			:	"",
 		"country"		:	"CN",
@@ -1513,6 +1572,28 @@
 			"addthisedge.com",
 			"bkrtx.com",
 			"bluekai.com"
+		]
+	},
+	{
+		"organization"	:	"Outbrain",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"outbrain.com",
+			"scribit.com",
+			"sphere.com",
+			"verticalacuity.com",
+			"visualrevenue.com"
+		]
+	},
+	{
+		"organization"	:	"OwnerIQ",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"dijipop.com",
+			"owneriq.com",
+			"owneriq.net"
 		]
 	},
 	{
@@ -1660,6 +1741,15 @@
 		]
 	},
 	{
+		"organization"	:	"Sharethrough",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"joinvan.com",
+			"sharethrough.com"
+		]
+	},
+	{
 		"organization"	:	"Signal",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -1780,11 +1870,33 @@
 		]
 	},
 	{
+		"organization"	:	"Taboola",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"perfectmarket.com",
+			"taboola.com"
+		]
+	},
+	{
 		"organization"	:	"TapAd",
 		"notes"			:	"",
 		"country"		:	"US",
 		"domains"		:	[
 			"tapad.com"
+		]
+	},
+	{
+		"organization"	:	"Teads",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"beead.fr",
+			"beezik.com",
+			"ebuzzing.com",
+			"nomao.com",
+			"promodigital.it",
+			"teads.tv"
 		]
 	},
 	{
@@ -1814,12 +1926,36 @@
 		]
 	},
 	{
+		"organization"	:	"The E.W. Scripps Company",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"bizrate.com",
+			"connexity.net",
+			"cracked.com",
+			"midroll.com",
+			"newsy.com",
+			"shopzilla.com",
+			"uswitch.com",
+			"weathersphere.com"
+		]
+	},
+	{
 		"organization"	:	"The Trade Desk",
 		"notes"			:	"",
 		"country"		:	"US",
 		"domains"		:	[
 			"adsrvr.org",
 			"thetradedesk.com"
+		]
+	},
+	{
+		"organization"	:	"TownNews.com",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"townnews.com",
+			"townnews365.com"
 		]
 	},
 	{
