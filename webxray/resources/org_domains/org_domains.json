@@ -26,6 +26,15 @@
 		]
 	},
 	{
+		"organization"	:	"Accuweather",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"accuweather.com",
+			"skymotion.com"
+		]
+	},
+	{
 		"organization"	:	"Actua Corporation",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -1947,6 +1956,14 @@
 		"domains"		:	[
 			"adsrvr.org",
 			"thetradedesk.com"
+		]
+	},
+	{
+		"organization"	:	"Tout",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"tout.com"
 		]
 	},
 	{
