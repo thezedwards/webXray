@@ -186,7 +186,7 @@ def interaction():
 			selection = input("\n\tChoose a page list by number: ")
 			if selection.isdigit():
 				selection = int(selection)
-				if selection >= 0 and selection <= len(files):
+				if selection >= 0 and selection < len(files):
 					break
 				else:
 					print('\tInvalid choice, try again.')
