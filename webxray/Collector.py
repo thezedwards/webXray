@@ -73,9 +73,7 @@ class Collector:
 			if "#" in uri[0]: continue
 		
 			count += 1
-		
-			print(uri)
-		
+
 			# only do lines starting with https?://
 			if not (re.match('^https?://.+', uri)):
 				print("\t\t%s | %-50s Not a valid address, Skipping." % (count, uri[:50]))
