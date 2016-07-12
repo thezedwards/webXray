@@ -74,14 +74,15 @@ class Collector:
 		
 			count += 1
 		
+			print(uri)
+		
 			# only do lines starting with https?://
 			if not (re.match('^https?://.+', uri)):
 				print("\t\t%s | %-50s Not a valid address, Skipping." % (count, uri[:50]))
 				continue
 		
-			# drop trailing '/, clean off white space, make lower, create cli-safe uri
-			# with parse.quote, but exclude :/ b/c of http://
-			uri = re.sub('/$', '', urllib.parse.quote(uri.strip(), safe=":/").lower())
+			# drop trailing '/, clean off white space, make lower
+			uri = re.sub('/$', '', uri.strip())
 
 			# if it is a m$ office or other doc, skip
 			if re.match('.+(pdf|ppt|pptx|doc|docx|txt|rtf|xls|xlsx)$', uri):
