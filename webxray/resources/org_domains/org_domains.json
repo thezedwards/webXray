@@ -72,6 +72,15 @@
 		]
 	},
 	{
+		"organization"	:	"AdForm",
+		"notes"			:	"",
+		"country"		:	"DK",
+		"domains"		:	[
+			"adform.com",
+			"adform.net"
+		]
+	},
+	{
 		"organization"	:	"AdGear Technologies",
 		"notes"			:	"",
 		"country"		:	"CA",
@@ -79,6 +88,14 @@
 			"adgear.com",
 			"adgrx.com",
 			"bloom-hq.com"
+		]
+	},
+	{
+		"organization"	:	"Adition Technologies",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"adition.com"
 		]
 	},
 	{
@@ -121,6 +138,14 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"adsame.com"
+		]
+	},
+	{
+		"organization"	:	"AdScale",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"adscale.de"
 		]
 	},
 	{
@@ -251,6 +276,7 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"adap.tv",
+			"adtech.de",
 			"adtechus.com",
 			"advertising.com",
 			"aol.com",
@@ -363,6 +389,16 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"optaim.com"
+		]
+	},
+	{
+		"organization"	:	"Bertelsmann",
+		"notes"			:	"Adality is 100% owned subsidiary of Bertelsmann per http://www.bertelsmann.com/media/investor-relations/sonst.-downloads/anteile-bertelsmann-31-dezember-2015.pdf",
+		"country"		:	"DE",
+		"domains"		:	[
+			"adality.de",
+			"adrtx.net",
+			"bertelsmann.de"
 		]
 	},
 	{
@@ -501,6 +537,16 @@
 		]
 	},
 	{
+		"organization"	:	"Comcast",
+		"notes"			:	"See crunchbase for more info re: aquisition freewheel/stickyadstv",
+		"country"		:	"US",
+		"domains"		:	[
+			"comcast.com",
+			"freewheel.tv",
+			"stickyadstv.com"
+		]
+	},
+	{
 		"organization"	:	"Community Health Systems, Inc.",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -578,6 +624,17 @@
 		]
 	},
 	{
+		"organization"	:	"Deutsche Telekom",
+		"notes"			:	"D-T is the parent of Emetriq",
+		"country"		:	"DE",
+		"domains"		:	[
+			"emetriq.de",
+			"telekom.com",
+			"telekom.de",
+			"xplosion.de"
+		]
+	},
+	{
 		"organization"	:	"Disqus",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -631,6 +688,15 @@
 		]
 	},
 	{
+		"organization"	:	"Dynadmic",
+		"notes"			:	"",
+		"country"		:	"FR",
+		"domains"		:	[
+			"dynadmic.com",
+			"dyntrk.com"
+		]
+	},
+	{
 		"organization"	:	"Ebix",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -663,6 +729,15 @@
 			"equifax.com",
 			"ixiaa.com",
 			"ixicorp.com"
+		]
+	},
+	{
+		"organization"	:	"etracker",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"etracker.com",
+			"etracker.de"
 		]
 	},
 	{
@@ -805,6 +880,7 @@
 			"blogblog.com",
 			"blogger.com",
 			"blogspot.com",
+			"blogspot.de",
 			"chromium.org",
 			"dmtry.com",
 			"doubleclick.com",
@@ -1154,6 +1230,15 @@
 		]
 	},
 	{
+		"organization"	:	"INFOnline",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"infonline.de",
+			"ioam.de"
+		]
+	},
+	{
 		"organization"	:	"Inform",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -1411,6 +1496,17 @@
 		]
 	},
 	{
+		"organization"	:	"Meetrics",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"meetrics.com",
+			"meetrics.de",
+			"meetrics.net",
+			"mxcdn.net"
+		]
+	},
+	{
 		"organization"	:	"Menlo Technologies",
 		"notes"			:	"",
 		"country"		:	"CN",
@@ -1542,6 +1638,14 @@
 			"nielsen-online.com",
 			"nielsen.com",
 			"vizu.com"
+		]
+	},
+	{
+		"organization"	:	"nugg.ad",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"nuggad.net"
 		]
 	},
 	{
@@ -1733,6 +1837,15 @@
 		]
 	},
 	{
+		"organization"	:	"Semasio",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"semasio.com",
+			"semasio.net"
+		]
+	},
+	{
 		"organization"	:	"Shanghai 2345 Network Technology",
 		"notes"			:	"",
 		"country"		:	"CN",
@@ -1862,6 +1975,16 @@
 		]
 	},
 	{
+		"organization"	:	"Ströer",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"m6r.eu",
+			"mbr-targeting.com",
+			"stroeer.de"
+		]
+	},
+	{
 		"organization"	:	"Suning Corporation",
 		"notes"			:	"",
 		"country"		:	"CN",
@@ -1935,6 +2058,14 @@
 		]
 	},
 	{
+		"organization"	:	"The ADEX",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"theadex.com"
+		]
+	},
+	{
 		"organization"	:	"The E.W. Scripps Company",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -1976,6 +2107,17 @@
 		]
 	},
 	{
+		"organization"	:	"Tradedoubler",
+		"notes"			:	"",
+		"country"		:	"SE",
+		"domains"		:	[
+			"adnologies.com",
+			"heias.com",
+			"tradedoubler.com",
+			"tradedoubler.se"
+		]
+	},
+	{
 		"organization"	:	"Tribal Fusion",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -1989,6 +2131,15 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"truste.com"
+		]
+	},
+	{
+		"organization"	:	"Trusted Shops",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"trustedshops.com",
+			"trustedshops.eu"
 		]
 	},
 	{
@@ -2027,6 +2178,26 @@
 		]
 	},
 	{
+		"organization"	:	"United Internet Media",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"1und1.de",
+			"gmx.net",
+			"tifbs.net",
+			"united-internet-media.de",
+			"web.de"
+		]
+	},
+	{
+		"organization"	:	"Ve Interactive",
+		"notes"			:	"",
+		"country"		:	"Uk",
+		"domains"		:	[
+			"veinteractive.com"
+		]
+	},
+	{
 		"organization"	:	"Vibrant Media",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -2062,6 +2233,15 @@
 		]
 	},
 	{
+		"organization"	:	"Webtrekk",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"wbtrk.net",
+			"webtrekk.com"
+		]
+	},
+	{
 		"organization"	:	"Wikimedia Foundation",
 		"notes"			:	"",
 		"country"		:	"US",
@@ -2081,11 +2261,12 @@
 	},
 	{
 		"organization"	:	"WPP",
-		"notes"			:	"Owns many properties, inc. XAXIS",
+		"notes"			:	"Owns many properties, inc. XAXIS; plista aquired 2014 by groupm, which is WPP",
 		"country"		:	"UK",
 		"domains"		:	[
 			"247realmedia.com",
 			"mookie1.com",
+			"plista.com",
 			"themig.com",
 			"xaxis.com"
 		]
@@ -2128,6 +2309,15 @@
 		"country"		:	"RU",
 		"domains"		:	[
 			"yandex.ru"
+		]
+	},
+	{
+		"organization"	:	"Yieldlab",
+		"notes"			:	"",
+		"country"		:	"DE",
+		"domains"		:	[
+			"yieldlab.de",
+			"yieldlab.net"
 		]
 	},
 	{
