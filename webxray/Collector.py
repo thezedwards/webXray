@@ -12,6 +12,7 @@ import re
 import sys
 import random
 import urllib.request
+from urllib.parse import urlsplit
 from multiprocessing import Pool
 
 # custom webxray classes
@@ -73,14 +74,29 @@ class Collector:
 			if "#" in uri[0]: continue
 		
 			count += 1
-
+		
 			# only do lines starting with https?://
 			if not (re.match('^https?://.+', uri)):
 				print("\t\t%s | %-50s Not a valid address, Skipping." % (count, uri[:50]))
 				continue
-		
-			# drop trailing '/, clean off white space, make lower
-			uri = re.sub('/$', '', uri.strip())
+
+			# non-ascii domains will crash phantomjs, so we need to convert them to 
+			# 	idna/ascii/utf-8
+			# this requires splitting apart the uri, converting the domain to idna,
+			#	and pasting it all back together. ugly.
+			
+			parsed_uri = urlsplit(uri.strip())
+			uri = parsed_uri[0] + "://"
+			uri += parsed_uri[1].encode('idna').decode('utf-8')
+			
+			# if chunks exist glue them back together
+			
+			if len(parsed_uri[2]) != 0:
+				uri += parsed_uri[2]
+			if len(parsed_uri[3]) != 0:
+				uri += '?' + parsed_uri[3]
+			if len(parsed_uri[4]) != 0:
+				uri += '#' + parsed_uri[4]
 
 			# if it is a m$ office or other doc, skip
 			if re.match('.+(pdf|ppt|pptx|doc|docx|txt|rtf|xls|xlsx)$', uri):
@@ -88,9 +104,9 @@ class Collector:
 				continue
 
 			# skip if in db already
-			if sql_driver.page_exists(uri):
-				print("\t\t%s | %-50s Exists in DB, Skipping." % (count, uri[:50]))
-				continue
+# 			if sql_driver.page_exists(uri):
+# 				print("\t\t%s | %-50s Exists in DB, Skipping." % (count, uri[:50]))
+# 				continue
 	
 			# only add if not in list already
 			if uri not in uris_to_process:
