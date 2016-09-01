@@ -226,7 +226,6 @@ class OutputStore:
 	
 	def close(self):
 		# close mysql connections
-		self.uri_parser.close()
 		self.sql_driver.close()
 		return
 	# end exit
