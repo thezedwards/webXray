@@ -298,13 +298,16 @@ class Reporter:
 		print("\t\t%% Pages with Cookies:\t\t%s%%" % int(percent_with_cookies))
 		output_for_csv.append('"%% Pages with Cookies","%s"\n' % int(percent_with_cookies))
 	
-		total_elements = self.sql_driver.total_element_count()
-		print("\t\tTotal Elements Requested:\t%s" % total_elements)
-		output_for_csv.append('"Total Elements Requested","%s"\n' % total_elements)
-
-		total_elements_received = self.sql_driver.total_element_count(received = True)
-		print("\t\tTotal Elements Received:\t%s" % total_elements_received)
-		output_for_csv.append('"Total Elements Received","%s"\n' % total_elements_received)
+#		due to possibility for skewed results this report being temporarily removed
+#		until version 1.1 makes a db-schema fix
+#	
+# 		total_elements_received = self.sql_driver.total_element_count(received = True)
+# 		print("\t\tTotal Elements Received:\t%s" % total_elements_received)
+# 		output_for_csv.append('"Total Elements Received","%s"\n' % total_elements_received)
+# 
+# 		percent_element_received = int((total_elements_received/total_elements)*100)
+# 		print('\t\t%% Elements Received:\t\t%s%%' % percent_element_received)
+# 		output_for_csv.append('"%% Elements Received","%s"\n' % percent_element_received)
 
 		percent_element_received = int((total_elements_received/total_elements)*100)
 		print('\t\t%% Elements Received:\t\t%s%%' % percent_element_received)
