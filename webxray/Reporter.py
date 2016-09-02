@@ -308,10 +308,10 @@ class Reporter:
 # 		percent_element_received = int((total_elements_received/total_elements)*100)
 # 		print('\t\t%% Elements Received:\t\t%s%%' % percent_element_received)
 # 		output_for_csv.append('"%% Elements Received","%s"\n' % percent_element_received)
-
-		percent_element_received = int((total_elements_received/total_elements)*100)
-		print('\t\t%% Elements Received:\t\t%s%%' % percent_element_received)
-		output_for_csv.append('"%% Elements Received","%s"\n' % percent_element_received)
+# 
+# 		percent_element_received = int((total_elements_received/total_elements)*100)
+# 		print('\t\t%% Elements Received:\t\t%s%%' % percent_element_received)
+# 		output_for_csv.append('"%% Elements Received","%s"\n' % percent_element_received)
 
 		total_pages_with_elements = self.sql_driver.pages_w_element_count()
 		print("\t\tPages with Elements:\t\t%s" % total_pages_with_elements)
