@@ -104,9 +104,9 @@ class Collector:
 				continue
 
 			# skip if in db already
-# 			if sql_driver.page_exists(uri):
-# 				print("\t\t%s | %-50s Exists in DB, Skipping." % (count, uri[:50]))
-# 				continue
+			if sql_driver.page_exists(uri):
+				print("\t\t%s | %-50s Exists in DB, Skipping." % (count, uri[:50]))
+				continue
 	
 			# only add if not in list already
 			if uri not in uris_to_process:
