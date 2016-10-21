@@ -467,7 +467,7 @@
 		]
 	},
 	{
-		"organization"	:	"Chango, Inc.",
+		"organization"	:	"Chango",
 		"notes"			:	"",
 		"country"		:	"CA",
 		"domains"		:	[
@@ -547,7 +547,7 @@
 		]
 	},
 	{
-		"organization"	:	"Community Health Systems, Inc.",
+		"organization"	:	"Community Health Systems",
 		"notes"			:	"",
 		"country"		:	"US",
 		"domains"		:	[
@@ -747,15 +747,6 @@
 		"domains"		:	[
 			"betrad.com",
 			"evidon.com"
-		]
-	},
-	{
-		"organization"	:	"eXelate",
-		"notes"			:	"",
-		"country"		:	"US",
-		"domains"		:	[
-			"exelate.com",
-			"exelator.com"
 		]
 	},
 	{
@@ -1151,7 +1142,7 @@
 		]
 	},
 	{
-		"organization"	:	"Health Grades, Inc.",
+		"organization"	:	"Health Grades",
 		"notes"			:	"",
 		"country"		:	"US",
 		"domains"		:	[
@@ -1403,7 +1394,7 @@
 		]
 	},
 	{
-		"organization"	:	"LiveRamp, Inc.",
+		"organization"	:	"LiveRamp",
 		"notes"			:	"",
 		"country"		:	"CA",
 		"domains"		:	[
@@ -1448,15 +1439,6 @@
 			"marketo.com",
 			"marketo.net",
 			"mktoresp.com"
-		]
-	},
-	{
-		"organization"	:	"MaxCDN",
-		"notes"			:	"",
-		"country"		:	"US",
-		"domains"		:	[
-			"bootstrapcdn.com",
-			"maxcdn.com"
 		]
 	},
 	{
@@ -1611,7 +1593,7 @@
 		]
 	},
 	{
-		"organization"	:	"Neustar, Inc.",
+		"organization"	:	"Neustar",
 		"notes"			:	"",
 		"country"		:	"US",
 		"domains"		:	[
@@ -1631,9 +1613,11 @@
 	},
 	{
 		"organization"	:	"Nielsen Online",
-		"notes"			:	"",
+		"notes"			:	"bought exelate in 2015",
 		"country"		:	"US",
 		"domains"		:	[
+			"exelate.com",
+			"exelator.com",
 			"imrworldwide.com",
 			"nielsen-online.com",
 			"nielsen.com",
@@ -1958,6 +1942,16 @@
 		]
 	},
 	{
+		"organization"	:	"StackPath",
+		"notes"			:	"used to be maxcdn",
+		"country"		:	"US",
+		"domains"		:	[
+			"bootstrapcdn.com",
+			"maxcdn.com",
+			"stackpath.com"
+		]
+	},
+	{
 		"organization"	:	"Statcounter",
 		"notes"			:	"",
 		"country"		:	"IE",
@@ -2151,7 +2145,7 @@
 		]
 	},
 	{
-		"organization"	:	"Turn, Inc.",
+		"organization"	:	"Turn",
 		"notes"			:	"",
 		"country"		:	"US",
 		"domains"		:	[
@@ -2321,7 +2315,7 @@
 		]
 	},
 	{
-		"organization"	:	"Youku Tudou Inc",
+		"organization"	:	"Youku Tudou",
 		"notes"			:	"",
 		"country"		:	"CN",
 		"domains"		:	[
