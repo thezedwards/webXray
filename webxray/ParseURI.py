@@ -21,7 +21,7 @@ class ParseURI:
 		# quick comparisons of smaller strings
 
 		# get the file from the local dir
-		pubsuffix_raw_list = open(os.path.join(os.path.dirname(__file__), './resources/pubsuffix/wbxrPubSuffixList.txt'), 'r')
+		pubsuffix_raw_list = open(os.path.join(os.path.dirname(__file__), './resources/pubsuffix/wbxrPubSuffixList.txt'), mode='r', encoding='utf8')
 		pubsuffix_list = []
 
 		for line in pubsuffix_raw_list:
