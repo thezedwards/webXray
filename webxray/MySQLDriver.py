@@ -137,32 +137,6 @@ class MySQLDriver:
 		print('\tSuccess!')
 	# end create_wbxr_db
 
-	def create_sub_domain_tld_db(self):
-		# create the new db
-		try:
-			self.db.execute('CREATE DATABASE IF NOT EXISTS sub_domain_tld')
-			self.db_conn.commit()
-		except:
-			print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			print('ERROR: Could not create uri parser database.')
-			print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			exit()
-
-		# switch to this db
-		self.db.execute('USE sub_domain_tld')
-	
-		# create new tables
-		db_init_file = open(os.path.join(os.path.dirname(__file__), './resources/db/mysql/sub_domain_tld-compact.sql'), 'r')
-		for query in db_init_file:
-			# skip lines that are comments
-			if "-" in query[0]: continue
-			# lose whitespace
-			query = query.strip()
-			# push to db
-			self.db.execute(query)
-			self.db_conn.commit()
-	# end create_wbxr_db
-
 	#-----------------------#
 	# INGESTION AND STORING #
 	#-----------------------#	
@@ -289,21 +263,6 @@ class MySQLDriver:
 # 			print("skipping duplicate error on %s" % uri)
 		return
 	# end log_error
-
-	def add_sub_domain_pubsuffix_tld(self, sub_domain, domain, pubsuffix, tld):
-		self.db.execute("INSERT IGNORE INTO sub_domain_tld (sub_domain_md5, sub_domain, domain_md5, domain, pubsuffix_md5, pubsuffix, tld_md5, tld) VALUES (MD5(%s), %s, MD5(%s), %s, MD5(%s), %s, MD5(%s), %s)", (sub_domain, sub_domain, domain, domain, pubsuffix, pubsuffix, tld, tld))
-		self.db_conn.commit()
-		return
-	# end add_tld_record
-
-	def sub_domain_exists(self, sub_domain):
-		# return true given item is in the db
-		self.db.execute("SELECT domain, pubsuffix, tld FROM sub_domain_tld WHERE sub_domain_md5 = MD5(%s)", (sub_domain,))
-		try:
-			return self.db.fetchone()
-		except:
-			return False
-	# end tld_exists
 
 	#------------------------#
 	# ANALYSIS AND REPORTING #
