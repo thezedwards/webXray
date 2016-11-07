@@ -286,7 +286,7 @@ class MySQLDriver:
 	# end add_org
 
 	def update_domain_org(self, id, domain):
-		self.db.execute('UPDATE IGNORE domain SET org_id = %s WHERE domain = "%s";' % (id, domain))
+		self.db.execute('UPDATE IGNORE domain SET org_id = %s WHERE domain_md5 = MD5(%s)', (id, domain))
 		self.db_conn.commit()
 	# end update_domain_org
 
