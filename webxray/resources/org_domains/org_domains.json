@@ -61,9 +61,12 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"acxiom-online.com",
-			"acxiom.com"
+			"acxiom.com",
+			"liveramp.com",
+			"rlcdn.com"
 		],
 		"subsidiaries"	:	[
+			"Liveramp"
 		]
 	},
 	{
@@ -1653,17 +1656,6 @@
 		"domains"		:	[
 			"krux.com",
 			"krxd.net"
-		],
-		"subsidiaries"	:	[
-		]
-	},
-	{
-		"organization"	:	"LiveRamp",
-		"notes"			:	"",
-		"country"		:	"CA",
-		"domains"		:	[
-			"liveramp.com",
-			"rlcdn.com"
 		],
 		"subsidiaries"	:	[
 		]
