@@ -967,6 +967,7 @@
 		"notes"			:	"liverail.com is an acquisition / 2014",
 		"country"		:	"US",
 		"domains"		:	[
+			"atdmt.com",
 			"facebook.com",
 			"facebook.net",
 			"fbcdn.com",
@@ -1793,7 +1794,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"aspnetcdn.com",
-			"atdmt.com",
 			"bing.com",
 			"bizo.com",
 			"bizographics.com",
