@@ -2360,7 +2360,7 @@
 		]
 	},
 	{
-		"organization"	:	"Spot X Change",
+		"organization"	:	"SpotXchange",
 		"notes"			:	"",
 		"country"		:	"US",
 		"domains"		:	[
@@ -2368,6 +2368,9 @@
 			"spotxchange.com"
 		],
 		"subsidiaries"	:	[
+			"SpotX",
+			"Spot X Change",
+			"SpotX Change"
 		]
 	},
 	{
