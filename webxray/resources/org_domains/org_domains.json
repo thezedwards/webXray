@@ -6,8 +6,6 @@
 		"domains"		:	[
 			"33across.com",
 			"tynt.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -17,8 +15,6 @@
 		"domains"		:	[
 			"360.cn",
 			"qhimg.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -27,8 +23,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"51yes.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -38,9 +32,6 @@
 		"domains"		:	[
 			"accuweather.com",
 			"skymotion.com"
-		],
-		"subsidiaries"	:	[
-			"SkyMotion"
 		]
 	},
 	{
@@ -50,9 +41,6 @@
 		"domains"		:	[
 			"actua.com",
 			"govdelivery.com"
-		],
-		"subsidiaries"	:	[
-			"GovDelivery"
 		]
 	},
 	{
@@ -64,9 +52,6 @@
 			"acxiom.com",
 			"liveramp.com",
 			"rlcdn.com"
-		],
-		"subsidiaries"	:	[
-			"LiveRamp"
 		]
 	},
 	{
@@ -76,8 +61,6 @@
 		"domains"		:	[
 			"adbrain.com",
 			"adbrn.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -88,8 +71,6 @@
 			"acs86.com",
 			"adchina.com",
 			"csbew.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -99,8 +80,6 @@
 		"domains"		:	[
 			"adform.com",
 			"adform.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -109,8 +88,6 @@
 		"country"		:	"DE",
 		"domains"		:	[
 			"adition.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -120,8 +97,6 @@
 		"domains"		:	[
 			"admaster.com.cn",
 			"cdnmaster.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -139,9 +114,6 @@
 			"omtrdc.net",
 			"typekit.com",
 			"typekit.net"
-		],
-		"subsidiaries"	:	[
-			"Typekit"
 		]
 	},
 	{
@@ -150,8 +122,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"adroll.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -160,8 +130,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"adsame.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -170,8 +138,6 @@
 		"country"		:	"DE",
 		"domains"		:	[
 			"adscale.de"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -181,8 +147,6 @@
 		"domains"		:	[
 			"adsocial.cn",
 			"jiathis.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -197,11 +161,6 @@
 			"dsply.com",
 			"foresee.com",
 			"webcollage.com"
-		],
-		"subsidiaries"	:	[
-			"Answers Corporation",
-			"ForeSee",
-			"Webcollage"
 		]
 	},
 	{
@@ -212,8 +171,6 @@
 			"51.la",
 			"ajiang.net",
 			"ajstat.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -225,8 +182,6 @@
 			"akamai.com",
 			"akamai.net",
 			"akamaihd.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -264,9 +219,6 @@
 			"tbcdn.cn",
 			"xiami.net",
 			"ykimg.com"
-		],
-		"subsidiaries"	:	[
-			"HiChina"
 		]
 	},
 	{
@@ -278,8 +230,6 @@
 			"allyes.com.cn",
 			"qtmojo.cn",
 			"qtmojo.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -289,8 +239,6 @@
 		"domains"		:	[
 			"allmobilize.com",
 			"yunshipei.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -305,9 +253,6 @@
 			"cloudfront.net",
 			"images-amazon.com",
 			"ssl-images-amazon.com"
-		],
-		"subsidiaries"	:	[
-			"Alexa"
 		]
 	},
 	{
@@ -316,32 +261,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"anquan.org"
-		],
-		"subsidiaries"	:	[
-		]
-	},
-	{
-		"organization"	:	"AOL",
-		"notes"			:	"Convertro acquired 2014, also owns Gravity Insights",
-		"country"		:	"US",
-		"domains"		:	[
-			"adap.tv",
-			"adtech.de",
-			"adtechus.com",
-			"advertising.com",
-			"aol.com",
-			"aolcdn.com",
-			"aolcdn.com",
-			"atwola.com",
-			"blogcdn.com",
-			"convertro.com",
-			"gravity.com",
-			"grvcdn.com",
-			"huffpost.com"
-		],
-		"subsidiaries"	:	[
-			"Convertro",
-			"Gravity Insights"
 		]
 	},
 	{
@@ -351,8 +270,6 @@
 		"domains"		:	[
 			"apple.com",
 			"mzstatic.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -364,9 +281,6 @@
 			"adnxs.com",
 			"appnexus.com",
 			"xaxis.com"
-		],
-		"subsidiaries"	:	[
-			"Xaxis"
 		]
 	},
 	{
@@ -376,8 +290,6 @@
 		"domains"		:	[
 			"audiencescience.com",
 			"revsci.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -387,8 +299,6 @@
 		"domains"		:	[
 			"autohome.com.cn",
 			"autoimg.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -399,9 +309,6 @@
 			"gravatar.com",
 			"wordpress.com",
 			"wp.com"
-		],
-		"subsidiaries"	:	[
-			"Wordpress"
 		]
 	},
 	{
@@ -416,8 +323,6 @@
 			"cnmo-img.com.cn",
 			"hao123.com",
 			"hao123img.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -426,8 +331,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"baifendian.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -436,8 +339,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"behe.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -446,8 +347,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"jiankongbao.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -457,8 +356,6 @@
 		"domains"		:	[
 			"emarbox.com",
 			"yigao.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -467,8 +364,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"optaim.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -479,9 +374,6 @@
 			"adality.de",
 			"adrtx.net",
 			"bertelsmann.de"
-		],
-		"subsidiaries"	:	[
-			"Adality"
 		]
 	},
 	{
@@ -496,10 +388,6 @@
 			"burstnet.com",
 			"rhythmone.com",
 			"rhythmxchange.com"
-		],
-		"subsidiaries"	:	[
-			"AdKarma",
-			"RhythmOne"
 		]
 	},
 	{
@@ -508,8 +396,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"brightcove.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -519,8 +405,6 @@
 		"domains"		:	[
 			"callrail.com",
 			"calltrk.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -529,8 +413,6 @@
 		"country"		:	"CA",
 		"domains"		:	[
 			"casalemedia.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -549,8 +431,6 @@
 			"xcarimg.com",
 			"zol-img.com.cn",
 			"zol.com.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -562,9 +442,6 @@
 			"centro.net",
 			"sitescout.com",
 			"sitescout.net"
-		],
-		"subsidiaries"	:	[
-			"SiteScout"
 		]
 	},
 	{
@@ -573,8 +450,6 @@
 		"country"		:	"CA",
 		"domains"		:	[
 			"chango.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -584,8 +459,6 @@
 		"domains"		:	[
 			"chartbeat.com",
 			"chartbeat.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -596,9 +469,6 @@
 			"56img.com",
 			"renren.com",
 			"v-56.com"
-		],
-		"subsidiaries"	:	[
-			"Ren Ren"
 		]
 	},
 	{
@@ -608,8 +478,6 @@
 		"domains"		:	[
 			"chitika.com",
 			"chitika.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -618,8 +486,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"cloudflare.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -629,8 +495,6 @@
 		"domains"		:	[
 			"124.17.1.253",
 			"cnnic.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -639,8 +503,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"cnisp.org.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -650,8 +512,6 @@
 		"domains"		:	[
 			"collective-media.net",
 			"collective.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -662,10 +522,6 @@
 			"comcast.com",
 			"freewheel.tv",
 			"stickyadstv.com"
-		],
-		"subsidiaries"	:	[
-			"FreeWheel",
-			"StickyADS.tv"
 		]
 	},
 	{
@@ -675,8 +531,6 @@
 		"domains"		:	[
 			"chs.net",
 			"g2gtoolkit.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -688,11 +542,6 @@
 			"fullcirclestudies.com",
 			"scorecardresearch.com",
 			"voicefive.com"
-		],
-		"subsidiaries"	:	[
-			"Full Circle Studies",
-			"ScorecardResearch",
-			"VoiceFive"
 		]
 	},
 	{
@@ -705,12 +554,6 @@
 			"fastclick.net",
 			"mediaplex.com",
 			"valueclick.com"
-		],
-		"subsidiaries"	:	[
-			"Dotomi",
-			"FastClick",
-			"Mediaplex",
-			"Valueclick"
 		]
 	},
 	{
@@ -722,8 +565,6 @@
 			"afy11.net",
 			"coxdigitalsolutions.com",
 			"coxreps.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -732,8 +573,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"crazyegg.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -743,8 +582,6 @@
 		"domains"		:	[
 			"criteo.com",
 			"criteo.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -754,8 +591,6 @@
 		"domains"		:	[
 			"datalogix.com",
 			"nexac.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -765,8 +600,6 @@
 		"domains"		:	[
 			"dataxu.com",
 			"w55c.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -778,10 +611,6 @@
 			"telekom.com",
 			"telekom.de",
 			"xplosion.de"
-		],
-		"subsidiaries"	:	[
-			"emetriq",
-			"xplosion interactive"
 		]
 	},
 	{
@@ -791,8 +620,6 @@
 		"domains"		:	[
 			"disqus.com",
 			"disquscdn.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -801,8 +628,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"doubleverify.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -812,8 +637,6 @@
 		"domains"		:	[
 			"dratio.com",
 			"wrating.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -823,8 +646,6 @@
 		"domains"		:	[
 			"adsymptotic.com",
 			"drawbrid.ge"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -834,8 +655,6 @@
 		"domains"		:	[
 			"ddccdn.com",
 			"drugs.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -845,8 +664,6 @@
 		"domains"		:	[
 			"dstillery.com",
 			"media6degrees.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -856,8 +673,6 @@
 		"domains"		:	[
 			"dynadmic.com",
 			"dyntrk.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -867,8 +682,6 @@
 		"domains"		:	[
 			"adam.com",
 			"ebix.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -877,8 +690,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"emarbox.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -887,8 +698,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"ensighten.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -899,9 +708,6 @@
 			"equifax.com",
 			"ixiaa.com",
 			"ixicorp.com"
-		],
-		"subsidiaries"	:	[
-			"IXI Corporation"
 		]
 	},
 	{
@@ -911,8 +717,6 @@
 		"domains"		:	[
 			"etracker.com",
 			"etracker.de"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -922,8 +726,6 @@
 		"domains"		:	[
 			"betrad.com",
 			"evidon.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -935,9 +737,6 @@
 			"consumerinfo.com",
 			"experian.com",
 			"experiandirect.com"
-		],
-		"subsidiaries"	:	[
-			"AudienceIQ"
 		]
 	},
 	{
@@ -947,8 +746,6 @@
 		"domains"		:	[
 			"adotube.com",
 			"exponential.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -958,8 +755,6 @@
 		"domains"		:	[
 			"dgit.com",
 			"extremereach.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -974,9 +769,6 @@
 			"fbcdn.net",
 			"liverail.com",
 			"lrcdn.net"
-		],
-		"subsidiaries"	:	[
-			"LiveRail"
 		]
 	},
 	{
@@ -986,8 +778,6 @@
 		"domains"		:	[
 			"farlex.com",
 			"tfd.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -997,8 +787,6 @@
 		"domains"		:	[
 			"fasthealth.com",
 			"helenkeller.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1007,8 +795,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"federatedmedia.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1020,8 +806,6 @@
 			"flipp.com",
 			"wishabi.com",
 			"wishabi.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1031,8 +815,6 @@
 		"domains"		:	[
 			"gannett.com",
 			"pointroll.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1042,8 +824,6 @@
 		"domains"		:	[
 			"gemius.com",
 			"gemius.pl"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1052,8 +832,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"gigya.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1321,15 +1099,6 @@
 			"youtube.com",
 			"youtubeeducation.com",
 			"ytimg.com"
-		],
-		"subsidiaries"	:	[
-			"AdSense",
-			"AdWords",
-			"Admeld",
-			"Blogger",
-			"DoubleClick",
-			"Youtube",
-			"invitemedia"
 		]
 	},
 	{
@@ -1340,8 +1109,6 @@
 			"gridsum.com",
 			"gridsumdissector.com",
 			"webdissector.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1351,8 +1118,6 @@
 		"domains"		:	[
 			"hdtmedia.com",
 			"icast.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1363,8 +1128,6 @@
 			"bettermedicine.com",
 			"healthgrades.com",
 			"hgimg.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1374,8 +1137,6 @@
 		"domains"		:	[
 			"hon.ch",
 			"honcode.ch"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1385,8 +1146,6 @@
 		"domains"		:	[
 			"hearst.com",
 			"hearst.com.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1398,10 +1157,6 @@
 			"himediagroup.com",
 			"sedo.com",
 			"sedoparking.com"
-		],
-		"subsidiaries"	:	[
-			"Adlinkgroup",
-			"Sedo"
 		]
 	},
 	{
@@ -1412,8 +1167,6 @@
 			"ehc.com",
 			"hcahealthcare.com",
 			"medcity.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1435,13 +1188,6 @@
 			"thedailybeast.com",
 			"tqn.com",
 			"vimeo.com"
-		],
-		"subsidiaries"	:	[
-			"About.com",
-			"Ask Jeeves",
-			"Ask.com",
-			"Dictionary.com",
-			"Vimeo"
 		]
 	},
 	{
@@ -1451,8 +1197,6 @@
 		"domains"		:	[
 			"360yield.com",
 			"improvedigital.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1462,8 +1206,6 @@
 		"domains"		:	[
 			"infonline.de",
 			"ioam.de"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1475,8 +1217,6 @@
 			"inform.com",
 			"mochila.com",
 			"newsinc.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1485,8 +1225,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"insightexpress.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1497,8 +1235,6 @@
 			"adsafeprotected.com",
 			"iasds01.com",
 			"integralads.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1512,12 +1248,6 @@
 			"unica.com",
 			"weather.com",
 			"weatherunderground.com"
-		],
-		"subsidiaries"	:	[
-			"IBM",
-			"The Weather Company",
-			"Unica",
-			"Watson Ads"
 		]
 	},
 	{
@@ -1526,8 +1256,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"iperceptions.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1536,8 +1264,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"ipinyou.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1547,9 +1273,6 @@
 		"domains"		:	[
 			"bidswitch.net",
 			"iponweb.com"
-		],
-		"subsidiaries"	:	[
-			"Bidswitch"
 		]
 	},
 	{
@@ -1561,8 +1284,6 @@
 			"irs01.com",
 			"irs01.net",
 			"irs09.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1573,8 +1294,6 @@
 			"china-netwave.com",
 			"uitv.com",
 			"uitv.com.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1586,8 +1305,6 @@
 			"360buy.com",
 			"360buyimg.com",
 			"jd.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1597,9 +1314,6 @@
 		"domains"		:	[
 			"jquery.com",
 			"jquery.org"
-		],
-		"subsidiaries"	:	[
-			"jQuery"
 		]
 	},
 	{
@@ -1612,10 +1326,6 @@
 			"lightspeedresearch.com",
 			"millwardbrown.com",
 			"questionmarket.com"
-		],
-		"subsidiaries"	:	[
-			"Lightspeed Research",
-			"Millward Brown Digital"
 		]
 	},
 	{
@@ -1625,8 +1335,6 @@
 		"domains"		:	[
 			"kindred.com",
 			"kindredhealthcare.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1635,8 +1343,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"knet.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1646,8 +1352,6 @@
 		"domains"		:	[
 			"anquan.org",
 			"knownsec.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1657,8 +1361,6 @@
 		"domains"		:	[
 			"krux.com",
 			"krxd.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1668,8 +1370,6 @@
 		"domains"		:	[
 			"crwdcntrl.net",
 			"lotame.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1682,10 +1382,6 @@
 			"magnetic.com",
 			"mybuys.com",
 			"veruta.com"
-		],
-		"subsidiaries"	:	[
-			"Magnetic Media Online",
-			"MyBuys"
 		]
 	},
 	{
@@ -1694,8 +1390,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"ebs.gov.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1706,8 +1400,6 @@
 			"marketo.com",
 			"marketo.net",
 			"mktoresp.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1718,8 +1410,14 @@
 			"maxpointinteractive.com",
 			"maxusglobal.com",
 			"mxptint.net"
-		],
-		"subsidiaries"	:	[
+		]
+	},
+	{
+		"organization"	:	"MediaAV",
+		"notes"			:	"",
+		"country"		:	"CN",
+		"domains"		:	[
+			"mediav.com"
 		]
 	},
 	{
@@ -1729,18 +1427,6 @@
 		"domains"		:	[
 			"mathtag.com",
 			"mediamath.com"
-		],
-		"subsidiaries"	:	[
-		]
-	},
-	{
-		"organization"	:	"MediaAV",
-		"notes"			:	"",
-		"country"		:	"CN",
-		"domains"		:	[
-			"mediav.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1750,8 +1436,6 @@
 		"domains"		:	[
 			"influencehealth.com",
 			"medseek.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1763,8 +1447,6 @@
 			"meetrics.de",
 			"meetrics.net",
 			"mxcdn.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1774,8 +1456,6 @@
 		"domains"		:	[
 			"menlotechnologies.cn",
 			"mlt01.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1784,8 +1464,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"miaozhen.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1806,11 +1484,6 @@
 			"s-microsoft.com",
 			"s-msn.com",
 			"s-msn.com"
-		],
-		"subsidiaries"	:	[
-			"Bing",
-			"Bizo",
-			"LinkedIn"
 		]
 	},
 	{
@@ -1820,8 +1493,6 @@
 		"domains"		:	[
 			"moat.com",
 			"moatads.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1830,8 +1501,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"glam.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1843,8 +1512,6 @@
 			"fonts.net",
 			"monotype.com",
 			"monotypeimaging.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1854,8 +1521,6 @@
 		"domains"		:	[
 			"mozilla.net",
 			"mozilla.org"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1865,8 +1530,18 @@
 		"domains"		:	[
 			"nativo.net",
 			"postrelease.com"
-		],
-		"subsidiaries"	:	[
+		]
+	},
+	{
+		"organization"	:	"NaviStone",
+		"notes"			:	"per this report: https://gizmodo.com/before-you-hit-submit-this-company-has-already-logge-1795906081 and whoisology domains linked to registrant email of murdoog.com (bevobirra@gmail.com)",
+		"country"		:	"US",
+		"domains"		:	[
+			"murdoog.com",
+			"navistone.com",
+			"navistone.marketing",
+			"navistonedata.com",
+			"navistonemarketing.com"
 		]
 	},
 	{
@@ -1880,8 +1555,6 @@
 			"lofter.com",
 			"netease.com",
 			"youdao.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1892,9 +1565,6 @@
 			"netiq.com",
 			"webtrends.com",
 			"webtrendslive.com"
-		],
-		"subsidiaries"	:	[
-			"WebTrends"
 		]
 	},
 	{
@@ -1905,8 +1575,6 @@
 			"adadvisor.net",
 			"agkn.com",
 			"neustar.biz"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1916,8 +1584,6 @@
 		"domains"		:	[
 			"newrelic.com",
 			"nr-data.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1931,10 +1597,6 @@
 			"nielsen-online.com",
 			"nielsen.com",
 			"vizu.com"
-		],
-		"subsidiaries"	:	[
-			"Vizu",
-			"exelate"
 		]
 	},
 	{
@@ -1943,8 +1605,6 @@
 		"country"		:	"DE",
 		"domains"		:	[
 			"nuggad.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1956,9 +1616,6 @@
 			"omnicomgroup.com",
 			"omnicommediagroup.com",
 			"p-td.com"
-		],
-		"subsidiaries"	:	[
-			"Accuen"
 		]
 	},
 	{
@@ -1968,8 +1625,6 @@
 		"domains"		:	[
 			"openx.com",
 			"openx.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1978,8 +1633,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"optimizely.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -1991,10 +1644,6 @@
 			"addthisedge.com",
 			"bkrtx.com",
 			"bluekai.com"
-		],
-		"subsidiaries"	:	[
-			"AddThis",
-			"Blue Kai"
 		]
 	},
 	{
@@ -2007,9 +1656,6 @@
 			"sphere.com",
 			"verticalacuity.com",
 			"visualrevenue.com"
-		],
-		"subsidiaries"	:	[
-			"Sphere"
 		]
 	},
 	{
@@ -2020,8 +1666,6 @@
 			"dijipop.com",
 			"owneriq.com",
 			"owneriq.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2033,8 +1677,6 @@
 			"pcauto.com.cn",
 			"pcgames.com.cn",
 			"pconline.com.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2045,10 +1687,6 @@
 			"legolas-media.com",
 			"thinkupfront.com",
 			"undertone.com"
-		],
-		"subsidiaries"	:	[
-			"Undertone",
-			"Upfront Media"
 		]
 	},
 	{
@@ -2058,8 +1696,6 @@
 		"domains"		:	[
 			"pinimg.com",
 			"pinterest.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2070,9 +1706,6 @@
 			"progress.com",
 			"telerik.com",
 			"telerikstatic.com"
-		],
-		"subsidiaries"	:	[
-			"Telerik"
 		]
 	},
 	{
@@ -2081,8 +1714,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"pubmatic.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2092,8 +1723,6 @@
 		"domains"		:	[
 			"contextweb.com",
 			"pulsepoint.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2103,8 +1732,6 @@
 		"domains"		:	[
 			"displaymarketplace.com",
 			"pulsepoint.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2115,8 +1742,6 @@
 			"quantcast.com",
 			"quantcount.com",
 			"quantserve.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2126,8 +1751,6 @@
 		"domains"		:	[
 			"gwallet.com",
 			"radiumone.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2136,8 +1759,6 @@
 		"country"		:	"NL",
 		"domains"		:	[
 			"readspeaker.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2147,8 +1768,6 @@
 		"domains"		:	[
 			"reson8.com",
 			"resonateinsights.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2160,9 +1779,6 @@
 			"rocketfuel.com",
 			"ru4.com",
 			"xplusone.net"
-		],
-		"subsidiaries"	:	[
-			"x+1"
 		]
 	},
 	{
@@ -2171,8 +1787,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"rubiconproject.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2184,9 +1798,6 @@
 			"adgrx.com",
 			"bloom-hq.com",
 			"samsung.com"
-		],
-		"subsidiaries"	:	[
-			"AdGear"
 		]
 	},
 	{
@@ -2196,8 +1807,6 @@
 		"domains"		:	[
 			"scorpioncms.com",
 			"scorpiondesign.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2207,8 +1816,6 @@
 		"domains"		:	[
 			"sellpoint.net",
 			"sellpoints.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2218,8 +1825,6 @@
 		"domains"		:	[
 			"semasio.com",
 			"semasio.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2229,8 +1834,6 @@
 		"domains"		:	[
 			"2345.com",
 			"50bang.org"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2239,8 +1842,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"sharethis.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2250,8 +1851,6 @@
 		"domains"		:	[
 			"joinvan.com",
 			"sharethrough.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2261,8 +1860,6 @@
 		"domains"		:	[
 			"signal.co",
 			"thebrighttag.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2271,8 +1868,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"simpli.fi"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2287,9 +1882,6 @@
 			"sinajs.cn",
 			"sinajs.cn",
 			"weibo.com"
-		],
-		"subsidiaries"	:	[
-			"Weibo"
 		]
 	},
 	{
@@ -2299,8 +1891,6 @@
 		"domains"		:	[
 			"siteimprove.com",
 			"siteimproveanalytics.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2310,8 +1900,6 @@
 		"domains"		:	[
 			"mediamind.com",
 			"serving-sys.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2320,8 +1908,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"smartadserver.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2331,8 +1917,6 @@
 		"domains"		:	[
 			"sogou.com",
 			"sogoucdn.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2344,8 +1928,6 @@
 			"itc.cn",
 			"sohu.com",
 			"sohu.com.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2355,8 +1937,6 @@
 		"domains"		:	[
 			"lijit.com",
 			"sovrn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2366,11 +1946,6 @@
 		"domains"		:	[
 			"spotxcdn.com",
 			"spotxchange.com"
-		],
-		"subsidiaries"	:	[
-			"SpotX",
-			"Spot X Change",
-			"SpotX Change"
 		]
 	},
 	{
@@ -2381,10 +1956,6 @@
 			"bootstrapcdn.com",
 			"maxcdn.com",
 			"stackpath.com"
-		],
-		"subsidiaries"	:	[
-			"BootstrapCDN",
-			"MaxCDN"
 		]
 	},
 	{
@@ -2393,8 +1964,6 @@
 		"country"		:	"IE",
 		"domains"		:	[
 			"statcounter.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2404,9 +1973,6 @@
 		"domains"		:	[
 			"inquicker.com",
 			"stericycle.com"
-		],
-		"subsidiaries"	:	[
-			"InQuicker"
 		]
 	},
 	{
@@ -2417,9 +1983,6 @@
 			"m6r.eu",
 			"mbr-targeting.com",
 			"stroeer.de"
-		],
-		"subsidiaries"	:	[
-			"mbr targeting"
 		]
 	},
 	{
@@ -2429,8 +1992,6 @@
 		"domains"		:	[
 			"cnsuning.com",
 			"suning.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2439,8 +2000,6 @@
 		"country"		:	"UK",
 		"domains"		:	[
 			"switchads.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2450,8 +2009,6 @@
 		"domains"		:	[
 			"perfectmarket.com",
 			"taboola.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2460,8 +2017,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"tapad.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2475,10 +2030,6 @@
 			"nomao.com",
 			"promodigital.it",
 			"teads.tv"
-		],
-		"subsidiaries"	:	[
-			"Nomao",
-			"PromoDigital"
 		]
 	},
 	{
@@ -2497,8 +2048,6 @@
 			"qq.com",
 			"tencent.com",
 			"yeswan.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2507,8 +2056,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"webterren.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2517,8 +2064,6 @@
 		"country"		:	"DE",
 		"domains"		:	[
 			"theadex.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2534,8 +2079,6 @@
 			"shopzilla.com",
 			"uswitch.com",
 			"weathersphere.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2545,8 +2088,6 @@
 		"domains"		:	[
 			"adsrvr.org",
 			"thetradedesk.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2555,8 +2096,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"tout.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2566,8 +2105,6 @@
 		"domains"		:	[
 			"townnews.com",
 			"townnews365.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2579,9 +2116,6 @@
 			"heias.com",
 			"tradedoubler.com",
 			"tradedoubler.se"
-		],
-		"subsidiaries"	:	[
-			"HEIAS"
 		]
 	},
 	{
@@ -2590,8 +2124,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"tribalfusion.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2600,8 +2132,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"truste.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2611,8 +2141,6 @@
 		"domains"		:	[
 			"trustedshops.com",
 			"trustedshops.eu"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2621,8 +2149,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"tubemogul.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2631,8 +2157,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"turn.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2642,8 +2166,6 @@
 		"domains"		:	[
 			"twimg.com",
 			"twitter.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2656,8 +2178,6 @@
 			"tifbs.net",
 			"united-internet-media.de",
 			"web.de"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2666,8 +2186,35 @@
 		"country"		:	"UK",
 		"domains"		:	[
 			"veinteractive.com"
-		],
-		"subsidiaries"	:	[
+		]
+	},
+	{
+		"organization"	:	"Verizon",
+		"notes"			:	"Verizon bought Yahoo and Aol, previously Aol acquired Convertro in 2014, also owns Gravity Insights",
+		"country"		:	"US",
+		"domains"		:	[
+			"adap.tv",
+			"adtech.de",
+			"adtechus.com",
+			"advertising.com",
+			"aol.com",
+			"aolcdn.com",
+			"aolcdn.com",
+			"atwola.com",
+			"blogcdn.com",
+			"bluelithium.com",
+			"brightroll.com",
+			"btrll.com",
+			"convertro.com",
+			"gravity.com",
+			"grvcdn.com",
+			"huffpost.com",
+			"interclick.com",
+			"tumblr.com",
+			"verizon.com",
+			"yahoo.com",
+			"yieldmanager.com",
+			"yimg.com"
 		]
 	},
 	{
@@ -2677,8 +2224,6 @@
 		"domains"		:	[
 			"intellitxt.com",
 			"vibrantmedia.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2688,8 +2233,6 @@
 		"domains"		:	[
 			"tidaltv.com",
 			"videologygroup.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2698,8 +2241,6 @@
 		"country"		:	"CN",
 		"domains"		:	[
 			"weather.com.cn"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2709,9 +2250,6 @@
 		"domains"		:	[
 			"medscape.com",
 			"webmd.com"
-		],
-		"subsidiaries"	:	[
-			"Medscape"
 		]
 	},
 	{
@@ -2721,8 +2259,6 @@
 		"domains"		:	[
 			"wbtrk.net",
 			"webtrekk.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2731,8 +2267,6 @@
 		"country"		:	"US",
 		"domains"		:	[
 			"wikimedia.org"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2743,9 +2277,6 @@
 			"visualwebsiteoptimizer.com",
 			"vwo.com",
 			"wingify.com"
-		],
-		"subsidiaries"	:	[
-			"Visual Website Optimizer"
 		]
 	},
 	{
@@ -2757,12 +2288,6 @@
 			"plista.com",
 			"safecount.net",
 			"themig.com"
-		],
-		"subsidiaries"	:	[
-			"GroupM",
-			"Media Innovation Group",
-			"Safecount",
-			"plista"
 		]
 	},
 	{
@@ -2771,31 +2296,6 @@
 		"country"		:	"RU",
 		"domains"		:	[
 			"yadro.ru"
-		],
-		"subsidiaries"	:	[
-		]
-	},
-	{
-		"organization"	:	"Yahoo",
-		"notes"			:	"",
-		"country"		:	"US",
-		"domains"		:	[
-			"bluelithium.com",
-			"brightroll.com",
-			"btrll.com",
-			"interclick.com",
-			"tumblr.com",
-			"yahoo.com",
-			"yieldmanager.com",
-			"yimg.com"
-		],
-		"subsidiaries"	:	[
-			"BlueLithium",
-			"BrightRoll",
-			"Flickr",
-			"Interclick",
-			"Tumblr",
-			"Yahoo!"
 		]
 	},
 	{
@@ -2804,8 +2304,6 @@
 		"country"		:	"RU",
 		"domains"		:	[
 			"yandex.ru"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2815,8 +2313,6 @@
 		"domains"		:	[
 			"yieldlab.de",
 			"yieldlab.net"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2829,8 +2325,6 @@
 			"tudouui.com",
 			"ykimg.com",
 			"youku.com"
-		],
-		"subsidiaries"	:	[
 		]
 	},
 	{
@@ -2841,8 +2335,6 @@
 			"chinauma.net",
 			"gtags.net",
 			"zamplus.com"
-		],
-		"subsidiaries"	:	[
 		]
 	}
 ]
