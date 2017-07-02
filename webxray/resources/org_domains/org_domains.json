@@ -549,10 +549,14 @@
 		"notes"			:	"Valueclick/Mediaplex is now 'Conversant'",
 		"country"		:	"US",
 		"domains"		:	[
+			"awltovhc.com",
 			"conversantmedia.com",
 			"dotomi.com",
 			"fastclick.net",
+			"ftjcfx.com",
+			"lduhtrp.net",
 			"mediaplex.com",
+			"tqlkg.com",
 			"valueclick.com"
 		]
 	},
@@ -1170,6 +1174,18 @@
 		]
 	},
 	{
+		"organization"	:	"Hubspot",
+		"notes"			:	"",
+		"country"		:	"US",
+		"domains"		:	[
+			"hs-analytics.net",
+			"hs-scripts.com",
+			"hsforms.net",
+			"hsleadflows.net",
+			"hubspot.com"
+		]
+	},
+	{
 		"organization"	:	"IAC",
 		"notes"			:	"more @ http://iac.com/brands",
 		"country"		:	"US",
@@ -1521,6 +1537,14 @@
 		"domains"		:	[
 			"mozilla.net",
 			"mozilla.org"
+		]
+	},
+	{
+		"organization"	:	"Native Ads",
+		"notes"			:	"",
+		"country"		:	"CA",
+		"domains"		:	[
+			"nativeads.com"
 		]
 	},
 	{
@@ -2206,12 +2230,14 @@
 			"brightroll.com",
 			"btrll.com",
 			"convertro.com",
+			"edgecast.com",
 			"gravity.com",
 			"grvcdn.com",
 			"huffpost.com",
 			"interclick.com",
 			"tumblr.com",
 			"verizon.com",
+			"vessel.com",
 			"yahoo.com",
 			"yieldmanager.com",
 			"yimg.com"
