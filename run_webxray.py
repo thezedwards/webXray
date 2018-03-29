@@ -1,47 +1,93 @@
-#
-#	Welcome to webXray!
-#
-#	This program needs the following to run:
-#		Python 3.4 				https://www.python.org
-#		phantomjs 1.9+ 			http://phantomjs.org
-#		MySQL					https://www.mysql.com
-#		MySQL Python Connector	https://dev.mysql.com/downloads/connector/python/ (go with platform independent)
-#	
-#	webXray will try to alert you to failed dependencies, so if you are having
-#	 issues make sure above is installed
-#
-#	This file is may be all you are ever be exposed to.  It has an interactive mode
-#		'-i' which is what most people will need for small to moderate sets of pages (eg < 10k).
-#		However, if you are doing big sets you may want to use the unattended options '-c' and '-a'.
-#		Run with '-h' for details.
-#
-#	An important option to set is pool_size which determines how many parallel processes are run,
-#		 look at the collect() function for details and to adjust.
-#
+"""
+	Welcome to webxray!
 
-# before anything test we are on right version of python!
+	This file may be all you are ever be exposed to.  It has an interactive mode
+		'-i' or no flag, which is what most people will need for small to moderate sets of pages (eg < 10k).
+	
+	If you are doing big sets you may want to use the unattended options 
+		to collect ('-c') and analyze ('-a').
+	
+	Run with '-h' for details.
+"""
+
+# test we are on right version of python
 import sys
-if sys.version_info[0] < 3:
-	print('Python 3.4 or above is required for webXray to function; please check your installation.')
-	exit()
-if sys.version_info[1] < 4:
-	print('Python 3.4 or above is required for webXray to function; please check your installation.')
-	exit()
+if sys.version_info[0] < 3 or sys.version_info[1] < 4:
+	print('******************************************************************************')
+	print(' Python 3.4 or above is required for webXray; please check your installation. ')
+	print('******************************************************************************')
+	quit()
 
-# standard python 3.4 libs
+# import standard python packages
 import os
 import re
 import time
 from optparse import OptionParser
 
-# set up a global mysql driver, in the future you could use other db drivers here
-# if the mysql connector is not installed this fails gracefully
-from webxray.MySQLDriver import MySQLDriver
-sql_driver = MySQLDriver()
+###################
+# GLOBAL SETTINGS #
+###################
 
-# databases are stored with a 'wbxr_' prefix, this function helps select a database in interactive mode
+# BROWSER SELECTION
+# 	browser_type can be chrome or phantomjs
+#	chrome is default
+browser_type = 'chrome'
+
+# BROWSER WAIT TIME
+#	in order to give time for all elements to load the browser will wait for a set ammount of time
+#	 DECREASING means faster collection, but you may miss slow-loading elements
+#	 INCREASING means slower collection, but higher likelihood of getting slow-loading elements
+#
+#	extensive testing has determined 30 seconds performs well, and you are advised to keep it there,
+#		but you may adjust to taste and network conditions
+#		for example, on a very slow connection you may want to use 60 seconds
+#
+#	when using chrome a wait time below 30 seconds often results in lost cookies and is NOT RECCOMENDED!
+browser_wait = 30
+
+# PERFORMANCE: RUNNING PARALLEL BROWSING ENGINES
+#	'pool_size' sets how many browser processes get run in parallel, 
+#	by default it is set to 1 so no parallel processes are run
+#	setting this to 'None' will use all available cores and is reccomended 
+#		if doing over 1k pages
+#
+#	note that with manual tweaking the pool can be larger than the number
+#		of available cores, but proceed with caution
+pool_size = 1
+
+# DATABASE ENGINE SELECTION
+# 	db_engine can be 'mysql', 'postgres', or 'sqlite'
+#	sqlite requires no configuation, but mysql and postgres
+#		need user/pw set up in the relevant driver in the 
+#		./webxray directory
+db_engine = 'sqlite'
+
+# set up database connection
+if db_engine == 'mysql':
+	from webxray.MySQLDriver import MySQLDriver
+	sql_driver = MySQLDriver()
+elif db_engine == 'sqlite':
+	from webxray.SQLiteDriver import SQLiteDriver
+	sql_driver = SQLiteDriver()
+elif db_engine == 'postgres':
+	from webxray.PostgreSQLDriver import PostgreSQLDriver
+	sql_driver = PostgreSQLDriver()
+else:
+	print('INVALED DB ENGINE FOR %s, QUITTING!' % db_engine)
+	quit()
+
+####################
+# HELPER FUNCTIONS #
+####################
+
 def select_wbxr_db():
+	"""
+	databases are stored with a prefix (default 'wbxr_'), this function helps select a database in interactive mode
+	"""
+
+	# you can optionally specify a different prefix here by setting "db_prefix = '[PREFIX]'"
 	wbxr_dbs = sql_driver.get_wbxr_dbs_list()
+	wbxr_dbs.sort()
 
 	if len(wbxr_dbs) == 0:
 		print('''\t\tThere are no databases to analyze, please try [C]ollecting data or 
@@ -50,11 +96,11 @@ def select_wbxr_db():
 		return
 
 	for index,db_name in enumerate(wbxr_dbs):
-		print('\t\t[%s] %s' % (index, db_name[5:]))
+		print('\t\t[%s] %s' % (index, db_name))
 
 	max_index = len(wbxr_dbs)-1
 	
-	# loop until we get acceptable input
+	# interaction step: loop until we get acceptable input
 	while True:
 		selected_db_index = input("\n\tPlease select database by number: ")
 		if selected_db_index.isdigit():
@@ -68,25 +114,29 @@ def select_wbxr_db():
 			print('\t\t You entered an invalid string, please select a number in the range 0-%s.' % max_index)
 			continue
 
-	selected_db_name = wbxr_dbs[selected_db_index]
-	return selected_db_name
-# end select_wbxr_db
+	db_name = wbxr_dbs[selected_db_index]
+	return db_name
+# select_wbxr_db
 
 def quit():
 	print('------------------')
 	print('Quitting, bye bye!')
 	print('------------------')
+	sql_driver.close()
 	exit()
-# end quit
+# quit
 
-# this is what most people should be dealing with
 def interaction():
+	"""
+	primary interaction function, most people should only be exposed to this
+	"""
+
 	print('\tWould you like to:')
 	print('\t\t[C] Collect Data')
 	print('\t\t[A] Analyze Data')
 	print('\t\t[Q] Quit')
 
-	# loop until we get acceptable input
+	# interaction: loop until we get acceptable input
 	while True:
 		selection = input("\tSelection: ").lower()
 		
@@ -110,7 +160,7 @@ def interaction():
 		print('\t\t[A] Add to an Existing Database')
 		print('\t\t[Q] Quit')
 	
-		# loop until we get acceptable input
+		# interaction: loop until we get acceptable input
 		while True:
 			selection = input("\tSelection: ").lower()
 		
@@ -130,20 +180,19 @@ def interaction():
 			print('\tCreating New Database')
 			print('\t----------------------')
 			print('\tDatabase name must be alpha numeric, and may contain a "_"; maximum length is 20 characters.')
-			# loop until we get acceptable input
-			while True:
-				new_db_name = input('\tEnter new database name: ').lower()
 
-				if len(new_db_name) <= 40 and re.search('^[a-zA-Z0-9_]*$', new_db_name):
-					print('\tNew db name is "%s"' % new_db_name)
+			# interaction: loop until we get acceptable input
+			while True:
+				db_name = input('\tEnter new database name: ').lower()
+
+				if len(db_name) <= 40 and re.search('^[a-zA-Z0-9_]*$', db_name):
+					print('\tNew db name is "%s"' % db_name)
 					break
 				else:
 					print('\tName was invalid, try again.')
 					continue
-			# go create new db here, set current_db_name to what it is
-			sql_driver.create_wbxr_db(new_db_name)
-			# add db prefix here
-			current_db_name = 'wbxr_'+new_db_name
+			sql_driver.create_wbxr_db(db_name)
+
 		elif selection == 'a':	
 			# collect - add to db
 			print('\t---------------------------')
@@ -151,18 +200,16 @@ def interaction():
 			print('\t---------------------------')
 			print('\tThe following webXray databases are available:')
 			
-			current_db_name = select_wbxr_db()
-	
-			# we do [5:] so we strip off the 'wbxr_' on the output
-			print('\tUsing database: %s' % current_db_name[5:])
+			db_name = select_wbxr_db()
+			print('\tUsing database: %s' % db_name)
 		
-		# we have figured out the db situation, now move on to collection	
+		# we have selected the db to use, now move on to collection	
 		print('\t--------------------')
 		print('\tSelecting Page List')
 		print('\t--------------------')
 		print('\tPlease select from the available files in the "page_lists" directory:')
 
-		# webXray needs a file with a list of page URIs to scan, these files should be kept in the
+		# webXray needs a file with a list of page urls to scan, these files should be kept in the
 		#	'page_lists' directory.  this function shows all available page lists and returns
 		#	the name of the selected list.
 		files = os.listdir(path='./page_lists')
@@ -176,12 +223,12 @@ def interaction():
 		# alpha sort file list for easier selection
 		files.sort()
 
-		# print out options
+		# print out pages lists to choose from
 		print('\tPage Lists Available:')
 		for index,file in enumerate(files):
 			print('\t\t[%s] %s' % (index, file))
 
-		# loop until we get acceptable input
+		# interaction: loop until we get acceptable input
 		while True:
 			selection = input("\n\tChoose a page list by number: ")
 			if selection.isdigit():
@@ -196,7 +243,6 @@ def interaction():
 				continue
 
 		pages_file_name = files[selection]
-
 		
 		print('\tPages file is "%s"' % pages_file_name)
 		
@@ -205,7 +251,7 @@ def interaction():
 		print('\t------------------')		
 		time.sleep(1)
 	
-		collect(current_db_name, pages_file_name)
+		collect(db_name, pages_file_name)
 
 		print('\t---------------------')
 		print('\t Collection Finished!')
@@ -223,101 +269,82 @@ def interaction():
 		print('\tThe following webXray databases are available for anlaysis:')
 		print('\t-----------------------------------------------------------')
 		
-		current_db_name = select_wbxr_db()
+		db_name = select_wbxr_db()
 
-		# we do [5:] so we strip off the 'wbxr_' on the output
-		print('\tUsing database: %s' % current_db_name[5:])
+		print('\tUsing database: %s' % db_name)
 
-		# going to do the report now
-		report(current_db_name)
+		# go do the report now
+		analyze(db_name)
 		
 		# restart interaction
 		interaction()
-# end interaction
-
-# both collect() and report() may either be called in interactive mode, or can be called
-# via the CLI when running on large datasets
+# interaction
 
 def collect(db_name, pages_file_name):
-	# we use multiprocessing to speed up collection, and the pool_size can be set here
-	#	('pool_size' being the number of parallel processes are run)
-	#  on small sets you can leave it at '1' and it will be slow, but very stable
-	#  on larger sets you should consider upping the pool_size to speed up your collection
-	#  and fully leverage your resources
-	#
-	# the real limit on performance here is that phantomjs is a web browser, so uses lots of 
-	#	cpu and mem
-	#
-	# roughly speaking, it is generally safe to run 4 concurrent processes for each GB of memory
-	#	eg: 
-	#		4gb = pool_size 16
-	#		8gb = pool_size 32
-	#
-	# of course local performance may vary, so tuning this variable is advised if pushing
-	#  over 1M pages - and if you are doing over 1M you should be tuning mysql as well!
-	#
-	# a sign your pool is too big is if the % of pages with 3p request goes way down - this 
-	#	means network requests are being fired off or completed and you are losing data
-	#
-	# the best way to play with this is start low and do a run of 500 pages, then increment x2
-	#	until your numbers start to go down, then ease back
-	#
-	pool_size = 4
+	"""
+	manage the loading of pages, extracting relevant data, and storing to db
+	may also be called in stand-alone with 'run_webxray.py -c [DB_NAME] [PAGE_FILE_NAME]'
+	"""
 
-	# custom classes
 	from webxray.Collector import Collector
-	Collector = Collector(db_name, pages_file_name)	
-	Collector.run(pool_size)
-# end collect
+	collector = Collector(db_engine, db_name, pages_file_name, [browser_type], browser_wait)
+	collector.run(pool_size)
+# collect
 
-def report(db_name):
-	from webxray.Reporter import Reporter
+def analyze(db_name):
+	"""
+	perform analysis, generate reports and store them in ./reports
+	may also be called in stand-alone with 'run_webxray.py -a [DB_NAME]'
+	"""
+
+	from webxray.Analyzer import Analyzer
 	
-	# set how many tlds you want to examine and how many results
-	num_tlds	= 0
+	# set how many tlds you want to produce sub-reports for
+	num_tlds	= None
+
+	# set reports to only get the top X results, set to None to get everything
 	num_results	= 100
 
-	# see Reporter.py for info on tracker_threshold - don't change until you read docs
-	tracker_threshold = False
+	# set up a new analyzer
+	analyzer = Analyzer(db_engine, db_name, num_tlds, num_results)
 
-	# set up a new reporter
-	Reporter	= Reporter(db_name, num_tlds, num_results, tracker_threshold)
+	# this is the full suite of reports, comment out those you don't need
+	analyzer.generate_db_summary_report()
+	analyzer.generate_stats_report()
+	analyzer.generate_aggregated_tracking_attribution_report()
+	analyzer.generate_3p_domain_report()
+	analyzer.generate_3p_element_report()
+	analyzer.generate_3p_element_report('javascript')
+	analyzer.generate_3p_element_report('image')
+	analyzer.generate_data_transfer_report()
+	analyzer.generate_aggregated_3p_ssl_use_report()
+	
+	# the following reports may produce very large files, you have been warned
+	# analyzer.generate_per_page_data_flow_report()
+	analyzer.generate_network_report()
+	analyzer.print_runtime()
+# report
 
-	# now get the reports
-	Reporter.header()
-	Reporter.get_summary_by_tld()
-	Reporter.get_reports_by_tld('orgs')
-	Reporter.get_reports_by_tld('domains')
-	Reporter.get_reports_by_tld('elements')
-	Reporter.get_reports_by_tld('elements', 'javascript')
-	Reporter.get_reports_by_tld('elements', 'image')
-	Reporter.get_network_ties()
-	Reporter.print_runtime()
-# end report
+def single(url):
+	"""
+	for one-off analyses printed to CLI, avoids db calls entirely
+	"""
 
-def single(uri):
-	print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-	print('\tSingle Site Test On: %s' % uri)
-	print('\t   (Will wait 20 seconds to load, 90 seconds for timeout.)')
-
-	# set up the outputprinter, this avoids db except for uri processing
-	from webxray.OutputPrinter import OutputPrinter
-	output_printer = OutputPrinter()	
-	output_printer.report(uri)
+	from webxray.SingleScan import SingleScan
+	single_scan = SingleScan(browser_type)
+	single_scan.execute(url, browser_wait)
 # single
 
 if __name__ == '__main__':
-
-	# for fun, and version info
 	print('''   
-              | |  \ \ / /                
- __      _____| |__ \ V / _ __ __ _ _   _ 
- \ \ /\ / / _ \ '_ \ > < | '__/ _` | | | |
-  \ V  V /  __/ |_) / . \| | | (_| | |_| |
-   \_/\_/ \___|_.__/_/ \_\_|  \__,_|\__, |
-                                     __/ |
-                                    |___/ 
-                            	   [v 1.0]
+	             | |                        
+	__      _____| |____  ___ __ __ _ _   _ 
+	\ \ /\ / / _ \ '_ \ \/ / '__/ _` | | | |
+	 \ V  V /  __/ |_) >  <| | | (_| | |_| |
+	  \_/\_/ \___|_.__/_/\_\_|  \__,_|\__, |
+	                                   __/ |
+	                                  |___/ 
+                            	   [v 2.0]
     ''')
 
 	# set up cli args
@@ -328,13 +355,12 @@ if __name__ == '__main__':
 	parser.add_option('-s', action='store_true', dest='single', help='Single Site: for One-Off Tests - Args [url to analyze]')
 	(options, args) = parser.parse_args()
 
-	mode = ''
 	mode_count = 0
 	
 	# set mode, make sure we don't have more than one specified
 	if options.interactive:
 		mode = 'interactive'
-		mode_count += 1
+		mode_count += 1 
 
 	if options.analyze:
 		mode = 'analyze'
@@ -348,37 +374,38 @@ if __name__ == '__main__':
 		mode = 'single'
 		mode_count += 1
 		
+	# if nothing is specified we do interactive
 	if mode_count == 0:
-		print('Error: No mode specified!')
-		parser.print_help()
-		exit()
+		mode = 'interactive'
 	elif mode_count > 1:
-		print('Error: Too many modes specified!')
+		print('Error: Too many modes specified, only one allowed!')
 		parser.print_help()
-		exit()
+		quit()
 
 	# do what we're supposed to do		
 	if mode == 'interactive':
 		interaction()
 	elif mode == 'analyze':
-		# need to verify this is an actual db name
 		try:
 			db_name = args[0]
 		except:
 			print('Need a db name!')
-			exit()
-		report(db_name)
+			quit()
+		analyze(db_name)
 	elif mode == 'collect':
 		try:
-			# need to check 0 is page db name, 1 is file name
 			db_name = args[0]
 			page_file = args[1]
 		except:
-			print('Need a db name and pages file!')
-			exit()
+			print('Need a db name and pages file name!')
+			quit()
 		collect(db_name, page_file)
 	elif mode == 'single':
-		# should check if this is actually a uri
-		single(args[0])
+		try:
+			url = args[0]
+		except:
+			print('URL needs to be supplied as an argument!')
+			quit()
+		single(url)
 	quit()
 # main

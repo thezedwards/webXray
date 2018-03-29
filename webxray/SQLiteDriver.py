@@ -1,19 +1,10 @@
-# stand python libs
+# standard python packages
 import os
+import hashlib
+import sqlite3
 import datetime
 
-# check if non-standard packages are installed
-try:
-	import mysql.connector
-	from mysql.connector import errorcode
-except:
-	print('***********************************************************************')
-	print(' FATAL ERROR: MySQL Connector is not installed, required to use MySQL! ')
-	print(' Download from https://dev.mysql.com/downloads/connector/python/       ')
-	print('***********************************************************************')
-	exit()
-
-class MySQLDriver:
+class SQLiteDriver:
 	"""
 	this class handles all of the database work, no sql is to be found 
 		elsewhere in the code base aside from other db drivers
@@ -21,61 +12,47 @@ class MySQLDriver:
 
 	def __init__(self, db_name = '', db_prefix = 'wbxr_'):
 		"""
-		set up connection to db server, note for mysql
-			special care is gtakentfor the charset
+		set the root path for the db directory since sqlite dbs are not contained in a server
+		if db_name is specified, set up global connection
 		"""
+		self.db_root_path = os.path.dirname(os.path.abspath(__file__))+'/resources/db/sqlite/'
 
 		# the db_prefix can be overridden if you like
 		self.db_prefix = db_prefix
-
-		# mysql can connect to an empty db to allow for creating
-		#	new dbs, but if a db is specified we do that directly
-		if db_name == '':
-			self.db_name = ''
-		else:
-			self.db_name = self.db_prefix+db_name
 		
-		# modify this per your install
-		mysql_config = {
-			'user': 'root',
-			'password': '',
-			'host': '127.0.0.1',
-			'database': self.db_name,
-			'raise_on_warnings': False,
-		}
-
-		try:
-			self.db_conn = mysql.connector.connect(**mysql_config)
-		except mysql.connector.Error as err:
-			if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-				print('Username or password may be wrong, check MySQLDriver config, exiting.')
-				exit()
-			elif err.errno == errorcode.ER_BAD_DB_ERROR:
-				print('Database "%s" does not exist, exiting.' % self.db_name)
-				exit()
-			else:
-				print('Error: %s ' % err)
-				exit()
-
-		self.db = self.db_conn.cursor()
-
-		# mysql's version of utf8 isn't real utf8 as it doesn' support emoji/etc
-		#	so the hack on the mysql side is utf8mb4, we have to enforce it here
-		# 	this is an ugly fix for a puzzling choice by mysql devs...
-		self.db.execute('SET NAMES utf8mb4')
-		self.db.execute("SET CHARACTER SET utf8mb4")
-		self.db.execute("SET character_set_connection=utf8mb4")
+		if db_name != '':
+			self.db_name = self.db_prefix+db_name+'.db'
+			self.db_conn = sqlite3.connect(self.db_root_path+self.db_name,detect_types=sqlite3.PARSE_DECLTYPES)
+			self.db = self.db_conn.cursor()
 	# __init__
 
 	#-----------------#
 	# GENERAL PURPOSE #
 	#-----------------#
 
+	def md5_text(self,text):
+		"""
+		this class is unique to the sqlite driver as md5 is not built in
+		"""
+		try:
+			return hashlib.md5(text.encode('utf-8')).hexdigest()
+		except:
+			return None
+	# md5_text
+
 	def db_switch(self, db_name):
 		"""
-		connect to a different database, does not require a new db connection in mysql
+		connect to a new db, in sqlite this requires loading the db from disk
 		"""
-		self.db.execute('USE %s' % self.db_prefix+db_name)
+
+		# close existing connection
+		self.close()
+
+		# open the new connection
+		self.db_name = self.db_prefix+db_name
+		self.db_conn = sqlite3.connect(self.db_root_path+self.db_name+'.db',detect_types=sqlite3.PARSE_DECLTYPES)
+		self.db = self.db_conn.cursor()
+		return True
 	# db_switch
 
 	def fetch_query(self, query):
@@ -92,18 +69,18 @@ class MySQLDriver:
 		"""
 		self.db.execute(query)
 		self.db_conn.commit()
-		return
+		return True
 	# commit_query
 
 	def check_db_exist(self, db_name):
 		"""
 		before creating a new db make sure it doesn't already exist, uses specified prefix
 		"""
-		self.db.execute("SHOW DATABASES LIKE '%s'" % self.db_prefix+db_name)
-		if len(self.db.fetchall()) == 1:
-			return True;
+		dbs = os.listdir(self.db_root_path)
+		if self.db_prefix+db_name+'.db' in dbs:
+			return True
 		else:
-			return False;
+			return False
 	# check_db_exist
 
 	def build_filtered_query(self,query,filters):
@@ -125,14 +102,10 @@ class MySQLDriver:
 		"""
 		return database names with the class-specified prefix, stripped of prefix, default is 'wbxr_'
 		"""
-		self.db.execute('show databases')
 		wbxr_dbs = []
-
-		for result in self.db.fetchall():
-			if result[0][0:len(self.db_prefix)] == self.db_prefix:
-				# [len(self.db_prefix):] strips the prefix
-				wbxr_dbs.append(result[0][len(self.db_prefix):])
-
+		for item in os.listdir(self.db_root_path):
+			if item[0:len(self.db_prefix)] == self.db_prefix:
+				wbxr_dbs.append(item[len(self.db_prefix):-3])
 		return wbxr_dbs
 	# get_wbxr_dbs_list
 
@@ -140,8 +113,13 @@ class MySQLDriver:
 		"""
 		very important, frees up connections to db
 		"""
-		self.db.close()
-		self.db_conn.close()
+
+		# it is possible a database is not open, in which case we silently fail
+		try:
+			self.db.close()
+			self.db_conn.close()
+		except:
+			pass
 	# close
 
 	#-------------#
@@ -150,37 +128,34 @@ class MySQLDriver:
 
 	def create_wbxr_db(self, db_name):
 		"""
-		create empty db using the sql init file in /webxray/resources/db/mysql
+		create empty db using the sql init file in /webxray/resources/db/sqlite
 		and update the current db
 		"""
 
 		# update global db_name
 		self.db_name = self.db_prefix+db_name
 
-		# create the new db
-		# mysql's utf8 isn't really utf8, utf8mb4 is true utf8 and must be set when db is created
-		try:
-			self.db.execute('create database %s CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci' % self.db_name)
-			self.db_conn.commit()
-		except:
-			print('****************************************************************')
-			print(' ERROR: Could not create database.  Check if it already exists. ')
-			print('****************************************************************')
+		# make sure we don't overwrite existing db
+		if os.path.isfile(self.db_root_path+self.db_name+'.db'):
+			print('****************************************************************************')
+			print('ERROR: Database exists, SQLite will overwrite existing databases, aborting! ')
+			print('****************************************************************************')
 			exit()
+		else:
+			# create new db here, if it does not exist yet it gets created on the connect
+			self.db_conn = sqlite3.connect(self.db_root_path+self.db_name+'.db',detect_types=sqlite3.PARSE_DECLTYPES)
+			self.db = self.db_conn.cursor()
 
-		# switch to this db
-		self.db.execute('USE %s' % self.db_name)
-
-		# initialize webxray formatted database
-		db_init_file = open(os.path.dirname(os.path.abspath(__file__))+'/resources/db/mysql/mysql_db_init.sql', 'r')
-		for query in db_init_file:
-			# skip lines that are comments
-			if "-" in query[0]: continue
-			# lose whitespace
-			query = query.strip()
-			# push to db
-			self.db.execute(query)
-			self.db_conn.commit()
+			# initialize webxray formatted database
+			db_init_file = open(self.db_root_path+'sqlite_db_init.schema', 'r')
+			for query in db_init_file:
+				# skip lines that are comments
+				if "-" in query[0]: continue
+				# lose whitespace
+				query = query.strip()
+				# push to db
+				self.db.execute(query)
+				self.db_conn.commit()
 	# create_wbxr_db
 
 	#-----------------------#
@@ -194,21 +169,22 @@ class MySQLDriver:
 		if no browser is specified just return the last time it was accessed
 		"""
 		if browser_type == None:
-			self.db.execute('SELECT accessed,browser_type FROM page WHERE start_url_md5 = MD5(%s) ORDER BY accessed DESC LIMIT 1', (url,))
+			self.db.execute('SELECT accessed,browser_type FROM page WHERE start_url_md5 = ? ORDER BY accessed DESC LIMIT 1', (self.md5_text(url),))
 		else:
-			self.db.execute('SELECT accessed,browser_type FROM page WHERE start_url_md5 = MD5(%s) AND browser_type = %s ORDER BY accessed DESC LIMIT 1', (url,browser_type))
+			self.db.execute('SELECT accessed,browser_type FROM page WHERE start_url_md5 = ? AND browser_type = ? ORDER BY accessed DESC LIMIT 1', (self.md5_text(url),browser_type))
 
 		try:
-			return self.db.fetchone()
+			return (datetime.datetime.strptime(self.db.fetchone()[0], "%Y-%m-%d %H:%M:%S.%f"), self.db.fetchone()[1])
 		except:
 			return None
 	# get_page_last_accessed_by_browser_type
+
 
 	def page_exists(self, url):
 		"""
 		checks if page exists at all, regardless of number of occurances
 		"""
-		self.db.execute('SELECT EXISTS (SELECT * FROM page WHERE start_url_md5 = MD5(%s))', (url,))
+		self.db.execute("SELECT COUNT(*) FROM page WHERE start_url_md5 = ?", (self.md5_text(url),))
 		if self.db.fetchone()[0]:
 			return True
 		else:
@@ -218,34 +194,35 @@ class MySQLDriver:
 	def add_domain(self, ip_addr, fqdn, domain, pubsuffix, tld):
 		"""
 		add a new domain record to db, ignores duplicates
-		returns id of specified domain
+		returns id of newly added domain
 		"""
 		self.db.execute("""
-			INSERT IGNORE INTO domain (
+			INSERT OR IGNORE INTO domain (
 				ip_addr, 
 				fqdn_md5, fqdn,
 				domain_md5, domain, 
 				pubsuffix_md5, pubsuffix, 
 				tld_md5, tld)
 			VALUES (
-				%s,
-				MD5(%s), %s,
-				MD5(%s), %s,
-				MD5(%s), %s, 
-				MD5(%s), %s)""", 
+				?,
+				?,?,
+				?,?,
+				?,?,
+				?,?)""", 
 			(
 				ip_addr, 
-				fqdn, fqdn,
-				domain, domain, 
-				pubsuffix, pubsuffix, 
-				tld, tld)
+				self.md5_text(fqdn), fqdn,
+				self.md5_text(domain), domain, 
+				self.md5_text(pubsuffix), pubsuffix, 
+				self.md5_text(tld), tld
 			)
+		)
 		self.db_conn.commit()
-		self.db.execute("SELECT id FROM domain WHERE fqdn_md5 = MD5(%s)", (fqdn,))
+		self.db.execute("SELECT id FROM domain WHERE fqdn_md5 = ?", (self.md5_text(fqdn),))
 		return self.db.fetchone()[0]
 	# add_domain
 
-	def add_page(self, 
+	def add_page(self,
 		browser_type, browser_version, browser_wait,
 		title, meta_desc, 
 		start_url, final_url,
@@ -258,13 +235,15 @@ class MySQLDriver:
 		ungracefully, which is desired as the bug would be major
 
 		returns id of newly added page
+
+		note that sqlite does not have an automatic timestamp so we have to create a datetime object
 		"""
 
 		accessed = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 		self.db.execute("""INSERT INTO page (
-				browser_type, browser_version, browser_wait,
 				title, meta_desc, 
+				browser_type, browser_version, browser_wait,
 				start_url_md5, start_url,
 				final_url_md5, final_url,
 				priv_policy_url_md5, priv_policy_url, 
@@ -273,21 +252,21 @@ class MySQLDriver:
 				load_time, domain_id,
 				accessed
 	 	) VALUES (
-	 			%s, %s, %s,
-		 		%s, %s, 
-		 		MD5(%s), %s,
-		 		MD5(%s), %s, 
-		 		MD5(%s), %s,
-		 		%s,
-		 		%s, %s, 
-		 		%s, %s,
-		 		%s
+		 		?,?,
+		 		?,?,?,
+		 		?,?,
+		 		?,?,
+		 		?,?,
+		 		?,
+		 		?,?,
+		 		?,?,
+		 		?
 		)""", 
-		(		browser_type, browser_version, browser_wait,
-				title, meta_desc, 
-				start_url, start_url, 
-				final_url, final_url,
-				priv_policy_url, priv_policy_url,
+		(		title, meta_desc, 
+				browser_type, browser_version, browser_wait,
+				self.md5_text(start_url), start_url, 
+				self.md5_text(final_url), final_url,
+				self.md5_text(priv_policy_url), priv_policy_url,
 				priv_policy_url_text,
 				is_ssl, source, 
 				load_time, domain_id,
@@ -296,7 +275,7 @@ class MySQLDriver:
 		self.db_conn.commit()
 		
 		# return id of record with this start_url and accessed time
-		self.db.execute("SELECT id FROM page WHERE start_url_md5 = MD5(%s) AND accessed = %s", (start_url,accessed))
+		self.db.execute("SELECT id FROM page WHERE start_url_md5 = ? AND accessed = ?", (self.md5_text(start_url),accessed))
 
 		return self.db.fetchone()[0]
 	# add_page
@@ -319,8 +298,7 @@ class MySQLDriver:
 
 		returns nothing
 		"""
-
-		self.db.execute("""INSERT INTO element (
+		self.db.execute("""INSERT OR IGNORE INTO element (
 				page_id,
 				full_url_md5, full_url,
 				element_url_md5, element_url,
@@ -335,22 +313,22 @@ class MySQLDriver:
 				type, args, 
 				domain_id) 
 		VALUES (
-				%s,
-				MD5(%s), %s,
-				MD5(%s), %s,
-				%s, %s,
-				%s,
-				%s, %s,
-				%s, %s,
-				%s, %s,
-				%s, %s,
-				%s, %s,
-				%s, %s,
-				%s, %s, 
-				%s)""", 
+				?,
+				?, ?,
+				?, ?,
+				?, ?,
+				?,
+				?, ?,
+				?, ?,
+				?, ?,
+				?, ?,
+				?, ?,
+				?, ?,
+				?, ?, 
+				?)""", 
 		(		page_id,
-				full_url, full_url,
-				element_url, element_url,
+				self.md5_text(full_url), full_url,
+				self.md5_text(element_url), element_url,
 				is_3p, is_ssl,
 				received, 
 				referer, page_domain_in_referer, 
@@ -383,7 +361,7 @@ class MySQLDriver:
 				domain, httponly, 
 				expiry, value, is_3p, 
 				domain_id)
-			VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+			VALUES (?,?,?,?,?,?,?,?,?,?)""",
 			(	page_id,
 				name, secure, path, 
 				domain, httponly, 
@@ -397,14 +375,9 @@ class MySQLDriver:
 	def log_error(self, url, msg):
 		"""
 		general purpose error logging, unique on url/msg
-
-		mysql does not allow unique to be keyed to text fields, so we have to check first manually
-			in order to avoid duplicates
 		"""
-		self.db.execute('SELECT COUNT(*) FROM error WHERE url = %s AND msg = %s', (url, msg))
-		if not self.db.fetchone()[0]:
-			self.db.execute("INSERT IGNORE INTO error (url, msg) VALUES (%s,%s)", (url, msg))
-			self.db_conn.commit()
+		self.db.execute("INSERT OR IGNORE INTO error (url, msg, timestamp) VALUES (?,?,?)", (url, msg,datetime.datetime.now()))
+		self.db_conn.commit()
 	# log_error
 
 	#------------------------#
@@ -418,33 +391,29 @@ class MySQLDriver:
 	def reset_domain_owners(self):
 		"""
 		when the domain ownership is updated it is neccessary to flush existing mappings
-		by first resetting all the domain owner records then clear the domain_owner db
+		first reset all the domain owner records then clear the domain_owner db
 		"""
-		self.db.execute('UPDATE domain SET domain_owner_id=NULL')
-		self.db.execute('DELETE FROM domain_owner')
+		self.db.execute('UPDATE domain SET domain_owner_id=NULL;')
+		self.db.execute('DELETE FROM domain_owner WHERE id != 1;')
 		return True
 	# reset_domain_owners
 
 	def add_domain_owner(self, 
-		id, parent_id, 
-		name, aliases, 
-		homepage_url, privacy_policy_url,
-		notes, country):
+			id, parent_id, 
+			name, aliases, 
+			homepage_url, privacy_policy_url,
+			notes, country):
 		"""
 		create entries for the domain owners we are analyzing
 		"""
 		self.db.execute("""
-			INSERT INTO domain_owner (
+			INSERT OR IGNORE INTO domain_owner (
 				id, parent_id, 
 				name, aliases, 
 				homepage_url, privacy_policy_url,
 				notes, country
-			) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""", 
-			(	id, parent_id, 
-				name, aliases, 
-				homepage_url, privacy_policy_url, 
-				notes, country
-			)
+			) VALUES (?,?,?,?,?,?,?,?)""", 
+			(id, parent_id, name, aliases, homepage_url, privacy_policy_url, notes, country)
 		)
 		self.db_conn.commit()
 	# add_domain_owner
@@ -453,7 +422,7 @@ class MySQLDriver:
 		"""
 		link the domains to the owners
 		"""
-		self.db.execute('UPDATE IGNORE domain SET domain_owner_id = %s WHERE domain_md5 = MD5(%s)', (id, domain))
+		self.db.execute('UPDATE OR IGNORE domain SET domain_owner_id = ? WHERE domain_md5 = ?', (id, self.md5_text(domain)))
 		self.db_conn.commit()
 		return True
 	# update_domain_owner
@@ -488,7 +457,7 @@ class MySQLDriver:
 			query = 'SELECT domain.tld from page LEFT JOIN domain ON page.domain_id = domain.id'
 		elif type == 'pubsuffix':
 			query = 'SELECT domain.pubsuffix from page LEFT JOIN domain ON page.domain_id = domain.id'
-	
+		
 		self.db.execute(query)
 		return self.db.fetchall()
 	# get_all_tlds
@@ -498,7 +467,7 @@ class MySQLDriver:
 		simple way to query number of pages in db, can filter on ssl
 		"""
 		if is_ssl is True:
-			self.db.execute('SELECT COUNT(*) FROM page WHERE is_ssl = TRUE')
+			self.db.execute('SELECT COUNT(*) FROM page WHERE is_ssl = 1')
 		else:
 			self.db.execute('SELECT COUNT(*) FROM page')
 		return self.db.fetchone()[0]
@@ -546,7 +515,7 @@ class MySQLDriver:
 		total cookies in the db, can be filtered on 3p only
 		"""
 		if is_3p:
-			self.db.execute('SELECT COUNT(*) FROM cookie WHERE is_3p = True')
+			self.db.execute('SELECT COUNT(*) FROM cookie WHERE is_3p = 1')
 		else:
 			self.db.execute('SELECT COUNT(*) FROM cookie')
 		return self.db.fetchone()[0]
@@ -567,21 +536,21 @@ class MySQLDriver:
 		filters = []
 
 		if received:
-			filters.append('received = TRUE')
+			filters.append('received = 1')
 
 		if party == 'third':
-			filters.append('is_3p = TRUE')
+			filters.append('is_3p = 1')
 		if party == 'first':
-			filters.append('is_3p = FALSE')
+			filters.append('is_3p = 0')
 
 		if is_ssl:
-			filters.append('is_ssl = TRUE')
+			filters.append('is_ssl = 1')
 
 		# execute and return
 		self.db.execute(self.build_filtered_query(query,filters))
 		return self.db.fetchone()[0]
 	# get_total_request_count
-	
+
 	def get_element_sizes(self, tld_filter = None):
 		"""
 		return tuple of (element_domain, size, is_3p (boolean), domain_owner_id)
@@ -635,13 +604,13 @@ class MySQLDriver:
 				JOIN page ON page.id = element.page_id
 				JOIN domain page_domain ON page_domain.id = page.domain_id
 				JOIN domain element_domain ON element_domain.id = element.domain_id'''
-			filters.append('element.is_3p = True')
+			filters.append('element.is_3p = 1')
 		elif type == 'cookies':
 			query = '''SELECT COUNT(DISTINCT cookie.page_id) FROM cookie
 				JOIN page ON page.id = cookie.page_id
 				JOIN domain page_domain ON page_domain.id = page.domain_id
 				JOIN domain cookie_domain ON cookie_domain.id = cookie.domain_id'''
-			filters.append('cookie.is_3p = True')
+			filters.append('cookie.is_3p = 1')
 		else:
 			query = '''
 				SELECT COUNT(*) FROM page 
@@ -658,14 +627,13 @@ class MySQLDriver:
 			#	in this case our count will be zero, so we do that and return
 			if len(tracker_domains) == 0:
 				return 0
-
 			# otherwise we build the query with a super long conditional as 
 			#	we have tracker domains
 			tracker_filter = '('
 			for tracker_domain_name in tracker_domains:
 				if type == 'cookies':
 					tracker_filter += "cookie_domain.domain = '%s' OR " % tracker_domain_name
-				else:	
+				else:
 					tracker_filter += "element_domain.domain = '%s' OR " % tracker_domain_name
 			tracker_filter = tracker_filter[:-3]
 			tracker_filter += ')'
@@ -680,12 +648,12 @@ class MySQLDriver:
 		basic utility function, allows to filter on page tld
 		"""
 		if tld_filter:
-			self.db.execute('SELECT page.id FROM page JOIN domain ON page.domain_id = domain.id WHERE domain.tld = %s', (tld_filter,))
+			self.db.execute('SELECT page.id FROM page JOIN domain ON page.domain_id = domain.id WHERE domain.tld = ?', (tld_filter,))
 		else:
 			self.db.execute('SELECT page.id FROM page')
 		return self.db.fetchall()
 	# get_page_ids
-
+	
 	def get_all_page_id_3p_domain_owner_ids(self,tld_filter=None):
 		"""
 		return mapping of all page to third-party element owner ids
@@ -697,16 +665,16 @@ class MySQLDriver:
 				JOIN element ON element.page_id = page.id
 				JOIN domain element_domain ON element.domain_id = element_domain.id
 				JOIN domain page_domain ON page.domain_id = page_domain.id
-				WHERE element.is_3p = TRUE
+				WHERE element.is_3p = 1
 				AND element_domain.domain_owner_id IS NOT NULL
-				AND page_domain.tld = %s
+				AND page_domain.tld = ?
 			""", (tld_filter,))
 		else:
 			self.db.execute("""
 				SELECT DISTINCT page.id, element_domain.domain_owner_id from page
 				JOIN element ON element.page_id = page.id
 				JOIN domain element_domain ON element.domain_id = element_domain.id
-				WHERE element.is_3p = TRUE
+				WHERE element.is_3p = 1
 				AND element_domain.domain_owner_id IS NOT NULL
 			""")
 
@@ -723,7 +691,7 @@ class MySQLDriver:
 			SELECT DISTINCT page.start_url,page.final_url,element_domain.fqdn,element_domain.domain_owner_id from page
 			JOIN element ON element.page_id = page.id
 			JOIN domain element_domain ON element.domain_id = element_domain.id
-			WHERE element.is_3p = TRUE
+			WHERE element.is_3p = 1
 			ORDER BY page.final_url, element_domain.domain_owner_id
 		""")
 		return self.db.fetchall()
@@ -742,11 +710,11 @@ class MySQLDriver:
 			LEFT JOIN element ON element.page_id = page.id
 			LEFT JOIN domain element_domain ON element_domain.id = element.domain_id
 			LEFT JOIN domain page_domain ON page_domain.id = page.domain_id
-			WHERE element.is_3p = True
+			WHERE element.is_3p = 1
 		"""
 
 		if tld_filter:
-			self.db.execute(query + ' AND page_domain.tld = %s', (tld_filter,))
+			self.db.execute(query + ' AND page_domain.tld = ?', (tld_filter,))
 		else:
 			self.db.execute(query)
 		return self.db.fetchall()
@@ -767,15 +735,15 @@ class MySQLDriver:
 				LEFT JOIN domain page_domain ON page.domain_id = page_domain.id
 				LEFT JOIN domain element_domain ON element_domain.id = element.domain_id
 				LEFT JOIN domain_owner on domain_owner.id = element_domain.domain_owner_id
-				WHERE element.is_3p = TRUE
+				WHERE element.is_3p = 1
 		"""
 
 		if tld_filter and element_type:
-			self.db.execute(base_query + ' AND page_domain.tld = %s AND element.type = %s', (tld_filter, element_type))
+			self.db.execute(base_query + ' AND page_domain.tld = ? AND element.type = ?', (tld_filter, element_type))
 		elif tld_filter:
-			self.db.execute(base_query + ' AND page_domain.tld = %s', (tld_filter,))
+			self.db.execute(base_query + ' AND page_domain.tld = ?', (tld_filter,))
 		elif element_type:
-			self.db.execute(base_query + ' AND element.type = %s', (element_type,))
+			self.db.execute(base_query + ' AND element.type = ?', (element_type,))
 		else:
 			self.db.execute(base_query)
 		return self.db.fetchall()
@@ -783,7 +751,7 @@ class MySQLDriver:
 
 	def get_page_domain_element_domain_pairs(self):
 		"""
-		return all of the unique pairings between the domain of a page and that
+		returns all of the unique pairings between the domain of a page and that
 			of an element
 		"""
 		query = """
@@ -796,7 +764,7 @@ class MySQLDriver:
 		self.db.execute(query)
 		return self.db.fetchall()
 	# get_page_domain_element_domain_pairs
-	
+
 	def get_page_id_page_domain_element_domain(self, tld_filter):
 		"""
 		return data needed for determing average number of 3p per page, etc.
@@ -812,7 +780,7 @@ class MySQLDriver:
 			JOIN domain page_domain ON page_domain.id = page.domain_id
 			JOIN element ON element.page_id = page.id
 			JOIN domain element_domain ON element_domain.id = element.domain_id
-			WHERE element.is_3p IS TRUE
+			WHERE element.is_3p = 1
 		'''
 
 		if tld_filter: 
@@ -832,7 +800,7 @@ class MySQLDriver:
 			JOIN domain page_domain ON page_domain.id = page.domain_id
 			JOIN cookie on cookie.page_id = page.id
 			JOIN domain cookie_domain ON cookie_domain.id = cookie.domain_id
-			WHERE cookie.is_3p IS TRUE
+			WHERE cookie.is_3p = 1
 		'''
 
 		if tld_filter: 
@@ -856,7 +824,7 @@ class MySQLDriver:
 				LEFT JOIN element ON element.page_id = page.id
 				JOIN domain page_domain ON page.domain_id = page_domain.id
 				JOIN domain element_domain ON element_domain.id = element.domain_id
-				WHERE element.is_3p = TRUE
+				WHERE element.is_3p = 1
 		"""
 		
 		# to limit analysis to domains who we know the owner add following to above query
@@ -884,11 +852,11 @@ class MySQLDriver:
 			JOIN 
 				domain_owner on domain.domain_owner_id = domain_owner.id
 			WHERE
-				element.is_3p = TRUE
+				element.is_3p = 1
 			AND
-				element.received = TRUE
+				element.received = 1
 		''')
 
 		return self.db.fetchall()
 	# get_3p_element_domain_owner_id_ssl_use
-# class MySQLDriver
+# SQLiteDriver

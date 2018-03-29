@@ -1,0 +1,125 @@
+-- this file is read line-by-line by python to init the database
+-- for the sake of readability, db schemas are in laid out in comments
+-- but for python sake they are read as very long single lines
+--
+-- kill old tables
+DROP TABLE IF EXISTS error;
+DROP TABLE IF EXISTS cookie;
+DROP TABLE IF EXISTS element;
+DROP TABLE IF EXISTS page;
+DROP TABLE IF EXISTS domain;
+DROP TABLE IF EXISTS domain_owner;
+---------------------
+--- DOMAIN OWNER  ---
+---------------------
+-- CREATE TABLE IF NOT EXISTS domain_owner(
+-- 	id INTEGER NOT NULL PRIMARY KEY,
+--	parent_id INTEGER,
+-- 	name TEXT,
+--	aliases TEXT,
+--	homepage_url TEXT,
+--	privacy_policy_url TEXT,
+-- 	notes TEXT,
+-- 	country TEXT,
+-- )
+CREATE TABLE IF NOT EXISTS domain_owner(id INTEGER NOT NULL PRIMARY KEY,parent_id INTEGER,name TEXT,aliases TEXT,homepage_url TEXT,privacy_policy_url TEXT,notes TEXT,country TEXT);
+--------------
+--- DOMAIN ---
+--------------
+-- CREATE TABLE IF NOT EXISTS domain(
+-- 	id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+-- 	ip_addr VARCHAR(255),
+-- 	fqdn_md5 VARCHAR(32) UNIQUE,
+-- 	fqdn TEXT,
+-- 	domain_md5 VARCHAR(32),
+-- 	domain TEXT,
+-- 	pubsuffix_md5 VARCHAR(32),
+-- 	pubsuffix VARCHAR(255),
+-- 	tld_md5 VARCHAR(32),
+-- 	tld VARCHAR(255),
+--  domain_owner_id INTEGER DEFAULT NULL REFERENCES domain_owner(id),
+-- );
+CREATE TABLE IF NOT EXISTS domain(id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,ip_addr VARCHAR(255),fqdn_md5 VARCHAR(32) UNIQUE,fqdn TEXT,domain_md5 VARCHAR(32),domain TEXT,pubsuffix_md5 VARCHAR(32),pubsuffix VARCHAR(255),tld_md5 VARCHAR(32),tld VARCHAR(255),domain_owner_id INTEGER DEFAULT NULL REFERENCES domain_owner(id));
+------------
+--- PAGE ---
+------------
+-- CREATE TABLE IF NOT EXISTS page(
+-- 	id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+--	browser_type VARCHAR(255),
+--	browser_version VARCHAR(255),
+--  browser_wait INTEGER,
+-- 	title TEXT,
+-- 	meta_desc TEXT,
+-- 	start_url_md5 VARCHAR(32),
+-- 	start_url TEXT,
+-- 	final_url_md5 VARCHAR(32),
+-- 	final_url TEXT,
+-- 	priv_policy_url_md5 VARCHAR(32),
+-- 	priv_policy_url TEXT,
+--  priv_policy_url_text TEXT,
+-- 	is_ssl BOOLEAN,
+-- 	source LONGTEXT,
+-- 	load_time INTEGER,
+-- 	domain_id INTEGER REFERENCES domain(id),
+-- 	accessed timestamp,
+-- 	UNIQUE KEY (accessed, start_url_md5)
+-- );
+CREATE TABLE IF NOT EXISTS page(id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,browser_type VARCHAR(255),browser_version VARCHAR(255),browser_wait INTEGER,title TEXT,meta_desc TEXT,start_url_md5 VARCHAR(32),start_url TEXT,final_url_md5 VARCHAR(32),final_url TEXT,priv_policy_url_md5 VARCHAR(32),priv_policy_url TEXT,priv_policy_url_text TEXT,is_ssl BOOLEAN,source LONGTEXT,load_time INTEGER,domain_id INTEGER REFERENCES domain(id),accessed timestamp,UNIQUE KEY (accessed, start_url_md5));
+---------------
+--- ELEMENT ---
+---------------
+-- CREATE TABLE IF NOT EXISTS element(
+-- 	id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+-- 	page_id INTEGER,
+-- 	full_url_md5 VARCHAR(32),
+-- 	full_url TEXT,
+-- 	element_url_md5 VARCHAR(32),
+-- 	element_url TEXT,
+-- 	is_3p BOOLEAN,
+-- 	is_ssl BOOLEAN,
+-- 	received BOOLEAN,
+-- 	referer TEXT,
+-- 	page_domain_in_referer BOOLEAN,
+--  start_time_offset INTEGER,
+-- 	load_time INTEGER,
+-- 	status VARCHAR(32),
+-- 	status_text TEXT,
+-- 	content_type TEXT,
+-- 	body_size INTEGER,
+-- 	request_headers TEXT,
+-- 	response_headers TEXT,
+-- 	file_md5 VARCHAR(32),
+-- 	extension VARCHAR(255),
+-- 	type VARCHAR(32),
+-- 	args TEXT,
+-- 	domain_id INTEGER REFERENCES domain(id),
+-- );
+CREATE TABLE IF NOT EXISTS element(id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,page_id INTEGER REFERENCES page(id),full_url_md5 VARCHAR(32),full_url TEXT,element_url_md5 VARCHAR(32),element_url TEXT,is_3p BOOLEAN,is_ssl BOOLEAN,received BOOLEAN,referer TEXT,page_domain_in_referer BOOLEAN,start_time_offset INTEGER,load_time INTEGER,status VARCHAR(32),status_text TEXT,content_type TEXT,body_size INTEGER,request_headers TEXT,response_headers TEXT,file_md5 VARCHAR(32),extension VARCHAR(255),type VARCHAR(32),args TEXT,domain_id INTEGER REFERENCES domain(id));
+--------------
+--- COOKIE ---
+--------------
+-- CREATE TABLE IF NOT EXISTS cookie(
+-- 	id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+-- 	page_id INTEGER,
+-- 	name TEXT,
+-- 	secure TEXT,
+-- 	path TEXT,
+-- 	domain TEXT,
+-- 	httponly TEXT,
+-- 	expiry TEXT,
+-- 	value TEXT,
+-- 	is_3p BOOLEAN,
+-- 	captured timestamp,
+-- 	domain_id INTEGER,
+-- );
+CREATE TABLE IF NOT EXISTS cookie(id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,page_id INTEGER REFERENCES page(id),name TEXT,secure TEXT,path TEXT,domain TEXT,httponly TEXT,expiry TEXT,value TEXT,is_3p BOOLEAN,captured timestamp,domain_id INTEGER REFERENCES domain(id));
+-------------
+--- ERROR ---
+-------------
+-- CREATE TABLE IF NOT EXISTS error(
+-- 	id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+-- 	url TEXT NOT NULL,
+-- 	msg TEXT NOT NULL,
+-- 	timestamp timestamp NOT NULL,
+-- );
+CREATE TABLE IF NOT EXISTS error(id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,url TEXT NOT NULL,msg TEXT NOT NULL,timestamp timestamp NOT NULL);

@@ -1,58 +1,115 @@
-#	we need to run phantomjs under the subprocess module and send back JSON
-#	it was easiest to segregate this into a separate class for maintainability
-#	should be noted almost all development was done with 1.9 branch of phantomjs
-#	the 2.x branch appears to work, but is new and a major change so somewhat unstable
-#
-#	another reason to segregate this is that if other options mature (eg slimerjs)
-#	those could be swapped in easily by writing a new class
-
+# standard python packages
 import os
+import re
+import json
 import subprocess
 
 class PhantomDriver:
-	def __init__(self, phantom_args, script_name):
+	"""
+	This class allows for using the PhantomJS browser with webXray.
+	
+	Requirements are phantomjs 1.9+ which is run under the subprocess module.
+
+	Pros:
+		Very low CPU/Mem over head
+		Extensive testing, very stable
+		User-Agent randomization works very well
+	Cons:
+		The phantomjs project is likely being discontinued!
+		Not a 'real' browser
+	"""
+
+	def __init__(self):
+		"""
+		the main purpose of the init is to make sure we have the correct
+			version of phantomjs installed and to build the command string
+			with the appropriate arguments to allow bad ssl configs to load
+		"""
+
+		# the following can be changed as needed
+		# on some systems it may work by default
+		phantomjs_binary_path = None
+
 		# first check is phantomjs version is ok
-		process = subprocess.Popen('phantomjs --version', shell=True, stdout=subprocess.PIPE)
+		if phantomjs_binary_path:
+			process = subprocess.Popen(phantomjs_binary_path+' --version', shell=True, stdout=subprocess.PIPE)
+		else:
+			process = subprocess.Popen('phantomjs --version', shell=True, stdout=subprocess.PIPE)
+
 		try:
 			output, errors = process.communicate()
 		except Exception as e:
 			process.kill()
-			self.die('phantomjs not returning version number, something must be wrong, check your installation!')
+			print('phantomjs not returning version number, something must be wrong, check your installation!')
+			exit()
 		
 		try:
-			phantomjs_version = float(output.decode('utf-8')[:3])
+			self.phantomjs_version = float(output.decode('utf-8')[:3])
 		except:
-			self.die('phantomjs not returning version number, something must be wrong, check your installation!')
+			print('phantomjs not returning version number, something must be wrong, check your installation!')
+			exit()
 
-		if phantomjs_version < 1.9:
-			self.die('you are running phantomjs version %s, webXray requires at least 1.9' % phantomjs_version)
-		
-		# looks good, build the command_string
-		self.command_string = "phantomjs "+phantom_args+" ./webxray/resources/phantomjs_scripts/"+script_name
-	# end __init__
+		if self.phantomjs_version < 1.9:
+			print('you are running phantomjs version %s, webXray requires at least 1.9' % self.phantomjs_version)
+			exit()
 
-	def die(self, msg):
-		print('!'*len(msg))
-		print('ERROR: %s' % msg)
-		print('!'*len(msg))
-		exit()
+		# build the command_string, path is relative from root webxray directory
+		if phantomjs_binary_path:
+			self.command_string = phantomjs_binary_path+' --ignore-ssl-errors=true --ssl-protocol=any '+os.path.dirname(os.path.abspath(__file__))+'/resources/phantomjs_scripts/wbxr_logger.js'
+		else:
+			self.command_string = 'phantomjs --ignore-ssl-errors=true --ssl-protocol=any '+os.path.dirname(os.path.abspath(__file__))+'/resources/phantomjs_scripts/wbxr_logger.js'
+	# __init__
 
-	def execute(self, script_args, seconds_to_timeout):
-		command = self.command_string+" '"+script_args+"'"
+	def get_webxray_scan_data(self, url, browser_wait):
+		"""
+		this function uses subprocess to spawn a phantomjs browser
+			which returns json over the CLI
+		the json is cleaned up and decoded as utf-8 and returns
+			something nice to the calling function
+		"""
+
+		# build command string to pass over CLI
+		command = '%s %s "%s"' % (self.command_string, browser_wait, url.replace('"','\"'))
 		process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
-		# make sure phantomjs has time to download/process the page
-		# but if we get nothing after number of seconds specified, we move on
+		# we use an additional timeout to allow phantomjs to finish running
+		#	and add 15 seconds to allow for extra lag with phantomjs/os
+		# 	but if we get nothing after number of seconds specified, we kill the 
+		#	process and move on
+		timeout = browser_wait+15
 		try:
-			output, errors = process.communicate(timeout=seconds_to_timeout)
+			output, errors = process.communicate(timeout=timeout)
 		except Exception as e:
 			process.kill()
-			return("FAIL: Phantomjs Timed Out After %s Seconds" % seconds_to_timeout)
+			return None
 
-		# output will be weird, decode utf-8 to save heartache
+		# output can be messy, decode utf-8 to save heartache
 		phantom_output = ''
 		for out_line in output.splitlines():
 			phantom_output += out_line.decode('utf-8')
-		return phantom_output
-	# end execute
-# end class PhantomDriver
+
+		# the phantomjs output is a json string, read it
+		try:
+			data = json.loads(re.search('(\{.+\})', phantom_output).group(1))
+		except:
+			return None
+
+		# other parts of webxray expect this data format, common to all browser drivers used
+		return_dict = {
+			'browser_type':			'phantomjs',
+			'browser_version':		self.phantomjs_version,
+			'browser_wait':			browser_wait,
+			'start_url':			url,
+			'final_url': 			data['final_url'],
+			'title': 				data['title'],
+			'meta_desc': 			data['meta_desc'],
+			'load_time': 			data['load_time'],
+			'processed_requests': 	data['processed_requests'],
+			'cookies': 				data['cookies'],
+			'all_links':			data['all_links'],
+			'source':				data['source']
+		}
+		
+		return return_dict
+	# get_webxray_scan_data
+# PhantomDriver

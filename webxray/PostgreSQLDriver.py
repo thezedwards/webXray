@@ -1,70 +1,53 @@
-# stand python libs
+# standard python libs
 import os
 import datetime
 
 # check if non-standard packages are installed
 try:
-	import mysql.connector
-	from mysql.connector import errorcode
+	import psycopg2
+	# required to create new dbs
+	from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 except:
-	print('***********************************************************************')
-	print(' FATAL ERROR: MySQL Connector is not installed, required to use MySQL! ')
-	print(' Download from https://dev.mysql.com/downloads/connector/python/       ')
-	print('***********************************************************************')
+	print('*********************************************************************')
+	print(' FATAL ERROR: psycopg2 is not installed, required to use Postgresql! ')
+	print('*********************************************************************')
 	exit()
 
-class MySQLDriver:
+class PostgreSQLDriver:
 	"""
 	this class handles all of the database work, no sql is to be found 
 		elsewhere in the code base aside from other db drivers
 	"""
 
-	def __init__(self, db_name = '', db_prefix = 'wbxr_'):
+	def __init__(self, db_name = '', db_prefix='wbxr_'):
 		"""
-		set up connection to db server, note for mysql
-			special care is gtakentfor the charset
+		set up connection to db server
 		"""
+
+		# modify this per your install
+		self.db_user = 'wbxr'
+		self.db_pass = ''
 
 		# the db_prefix can be overridden if you like
 		self.db_prefix = db_prefix
 
-		# mysql can connect to an empty db to allow for creating
-		#	new dbs, but if a db is specified we do that directly
+		# default db is postgres, unlike mysql we must connect to something!
+		self.default_db_name = 'postgres'
+
 		if db_name == '':
-			self.db_name = ''
+			self.db_name = self.default_db_name
 		else:
 			self.db_name = self.db_prefix+db_name
-		
-		# modify this per your install
-		mysql_config = {
-			'user': 'root',
-			'password': '',
-			'host': '127.0.0.1',
-			'database': self.db_name,
-			'raise_on_warnings': False,
-		}
 
-		try:
-			self.db_conn = mysql.connector.connect(**mysql_config)
-		except mysql.connector.Error as err:
-			if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-				print('Username or password may be wrong, check MySQLDriver config, exiting.')
-				exit()
-			elif err.errno == errorcode.ER_BAD_DB_ERROR:
-				print('Database "%s" does not exist, exiting.' % self.db_name)
-				exit()
-			else:
-				print('Error: %s ' % err)
-				exit()
+		self.db_conn = psycopg2.connect(
+			database=self.db_name,
+			user=self.db_user,
+			password=self.db_pass
+		)
 
+		# allows us to create new dbs in postgres
+		self.db_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 		self.db = self.db_conn.cursor()
-
-		# mysql's version of utf8 isn't real utf8 as it doesn' support emoji/etc
-		#	so the hack on the mysql side is utf8mb4, we have to enforce it here
-		# 	this is an ugly fix for a puzzling choice by mysql devs...
-		self.db.execute('SET NAMES utf8mb4')
-		self.db.execute("SET CHARACTER SET utf8mb4")
-		self.db.execute("SET character_set_connection=utf8mb4")
 	# __init__
 
 	#-----------------#
@@ -73,9 +56,24 @@ class MySQLDriver:
 
 	def db_switch(self, db_name):
 		"""
-		connect to a different database, does not require a new db connection in mysql
+		connect to a new db, in postgres this requires a new db connection
 		"""
-		self.db.execute('USE %s' % self.db_prefix+db_name)
+
+		# close existing connection
+		self.close()
+
+		# if there is a supplied db_name we also reset the global db_name
+		# otherwise we should connect to the current global
+		if db_name:
+			self.db_name = self.db_prefix+db_name
+		
+		# open the new connection
+		self.db_conn = psycopg2.connect(
+			database=self.db_name,
+			user=self.db_user
+		)
+		self.db_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+		self.db = self.db_conn.cursor()
 	# db_switch
 
 	def fetch_query(self, query):
@@ -92,14 +90,13 @@ class MySQLDriver:
 		"""
 		self.db.execute(query)
 		self.db_conn.commit()
-		return
 	# commit_query
 
 	def check_db_exist(self, db_name):
 		"""
 		before creating a new db make sure it doesn't already exist, uses specified prefix
 		"""
-		self.db.execute("SHOW DATABASES LIKE '%s'" % self.db_prefix+db_name)
+		self.db.execute('SELECT datname FROM pg_database WHERE datname = %s', (self.db_prefix+db_name,))
 		if len(self.db.fetchall()) == 1:
 			return True;
 		else:
@@ -125,14 +122,15 @@ class MySQLDriver:
 		"""
 		return database names with the class-specified prefix, stripped of prefix, default is 'wbxr_'
 		"""
-		self.db.execute('show databases')
+		self.db.execute('SELECT datname FROM pg_database;')
 		wbxr_dbs = []
 
 		for result in self.db.fetchall():
 			if result[0][0:len(self.db_prefix)] == self.db_prefix:
-				# [len(self.db_prefix):] strips the prefix
+				# [self.db_prefix:] strips the prefix
 				wbxr_dbs.append(result[0][len(self.db_prefix):])
 
+		# return wbxr_dbs
 		return wbxr_dbs
 	# get_wbxr_dbs_list
 
@@ -150,7 +148,7 @@ class MySQLDriver:
 
 	def create_wbxr_db(self, db_name):
 		"""
-		create empty db using the sql init file in /webxray/resources/db/mysql
+		create empty db using the sql init file in /webxray/resources/db/postgresql
 		and update the current db
 		"""
 
@@ -158,9 +156,8 @@ class MySQLDriver:
 		self.db_name = self.db_prefix+db_name
 
 		# create the new db
-		# mysql's utf8 isn't really utf8, utf8mb4 is true utf8 and must be set when db is created
 		try:
-			self.db.execute('create database %s CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci' % self.db_name)
+			self.db.execute('CREATE DATABASE %s' % self.db_name)
 			self.db_conn.commit()
 		except:
 			print('****************************************************************')
@@ -168,11 +165,11 @@ class MySQLDriver:
 			print('****************************************************************')
 			exit()
 
-		# switch to this db
-		self.db.execute('USE %s' % self.db_name)
+		# we already updated the global db_name so we pass None here
+		self.db_switch(None)
 
 		# initialize webxray formatted database
-		db_init_file = open(os.path.dirname(os.path.abspath(__file__))+'/resources/db/mysql/mysql_db_init.sql', 'r')
+		db_init_file = open(os.path.dirname(os.path.abspath(__file__))+'/resources/db/postgresql/postgres_db_init.sql', 'r')
 		for query in db_init_file:
 			# skip lines that are comments
 			if "-" in query[0]: continue
@@ -207,12 +204,10 @@ class MySQLDriver:
 	def page_exists(self, url):
 		"""
 		checks if page exists at all, regardless of number of occurances
+		postgres has an EXISTS query built-in, mysql and sqlite do not
 		"""
-		self.db.execute('SELECT EXISTS (SELECT * FROM page WHERE start_url_md5 = MD5(%s))', (url,))
-		if self.db.fetchone()[0]:
-			return True
-		else:
-			return False
+		self.db.execute("SELECT EXISTS(SELECT start_url_md5 FROM page WHERE start_url_md5 = MD5(%s))", (url,))
+		return self.db.fetchone()[0]
 	# page_exists
 
 	def add_domain(self, ip_addr, fqdn, domain, pubsuffix, tld):
@@ -221,7 +216,7 @@ class MySQLDriver:
 		returns id of specified domain
 		"""
 		self.db.execute("""
-			INSERT IGNORE INTO domain (
+			INSERT INTO domain (
 				ip_addr, 
 				fqdn_md5, fqdn,
 				domain_md5, domain, 
@@ -232,7 +227,8 @@ class MySQLDriver:
 				MD5(%s), %s,
 				MD5(%s), %s,
 				MD5(%s), %s, 
-				MD5(%s), %s)""", 
+				MD5(%s), %s)
+			ON CONFLICT DO NOTHING""", 
 			(
 				ip_addr, 
 				fqdn, fqdn,
@@ -282,7 +278,7 @@ class MySQLDriver:
 		 		%s, %s, 
 		 		%s, %s,
 		 		%s
-		)""", 
+		)""",
 		(		browser_type, browser_version, browser_wait,
 				title, meta_desc, 
 				start_url, start_url, 
@@ -347,7 +343,8 @@ class MySQLDriver:
 				%s, %s,
 				%s, %s,
 				%s, %s, 
-				%s)""", 
+				%s)
+		""", 
 		(		page_id,
 				full_url, full_url,
 				element_url, element_url,
@@ -397,14 +394,9 @@ class MySQLDriver:
 	def log_error(self, url, msg):
 		"""
 		general purpose error logging, unique on url/msg
-
-		mysql does not allow unique to be keyed to text fields, so we have to check first manually
-			in order to avoid duplicates
 		"""
-		self.db.execute('SELECT COUNT(*) FROM error WHERE url = %s AND msg = %s', (url, msg))
-		if not self.db.fetchone()[0]:
-			self.db.execute("INSERT IGNORE INTO error (url, msg) VALUES (%s,%s)", (url, msg))
-			self.db_conn.commit()
+		self.db.execute("INSERT INTO error (url, msg) VALUES (%s,%s) ON CONFLICT DO NOTHING", (url, msg))
+		self.db_conn.commit()
 	# log_error
 
 	#------------------------#
@@ -420,7 +412,7 @@ class MySQLDriver:
 		when the domain ownership is updated it is neccessary to flush existing mappings
 		by first resetting all the domain owner records then clear the domain_owner db
 		"""
-		self.db.execute('UPDATE domain SET domain_owner_id=NULL')
+		self.db.execute('UPDATE domain SET domain_owner_id = NULL')
 		self.db.execute('DELETE FROM domain_owner')
 		return True
 	# reset_domain_owners
@@ -453,7 +445,7 @@ class MySQLDriver:
 		"""
 		link the domains to the owners
 		"""
-		self.db.execute('UPDATE IGNORE domain SET domain_owner_id = %s WHERE domain_md5 = MD5(%s)', (id, domain))
+		self.db.execute('UPDATE domain SET domain_owner_id = %s WHERE domain_md5 = MD5(%s)', (id, domain))
 		self.db_conn.commit()
 		return True
 	# update_domain_owner
@@ -488,7 +480,7 @@ class MySQLDriver:
 			query = 'SELECT domain.tld from page LEFT JOIN domain ON page.domain_id = domain.id'
 		elif type == 'pubsuffix':
 			query = 'SELECT domain.pubsuffix from page LEFT JOIN domain ON page.domain_id = domain.id'
-	
+		
 		self.db.execute(query)
 		return self.db.fetchall()
 	# get_all_tlds
@@ -526,7 +518,7 @@ class MySQLDriver:
 		NOTE: for time-series collections this overall behavior may be undesirable
 		"""
 		noload_count = 0
-		self.db.execute('SELECT DISTINCT url FROM error WHERE msg = "Unable to load page"')
+		self.db.execute('SELECT DISTINCT url FROM error WHERE msg = %s', ("Unable to load page",))
 		for item in self.db.fetchall():
 			if not self.page_exists(item[0]):
 				noload_count += 1
@@ -581,7 +573,7 @@ class MySQLDriver:
 		self.db.execute(self.build_filtered_query(query,filters))
 		return self.db.fetchone()[0]
 	# get_total_request_count
-	
+
 	def get_element_sizes(self, tld_filter = None):
 		"""
 		return tuple of (element_domain, size, is_3p (boolean), domain_owner_id)
@@ -608,7 +600,7 @@ class MySQLDriver:
 		
 		return self.db.fetchall()
 	# get_element_sizes
-
+	
 	def get_complex_page_count(self, tld_filter = None, type = None, tracker_domains = None):
 		"""
 		given various types of analyses we may want to count how many pages meet
@@ -658,14 +650,13 @@ class MySQLDriver:
 			#	in this case our count will be zero, so we do that and return
 			if len(tracker_domains) == 0:
 				return 0
-
 			# otherwise we build the query with a super long conditional as 
 			#	we have tracker domains
 			tracker_filter = '('
 			for tracker_domain_name in tracker_domains:
 				if type == 'cookies':
 					tracker_filter += "cookie_domain.domain = '%s' OR " % tracker_domain_name
-				else:	
+				else:
 					tracker_filter += "element_domain.domain = '%s' OR " % tracker_domain_name
 			tracker_filter = tracker_filter[:-3]
 			tracker_filter += ')'
@@ -783,7 +774,7 @@ class MySQLDriver:
 
 	def get_page_domain_element_domain_pairs(self):
 		"""
-		return all of the unique pairings between the domain of a page and that
+		returns all of the unique pairings between the domain of a page and that
 			of an element
 		"""
 		query = """
@@ -796,7 +787,7 @@ class MySQLDriver:
 		self.db.execute(query)
 		return self.db.fetchall()
 	# get_page_domain_element_domain_pairs
-	
+
 	def get_page_id_page_domain_element_domain(self, tld_filter):
 		"""
 		return data needed for determing average number of 3p per page, etc.
@@ -841,7 +832,7 @@ class MySQLDriver:
 		self.db.execute(query)
 		return self.db.fetchall()
 	# get_page_id_3p_cookie_id_3p_cookie_domain
-
+	
 	def get_3p_network_ties(self, domain_owner_is_known = False):
 		"""
 		returns all of the unique pairings between the domain of a page and that
@@ -891,4 +882,4 @@ class MySQLDriver:
 
 		return self.db.fetchall()
 	# get_3p_element_domain_owner_id_ssl_use
-# class MySQLDriver
+# class PostgreSQLDriver

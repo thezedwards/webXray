@@ -1,232 +1,368 @@
-#	this class receives JSON data from phantomjs, processes it and stores it in the db
-#	designed to fail gracefully...
-
 # standard python libs
+import os
 import re
 import json
+import hashlib
 import urllib.request
+from urllib.parse import urlparse
 
-# webxray classes
-from webxray.ParseURI import ParseURI
-from webxray.MySQLDriver import MySQLDriver
+# custom webxray classes
+from webxray.ParseURL import ParseURL
 
 class OutputStore:
-	def __init__(self, dbname):
-		self.uri_parser = ParseURI()
-		self.sql_driver = MySQLDriver(dbname)
-	# end init
+	"""	
+		this class receives data from the browser, processes it, and stores it in the db
+	"""
 
-	def store(self, uri, phantom_output):
-		# parse out the json from our phantom_output
-		# sometimes phantom prints out errors before the json, (despite us turning
-		# it off!), so we match inside of the {}s to get json only
-		try:
-			data = json.loads(re.search('(\{.+\})', phantom_output).group(1))
-		except Exception as e:
-			self.sql_driver.log_error(uri, "Could Not Load JSON: %s" % e)
-			return 'Could Not Load JSON'
+	def __init__(self, db_engine, db_name):
+		self.db_engine	= db_engine
+		self.db_name	= db_name
+		self.url_parser = ParseURL()
+	# init
 
-		# we need to parse the domain to determine if requests are local or 3rd party
-		# we need pubsuffix and tld for later analysis so store them now
-
-		origin_domain_pubsuffix_tld = self.uri_parser.get_domain_pubsuffix_tld(uri)
-		origin_domain = origin_domain_pubsuffix_tld[0]
-		origin_pubsuffix = origin_domain_pubsuffix_tld[1]
-		origin_tld = origin_domain_pubsuffix_tld[2]
+	def store(self, url, browser_output, store_source=False, store_1p=True, get_file_hashes=False, hash_3p_only=False):
+		"""
+		this is the primary function of this class,
 		
-		if re.match('^Exception.+', origin_domain):
-			self.sql_driver.log_error(uri, 'Could not parse TLD for %s' % uri)
-			return 'Could not parse TLD for %s' % uri
+		it takes the url of the given page and the request and cookie data generated
+			by the browser
 
-		page_domain_id = self.sql_driver.add_domain(origin_domain, origin_pubsuffix, origin_tld)
-
-		# newFollowLogger is giving us the follow JSON data:
-		# note source is null for now, but store anyway
-# 		big_out = {
-# 			final_uri: final_uri,
-# 			title: page.title,
-# 			meta_desc : meta_desc,
-# 			requested_uris: JSON.stringify(requested_uris),
-# 			received_uris: JSON.stringify(received_uris),
-# 			cookies: phantom.cookies,
-# 			source: 'NULL',
-# 		};
-
-		# we are now storing uris with and without args and saving args
-		# we must unquote to uri to get back to original state so can parse
-		start_uri_original = urllib.parse.unquote(uri)
-
-		try:
-			start_uri_no_args = re.search('^(.+?)\?.+$', start_uri_original).group(1) # start uri no args
-		except:
-			start_uri_no_args = uri
-
-		try:
-			start_uri_args = re.search('^.+(\?.+)$', start_uri_original).group(1) # start uri args
-		except:
-			start_uri_args = 'NULL'
+		data is cleaned up with some minor analysis (eg file types) and stored 
+			for later in-depth analysis.
 		
-		# same for the final uri (this is where we are after potential redirects)
-		final_uri = re.sub('\"', '', json.dumps(data["final_uri"]))
-		final_uri_original = urllib.parse.unquote(final_uri)
-		
-		try:
-			final_uri_no_args = re.search('^(.+?)\?.+$', final_uri_original).group(1) # start uri no args
-		except:
-			final_uri_no_args = final_uri
+		there is an option to store first party requests as well as third, turned on by default
+			to save disk space turn off store_1p
 
-		try:
-			final_uri_args = re.search('^.+(\?.+)$', final_uri_original).group(1) # start uri args
-		except:
-			final_uri_args = 'NULL'
-	
+		there is also an option to get file hashes, this introduces serious overhead
+			and is turned off by default
+		"""
+
+		# open up a sql connection
+		if self.db_engine == 'mysql':
+			from webxray.MySQLDriver import MySQLDriver
+			sql_driver = MySQLDriver(self.db_name)
+		elif self.db_engine == 'sqlite':
+			from webxray.SQLiteDriver import SQLiteDriver
+			sql_driver = SQLiteDriver(self.db_name)
+		elif self.db_engine == 'postgres':
+			from webxray.PostgreSQLDriver import PostgreSQLDriver
+			sql_driver = PostgreSQLDriver(self.db_name)
+		else:
+			print('INVALED DB ENGINE FOR %s, QUITTING!' % db_engine)
+			exit()
+
+		# get the ip, fqdn, domain, pubsuffix, and tld
+		# we need the domain to figure out if cookies/elements are third-party
+		origin_ip_fqdn_domain_pubsuffix_tld	= self.url_parser.get_ip_fqdn_domain_pubsuffix_tld(url)
+
+		# if we can't get page domain info we fail gracefully
+		if origin_ip_fqdn_domain_pubsuffix_tld is None:
+			sql_driver.log_error(url, 'Could not parse TLD for %s' % url)
+			return False
+
+		origin_ip 			= origin_ip_fqdn_domain_pubsuffix_tld[0]
+		origin_fqdn 		= origin_ip_fqdn_domain_pubsuffix_tld[1]
+		origin_domain 		= origin_ip_fqdn_domain_pubsuffix_tld[2]
+		origin_pubsuffix 	= origin_ip_fqdn_domain_pubsuffix_tld[3]
+		origin_tld 			= origin_ip_fqdn_domain_pubsuffix_tld[4]
+		
+		# sql_driver.add_domain both stores the new domain and returns its db row id
+		# if it is already in db just return the existing id
+		page_domain_id = sql_driver.add_domain(origin_ip, origin_fqdn, origin_domain, origin_pubsuffix, origin_tld)
+
+		# if the final page is https (often after a redirect), mark it appropriately
+		if browser_output['final_url'][:5] == 'https':
+			page_is_ssl = True
+		else:
+			page_is_ssl = False
+
+		if store_source:
+			# handles issue where postgres will crash on inserting null character
+			source = browser_output['source'].replace('\x00',' ')
+		else:
+			source = None
+
 		# add page
-		# json.dumps to make sure strings go out ok for db
-		page_id = self.sql_driver.add_page(								 
-			str(re.sub('\"', '', json.dumps(data["title"]))),
-			str(re.sub('\"', '', json.dumps(data["meta_desc"]))),
-			uri, 
-			start_uri_no_args, 
-			start_uri_args,
-			final_uri, 
-			final_uri_no_args, 
-			final_uri_args,
-			str(re.sub('\"', '', json.dumps(data["source"]))),
-			str(re.sub('\"', '', json.dumps(data["requested_uris"]))),
-			str(re.sub('\"', '', json.dumps(data["received_uris"]))),
-			page_domain_id)
+		page_id = sql_driver.add_page(
+			browser_output['browser_type'],
+			browser_output['browser_version'],
+			browser_output['browser_wait'],
+			browser_output['title'],
+			browser_output['meta_desc'],
+			url, 
+			browser_output['final_url'],
+			None,
+			None,
+			page_is_ssl,
+			source,
+			browser_output['load_time'],
+			page_domain_id
+		)
 
-		for cookie in data["cookies"]:
-			# store external cookies, uri_parser fails on non-http, we should fix this
-			# right now a lame hack is to prepend http://
-			cookie_domain_pubsuffix_tld = self.uri_parser.get_domain_pubsuffix_tld("http://"+cookie["domain"])
-			cookie_domain = cookie_domain_pubsuffix_tld[0]
-			cookie_pubsuffix = cookie_domain_pubsuffix_tld[1]
-			cookie_tld = cookie_domain_pubsuffix_tld[2]
-
-			# something went wrong, but carry on...
-			if re.match('^Exception.+', cookie_domain):
-				self.sql_driver.log_error(uri, 'Error parsing cookie: '+cookie_domain)
+		# store cookies
+		for cookie in browser_output['cookies']:
+			# get the ip, fqdn, domain, pubsuffix, and tld
+			# we need the domain to figure out if cookies/elements are third-party
+			# note:
+			#	url_parser fails on non-http, we should fix this, right now a lame hack is to prepend http://
+			cookie_ip_fqdn_domain_pubsuffix_tld	= self.url_parser.get_ip_fqdn_domain_pubsuffix_tld('http://'+cookie['domain'])
+			
+			# something went wrong, log and fail gracefully
+			if cookie_ip_fqdn_domain_pubsuffix_tld is None:
+				sql_driver.log_error(url, 'Error parsing cookie with domain: '+cookie['domain'])
 				continue
 
-			# this is a 3party cookie
+			# otherwise, everything went fine
+			cookie_ip 			= cookie_ip_fqdn_domain_pubsuffix_tld[0]
+			cookie_fqdn 		= cookie_ip_fqdn_domain_pubsuffix_tld[1]
+			cookie_domain 		= cookie_ip_fqdn_domain_pubsuffix_tld[2]
+			cookie_pubsuffix 	= cookie_ip_fqdn_domain_pubsuffix_tld[3]
+			cookie_tld 			= cookie_ip_fqdn_domain_pubsuffix_tld[4]
+
+			# mark third-party cookies
 			if origin_domain != cookie_domain:
-
-				cookie_domain_id = self.sql_driver.add_domain(cookie_domain, cookie_pubsuffix, cookie_tld)
-			
-				# name and domain are required, so if they fail we just continue
-				try: name = cookie["name"]
-				except: continue
-			
-				try: domain = cookie_domain
-				except: continue
-			
-				# these are optional, keep going with "N/A" vals
-			
-				try: secure = cookie["secure"]
-				except: secure = "N/A"
-			
-				try: path = cookie["path"]
-				except: path = "N/A"
-			
-				try: expires = cookie["expires"]
-				except: expires = "N/A"
-			
-				try: httponly = cookie["httponly"]
-				except: httponly = "N/A"
-			
-				try: expiry = cookie["expiry"]
-				except: expiry = "N/A"
-			
-				try: value = cookie["value"]
-				except: value = "N/A"
-			
-				cookie_id = self.sql_driver.add_cookie(	name, secure, path, domain, 
-														expires, httponly, expiry, value, 
-														cookie_domain_id)
-				self.sql_driver.add_cookie_to_page(cookie_id, page_id)
-
-		for request in data["requested_uris"]:
-			# if the request starts with "data" we can't parse tld anyway, so skip
-			if re.match('^(data|about|chrome).+', request):
-				continue
-
-			# get domain, pubsuffix, and tld from request
-			requested_domain_pubsuffix_tld = self.uri_parser.get_domain_pubsuffix_tld(request)
-			requested_domain = requested_domain_pubsuffix_tld[0]
-			requested_pubsuffix = requested_domain_pubsuffix_tld[1]
-			requested_tld = requested_domain_pubsuffix_tld[2]
-			
-			# see if we got back what we requested, if not a few things may have happened
-			# 	* malformed uri
-			#	* resource is gone or never existed
-			#	* network latency (ie it didn't arrive in window specified)
-			#	* we could be behind a firewall or censorship mechanism (eg gfw, golden shield)
-			#	* our IP is blacklisted b/c we are totally a bot X-D
-			# the point being, interpret this value with an open mind
-			
-			if request in data['received_uris']:
-				recieved = '1'
+				is_3p_cookie = True
 			else:
-				recieved = '0'
-			
-			# catch exceptions
-			if re.match('^Exception.+', requested_domain):
-				self.sql_driver.log_error(uri, 'Error parsing element request: '+request)
+				is_3p_cookie = False
+
+			# this is a first party cookie, see if we want to store it
+			if is_3p_cookie is False and store_1p is False:
 				continue
 
-			# store new elements
-			if origin_domain != requested_domain:
-				full_uri = request
-				try:
-					element_uri = re.search('^(.+?)\?.+$', full_uri).group(1) # start uri no args
-				except:
-					element_uri = full_uri
+			# sql_driver.add_domain both stores the new domain and returns its id
+			cookie_domain_id = sql_driver.add_domain(cookie_ip, cookie_fqdn, cookie_domain, cookie_pubsuffix, cookie_tld)
+		
+			# name and domain are required, so if they fail we just continue
+			try: name = cookie['name']
+			except: continue
+		
+			try: domain = cookie_domain
+			except: continue
+		
+			# these are optional, fill with null values if fail
+			try: secure = cookie['secure']
+			except: secure = None
+		
+			try: path = cookie['path']
+			except: path = None
+		
+			try: httponly = cookie['httponly']
+			except: httponly = None
+		
+			try: expiry = cookie['expiry']
+			except: expiry = None
+		
+			try: value = cookie['value']
+			except: value = None
+		
+			# all done with this cookie
+			sql_driver.add_cookie(
+				page_id,
+				name, secure, path, domain, 
+				httponly, expiry, value, 
+				is_3p_cookie, cookie_domain_id
+			)
 
-				# attempt to parse off the extension
-				try:
-					element_extension = re.search('\.([0-9A-Za-z]+)$', element_uri).group(1).lower()
-				except:
-					element_extension = "NULL"
-				
-				# figure out what type of element it is
-				if element_extension == 'png' or element_extension == 'jpg' or element_extension == 'jpgx' or element_extension == 'jpeg' or element_extension == 'gif' or element_extension == 'svg' or element_extension == 'bmp' or element_extension == 'tif' or element_extension == 'tiff' or element_extension == 'webp' or element_extension == 'srf':
-					element_type = 'image'
-				elif element_extension == 'js' or element_extension == 'javascript':
-					element_type = 'javascript'
-				elif element_extension == 'json' or element_extension == 'jsonp' or element_extension == 'xml':
-					element_type = 'data_structured'
-				elif element_extension == 'css':
-					element_type = 'style_sheet'
-				elif element_extension == 'woff' or  element_extension == 'ttf' or  element_extension == 'otf':
-					element_type = 'font'
-				elif element_extension == 'htm' or element_extension == 'html' or element_extension == 'shtml':
-					element_type = 'page_static'
-				elif element_extension == 'php' or element_extension == 'asp' or element_extension == 'jsp' or element_extension == 'aspx' or element_extension == 'ashx' or element_extension == 'pl' or element_extension == 'cgi' or element_extension == 'fcgi':
-					element_type = 'page_dynamic'
-				elif element_extension == 'swf' or element_extension == 'fla':
-					element_type = 'Shockwave Flash'
-				elif element_extension == 'NULL':
-					element_type = 'NULL'
+		# process requests now
+		for request in browser_output['processed_requests']:
+			# if the request starts with the following we can't parse anyway, so skip
+			if re.match('^(data|about|chrome|blob).+', request):
+				continue
+
+			# get the ip, fqdn, domain, pubsuffix, and tld
+			# we need the domain to figure out if cookies/elements are third-party
+			element_ip_fqdn_domain_pubsuffix_tld	= self.url_parser.get_ip_fqdn_domain_pubsuffix_tld(request)
+
+			# problem with this request, log and fail gracefully
+			if element_ip_fqdn_domain_pubsuffix_tld is None:
+				sql_driver.log_error(url, 'Error parsing element request: '+request)
+				continue
+
+			element_ip 			= element_ip_fqdn_domain_pubsuffix_tld[0]
+			element_fqdn 		= element_ip_fqdn_domain_pubsuffix_tld[1]
+			element_domain 		= element_ip_fqdn_domain_pubsuffix_tld[2]
+			element_pubsuffix 	= element_ip_fqdn_domain_pubsuffix_tld[3]
+			element_tld 		= element_ip_fqdn_domain_pubsuffix_tld[4]
+
+			# sql_driver.add_domain both stores the new domain and returns its db row id
+			element_domain_id = sql_driver.add_domain(element_ip, element_fqdn, element_domain, element_pubsuffix, element_tld)
+
+			# mark third-party elements based on domain
+			if origin_domain != element_domain:
+				is_3p_element = True
+			else:
+				is_3p_element = False
+
+			# if we are not storing 1p elements continue
+			if is_3p_element is False and store_1p is False:
+				continue
+			
+			if request[:5] == 'https':
+				element_is_ssl = True
+			else:
+				element_is_ssl = False
+
+			try:
+				received = browser_output['processed_requests'][request]['received']
+			except:
+				received = None
+
+			# get domain of referer and determine if page leaked by referer
+			try:
+				referer = browser_output['processed_requests'][request]['referer']
+			except:
+				referer = None
+
+			if referer and len(referer) != 0:
+				referer_ip_fqdn_domain_pubsuffix_tld = self.url_parser.get_ip_fqdn_domain_pubsuffix_tld(referer)
+
+				if referer_ip_fqdn_domain_pubsuffix_tld:
+					if referer_ip_fqdn_domain_pubsuffix_tld[2] == origin_domain:
+						page_domain_in_referer = True
+					else:
+						page_domain_in_referer = False
 				else:
-					element_type = 'unknown'
+					page_domain_in_referer = None
+					sql_driver.log_error(url, 'Error parsing referer header: '+referer)
+			else:
+				page_domain_in_referer = None
 
+			try:
+				start_time_offset = browser_output['processed_requests'][request]['start_time_offset']
+			except:
+				start_time_offset = None
+
+			try:
+				load_time = browser_output['processed_requests'][request]['load_time']
+			except:
+				load_time = None
+
+			try:
+				status = browser_output['processed_requests'][request]['status']
+			except:
+				status = None
+
+			try:
+				status_text = browser_output['processed_requests'][request]['status_text']
+			except:
+				status_text = None
+
+			try:
+				content_type = browser_output['processed_requests'][request]['content_type']
+			except:
+				content_type = None
+			
+			try:
+				body_size = browser_output['processed_requests'][request]['body_size']
+			except:
+				body_size = None
+
+			try:
+				request_headers = str(browser_output['processed_requests'][request]['request_headers'])
+			except:
+				request_headers = None
+
+			try:
+				response_headers = str(browser_output['processed_requests'][request]['response_headers'])
+			except:
+				response_headers = None
+
+			# consider anything before the "?" to be the element_url
+			try:
+				element_url = re.search('^(.+?)\?.+$', request).group(1)
+			except:
+				element_url = request
+
+			# consider anything after the "?" to be the args
+			try:
+				element_args = re.search('^.+(\?.+)$', request).group(1) # start url args
+			except:
+				element_args = None
+
+			# attempt to parse off the extension
+			try:
+				element_extension = re.search('\.([0-9A-Za-z]+)$', element_url).group(1).lower()
+			except:
+				element_extension = None
+			
+			# lists of common extensions, can be expanded
+			image_extensions 	= ['png', 'jpg', 'jpgx', 'jpeg', 'gif', 'svg', 'bmp', 'tif', 'tiff', 'webp', 'srf']
+			script_extensions 	= ['js', 'javascript']
+			data_extensions 	= ['json', 'jsonp', 'xml']
+			font_extentions 	= ['woff', 'ttf', 'otf']
+			static_extentions 	= ['html', 'htm', 'shtml']
+			dynamic_extentions	= ['php', 'asp', 'jsp', 'aspx', 'ashx', 'pl', 'cgi', 'fcgi']
+
+			# figure out what type of element it is
+			if element_extension in image_extensions:
+				element_type = 'image'
+			elif element_extension in script_extensions:
+				element_type = 'javascript'
+			elif element_extension in data_extensions:
+				element_type = 'data_structured'
+			elif element_extension == 'css':
+				element_type = 'style_sheet'
+			elif element_extension in font_extentions:
+				element_type = 'font'
+			elif element_extension in static_extentions:
+				element_type = 'page_static'
+			elif element_extension == dynamic_extentions:
+				element_type = 'page_dynamic'
+			elif element_extension == 'swf' or element_extension == 'fla':
+				element_type = 'Shockwave Flash'
+			else:
+				element_type = None
+
+			# file hashing has non-trivial overhead and off by default
+			#
+			# what this does is uses the same ua/referer as the actual request
+			# 	so we are just replaying the last one to get similar response
+			# 	note that we aren't sending the same cookies so that could be an issue
+			# 	otherwise it is equivalent to a page refresh in theory
+
+			# option to hash only 3p elements observed here
+			if (get_file_hashes and hash_3p_only and is_3p_element) or (get_file_hashes and hash_3p_only == False):
+				replay_element_request = urllib.request.Request(
+					request,
+					headers = {
+						'User-Agent' : browser_output['processed_requests'][request]['user_agent'],
+						'Referer' : referer,
+						'Accept' : '*/*'
+					}
+				)
 				try:
-					args = re.search('^.+(\?.+)$', full_uri).group(1) # start uri args
+					file_md5 = hashlib.md5(urllib.request.urlopen(replay_element_request,timeout=10).read()).hexdigest()
 				except:
-					args = 'NULL'
+					file_md5 = None
+			else:
+				file_md5 = None
 
-				element_domain_id = self.sql_driver.add_domain(requested_domain, requested_pubsuffix, requested_tld)
+			# all done with this request
+			sql_driver.add_element(
+				page_id,
+				request, element_url,
+				is_3p_element, element_is_ssl,
+				received,
+				referer,
+				page_domain_in_referer,
+				start_time_offset,
+				load_time,
+				status,
+				status_text,
+				content_type,
+				body_size,
+				request_headers,
+				response_headers,
+				file_md5,
+				element_extension,
+				element_type,
+				element_args,
+				element_domain_id
+			)
 
-				element_id = self.sql_driver.add_element("NULL", full_uri, element_uri, recieved, element_extension, element_type, args, element_domain_id)
-				self.sql_driver.add_element_to_page(element_id, page_id)
+		# close db connection
+		sql_driver.close()
 
-		return 'Successfully Added to DB'
-	# end report()
-	
-	def close(self):
-		# close mysql connections
-		self.sql_driver.close()
-		return
-	# end exit
-# end class OutputStore
+		return True
+	# store
+# OutputStore
