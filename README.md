@@ -78,6 +78,10 @@ per\_page\_data\_flow.csv: one giant file that lists the requests made for each 
 
 webxray can load many pages in parallell and may be used for analyzing millions of pages fairly quickly.  However, out-of-the-box, webxray is configured to only scan one page at a time.  If you think your system can handle more (and chances are it can!), open the 'run\_webxray.py' file and search for the first occurance of the 'pool\_size' variable.  When you find that there are instructions on how to increase the numbers of pages you can do concurrently.  Please find additional information on the [project website](http://webxray.org/#advanced_options).
 
+# Academic Citation
+
+This tools is produced by Timothy Libert, if you are using it for academic research, please cite the most pertinent publication from his [Google Scholar page](https://scholar.google.com/citations?user=pR9YdCcAAAAJ&hl=en&oi=ao).
+
 # License
 
 webxray is FOSS and licensed under GPLv3, see LICENSE.md for details.
