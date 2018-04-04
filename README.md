@@ -80,7 +80,7 @@ webxray can load many pages in parallell and may be used for analyzing millions 
 
 # Academic Citation
 
-This tools is produced by Timothy Libert, if you are using it for academic research, please cite the most pertinent publication from his [Google Scholar page](https://scholar.google.com/citations?user=pR9YdCcAAAAJ&hl=en&oi=ao).
+This tool is produced by Timothy Libert, if you are using it for academic research, please cite the most pertinent publication from his [Google Scholar page](https://scholar.google.com/citations?user=pR9YdCcAAAAJ&hl=en&oi=ao).
 
 # License
 
