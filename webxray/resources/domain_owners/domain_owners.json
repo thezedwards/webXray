@@ -42,7 +42,7 @@
 	},
 	{
 		"id"				 : 3,
-		"parent_id"			 : 164,
+		"parent_id"			 : 183,
 		"owner_name"		 : "About.com",
 		"aliases"			 : ["About"],
 		"homepage_url"		 : null,
@@ -55,7 +55,7 @@
 	},
 	{
 		"id"				 : 4,
-		"parent_id"			 : 236,
+		"parent_id"			 : 269,
 		"owner_name"		 : "Accuen",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -109,7 +109,7 @@
 	},
 	{
 		"id"				 : 8,
-		"parent_id"			 : 64,
+		"parent_id"			 : 70,
 		"owner_name"		 : "Adality",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://adality.de/en/",
@@ -152,7 +152,7 @@
 	},
 	{
 		"id"				 : 11,
-		"parent_id"			 : 240,
+		"parent_id"			 : 275,
 		"owner_name"		 : "AddThis",
 		"aliases"			 : ["Add This"],
 		"homepage_url"		 : "http://www.addthis.com",
@@ -180,7 +180,7 @@
 	},
 	{
 		"id"				 : 13,
-		"parent_id"			 : 266,
+		"parent_id"			 : 303,
 		"owner_name"		 : "AdGear",
 		"aliases"			 : ["Ad Gear"],
 		"homepage_url"		 : "http://adgear.com",
@@ -195,7 +195,7 @@
 	},
 	{
 		"id"				 : 14,
-		"parent_id"			 : 93,
+		"parent_id"			 : 103,
 		"owner_name"		 : "Adify",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -222,7 +222,7 @@
 	},
 	{
 		"id"				 : 16,
-		"parent_id"			 : 260,
+		"parent_id"			 : 297,
 		"owner_name"		 : "AdKarma",
 		"aliases"			 : ["Ad Karma"],
 		"homepage_url"		 : "http://www.adkarma.com",
@@ -235,7 +235,7 @@
 	},
 	{
 		"id"				 : 17,
-		"parent_id"			 : 159,
+		"parent_id"			 : 178,
 		"owner_name"		 : "AdLink Group",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -262,7 +262,7 @@
 	},
 	{
 		"id"				 : 19,
-		"parent_id"			 : 141,
+		"parent_id"			 : 156,
 		"owner_name"		 : "Admeld",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -275,7 +275,7 @@
 	},
 	{
 		"id"				 : 20,
-		"parent_id"			 : 198,
+		"parent_id"			 : 224,
 		"owner_name"		 : "AdMobius",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -377,7 +377,20 @@
 	},
 	{
 		"id"				 : 27,
-		"parent_id"			 : 141,
+		"parent_id"			 : null,
+		"owner_name"		 : "AdSearch",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://adsearch.pl",
+		"privacy_policy_url" : "http://firma.interia.pl/polityka-cookies",
+		"notes"				 : "Could be owned by Interia.pl, but I can't read polish",
+		"country"			 : "PL",
+		"domains"			 : [
+			"adsearch.pl"
+		]
+	},
+	{
+		"id"				 : 28,
+		"parent_id"			 : 156,
 		"owner_name"		 : "AdSense",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -391,7 +404,7 @@
 		]
 	},
 	{
-		"id"				 : 28,
+		"id"				 : 29,
 		"parent_id"			 : null,
 		"owner_name"		 : "AdSocial",
 		"aliases"			 : ["Ad Social"],
@@ -405,7 +418,7 @@
 		]
 	},
 	{
-		"id"				 : 29,
+		"id"				 : 30,
 		"parent_id"			 : null,
 		"owner_name"		 : "AdSpyglass",
 		"aliases"			 : [],
@@ -419,8 +432,8 @@
 		]
 	},
 	{
-		"id"				 : 30,
-		"parent_id"			 : 141,
+		"id"				 : 31,
+		"parent_id"			 : 156,
 		"owner_name"		 : "AdWords",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -432,7 +445,21 @@
 		]
 	},
 	{
-		"id"				 : 31,
+		"id"				 : 32,
+		"parent_id"			 : null,
+		"owner_name"		 : "ADYOULIKE",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.adyoulike.com/",
+		"privacy_policy_url" : "https://www.adyoulike.com/privacy_policy.php",
+		"notes"				 : "omnitagjs.com per Ghostery",
+		"country"			 : "US",
+		"domains"			 : [
+			"adyoulike.com",
+			"omnitagjs.com"
+		]
+	},
+	{
+		"id"				 : 33,
 		"parent_id"			 : null,
 		"owner_name"		 : "AFCV Holdings",
 		"aliases"			 : [],
@@ -445,7 +472,7 @@
 		]
 	},
 	{
-		"id"				 : 32,
+		"id"				 : 34,
 		"parent_id"			 : null,
 		"owner_name"		 : "Ajiang",
 		"aliases"			 : [],
@@ -460,7 +487,7 @@
 		]
 	},
 	{
-		"id"				 : 33,
+		"id"				 : 35,
 		"parent_id"			 : null,
 		"owner_name"		 : "Akamai",
 		"aliases"			 : [],
@@ -473,12 +500,13 @@
 			"akamai.com",
 			"akamai.net",
 			"akamaihd.net",
-			"akamaized.net"
+			"akamaized.net",
+			"akstat.io"
 		]
 	},
 	{
-		"id"				 : 34,
-		"parent_id"			 : 55,
+		"id"				 : 36,
+		"parent_id"			 : 59,
 		"owner_name"		 : "Akismet",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -490,8 +518,8 @@
 		]
 	},
 	{
-		"id"				 : 35,
-		"parent_id"			 : 41,
+		"id"				 : 37,
+		"parent_id"			 : 43,
 		"owner_name"		 : "Alexa",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -504,7 +532,7 @@
 		]
 	},
 	{
-		"id"				 : 36,
+		"id"				 : 38,
 		"parent_id"			 : null,
 		"owner_name"		 : "Alibaba",
 		"aliases"			 : ["HiChina"],
@@ -541,7 +569,7 @@
 		]
 	},
 	{
-		"id"				 : 37,
+		"id"				 : 39,
 		"parent_id"			 : null,
 		"owner_name"		 : "All Yes",
 		"aliases"			 : [],
@@ -557,7 +585,7 @@
 		]
 	},
 	{
-		"id"				 : 38,
+		"id"				 : 40,
 		"parent_id"			 : null,
 		"owner_name"		 : "AllMobilize",
 		"aliases"			 : [],
@@ -571,7 +599,7 @@
 		]
 	},
 	{
-		"id"				 : 39,
+		"id"				 : 41,
 		"parent_id"			 : null,
 		"owner_name"		 : "Alphabet",
 		"aliases"			 : [],
@@ -584,7 +612,7 @@
 		]
 	},
 	{
-		"id"				 : 40,
+		"id"				 : 42,
 		"parent_id"			 : null,
 		"owner_name"		 : "Altice SA",
 		"aliases"			 : [],
@@ -597,7 +625,7 @@
 		]
 	},
 	{
-		"id"				 : 41,
+		"id"				 : 43,
 		"parent_id"			 : null,
 		"owner_name"		 : "Amazon",
 		"aliases"			 : ["Alexa"],
@@ -613,8 +641,8 @@
 		]
 	},
 	{
-		"id"				 : 42,
-		"parent_id"			 : 41,
+		"id"				 : 44,
+		"parent_id"			 : 43,
 		"owner_name"		 : "Amazon Marketing Services",
 		"aliases"			 : ["Amazon Ad System","Amazon AdSystem"],
 		"homepage_url"		 : null,
@@ -626,8 +654,8 @@
 		]
 	},
 	{
-		"id"				 : 43,
-		"parent_id"			 : 41,
+		"id"				 : 45,
+		"parent_id"			 : 43,
 		"owner_name"		 : "Amazon Web Services",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -636,12 +664,14 @@
 		"country"			 : "US",
 		"domains"			 : [
 			"amazonaws.com",
+			"amazonwebservices.com",
+			"awsstatic.com",
 			"cloudfront.net"
 		]
 	},
 	{
-		"id"				 : 44,
-		"parent_id"			 : 279,
+		"id"				 : 46,
+		"parent_id"			 : 317,
 		"owner_name"		 : "Amobee",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.amobee.com",
@@ -653,8 +683,8 @@
 		]
 	},
 	{
-		"id"				 : 45,
-		"parent_id"			 : 31,
+		"id"				 : 47,
+		"parent_id"			 : 33,
 		"owner_name"		 : "Answers Corporation",
 		"aliases"			 : ["Answers.com"],
 		"homepage_url"		 : null,
@@ -667,8 +697,8 @@
 		]
 	},
 	{
-		"id"				 : 46,
-		"parent_id"			 : 235,
+		"id"				 : 48,
+		"parent_id"			 : 268,
 		"owner_name"		 : "Aol",
 		"aliases"			 : ["America Online"],
 		"homepage_url"		 : null,
@@ -684,7 +714,7 @@
 		]
 	},
 	{
-		"id"				 : 47,
+		"id"				 : 49,
 		"parent_id"			 : null,
 		"owner_name"		 : "Apple",
 		"aliases"			 : [],
@@ -698,7 +728,7 @@
 		]
 	},
 	{
-		"id"				 : 48,
+		"id"				 : 50,
 		"parent_id"			 : null,
 		"owner_name"		 : "AppNexus",
 		"aliases"			 : ["App Nexus"],
@@ -713,8 +743,8 @@
 		]
 	},
 	{
-		"id"				 : 49,
-		"parent_id"			 : 102,
+		"id"				 : 51,
+		"parent_id"			 : 114,
 		"owner_name"		 : "Are You a Human",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://areyouahuman.com/",
@@ -726,8 +756,8 @@
 		]
 	},
 	{
-		"id"				 : 50,
-		"parent_id"			 : 164,
+		"id"				 : 52,
+		"parent_id"			 : 183,
 		"owner_name"		 : "Ask Jeeves",
 		"aliases"			 : ["Ask Jeeves"],
 		"homepage_url"		 : null,
@@ -739,8 +769,8 @@
 		]
 	},
 	{
-		"id"				 : 51,
-		"parent_id"			 : 164,
+		"id"				 : 53,
+		"parent_id"			 : 183,
 		"owner_name"		 : "Ask.com",
 		"aliases"			 : ["Ask"],
 		"homepage_url"		 : null,
@@ -752,7 +782,22 @@
 		]
 	},
 	{
-		"id"				 : 52,
+		"id"				 : 54,
+		"parent_id"			 : null,
+		"owner_name"		 : "AT Internet",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.atinternet.com/",
+		"privacy_policy_url" : "https://www.atinternet.com/en/company/data-protection/data-collection-on-our-customers-sites/",
+		"notes"				 : "aticdn.net and ati-host.net per Ghostery",
+		"country"			 : "FR",
+		"domains"			 : [
+			"ati-host.net",
+			"aticdn.net",
+			"atinternet.com"
+		]
+	},
+	{
+		"id"				 : 55,
 		"parent_id"			 : null,
 		"owner_name"		 : "Audience Science",
 		"aliases"			 : [],
@@ -766,8 +811,22 @@
 		]
 	},
 	{
-		"id"				 : 53,
-		"parent_id"			 : 122,
+		"id"				 : 56,
+		"parent_id"			 : null,
+		"owner_name"		 : "Audience Square",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://audience-square.com",
+		"privacy_policy_url" : null,
+		"notes"				 : null,
+		"country"			 : "FR",
+		"domains"			 : [
+			"audience-square.com",
+			"audiencesquare.com"
+		]
+	},
+	{
+		"id"				 : 57,
+		"parent_id"			 : 135,
 		"owner_name"		 : "AudienceIQ",
 		"aliases"			 : ["Audience IQ"],
 		"homepage_url"		 : null,
@@ -779,7 +838,7 @@
 		]
 	},
 	{
-		"id"				 : 54,
+		"id"				 : 58,
 		"parent_id"			 : null,
 		"owner_name"		 : "Autohome",
 		"aliases"			 : ["Auto Home"],
@@ -793,7 +852,7 @@
 		]
 	},
 	{
-		"id"				 : 55,
+		"id"				 : 59,
 		"parent_id"			 : null,
 		"owner_name"		 : "Automattic",
 		"aliases"			 : [],
@@ -806,7 +865,7 @@
 		]
 	},
 	{
-		"id"				 : 56,
+		"id"				 : 60,
 		"parent_id"			 : null,
 		"owner_name"		 : "Avocet",
 		"aliases"			 : [],
@@ -820,7 +879,7 @@
 		]
 	},
 	{
-		"id"				 : 57,
+		"id"				 : 61,
 		"parent_id"			 : null,
 		"owner_name"		 : "Awempire",
 		"aliases"			 : ["AdultWebmasterEmpire.Com"],
@@ -834,7 +893,35 @@
 		]
 	},
 	{
-		"id"				 : 58,
+		"id"				 : 62,
+		"parent_id"			 : 63,
+		"owner_name"		 : "AWIN",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.awin.com/",
+		"privacy_policy_url" : "https://www.awin.com/gb/legal/privacy-policy",
+		"notes"				 : "Ghostery lists dwin1.com as belonging to digitalwindow.com which now redirects to awin.com",
+		"country"			 : "DE",
+		"domains"			 : [
+			"awin.com",
+			"digitalwindow.com",
+			"dwin1.com"
+		]
+	},
+	{
+		"id"				 : 63,
+		"parent_id"			 : null,
+		"owner_name"		 : "Axel Springer",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://www.axelspringer.de/",
+		"privacy_policy_url" : "http://www.axelspringer.de/artikel/Hinweise-zum-Datenschutz_40410.html",
+		"notes"				 : null,
+		"country"			 : "DE",
+		"domains"			 : [
+			"axelspringer.de"
+		]
+	},
+	{
+		"id"				 : 64,
 		"parent_id"			 : null,
 		"owner_name"		 : "Baidu",
 		"aliases"			 : [],
@@ -853,7 +940,7 @@
 		]
 	},
 	{
-		"id"				 : 59,
+		"id"				 : 65,
 		"parent_id"			 : null,
 		"owner_name"		 : "Baifendian",
 		"aliases"			 : [],
@@ -866,7 +953,7 @@
 		]
 	},
 	{
-		"id"				 : 60,
+		"id"				 : 66,
 		"parent_id"			 : null,
 		"owner_name"		 : "BEHE Adtech Solution",
 		"aliases"			 : [],
@@ -879,7 +966,7 @@
 		]
 	},
 	{
-		"id"				 : 61,
+		"id"				 : 67,
 		"parent_id"			 : null,
 		"owner_name"		 : "Beijing Cloudwise Technology",
 		"aliases"			 : [],
@@ -892,7 +979,7 @@
 		]
 	},
 	{
-		"id"				 : 62,
+		"id"				 : 68,
 		"parent_id"			 : null,
 		"owner_name"		 : "Beijing Emar Online Technology",
 		"aliases"			 : [],
@@ -906,7 +993,7 @@
 		]
 	},
 	{
-		"id"				 : 63,
+		"id"				 : 69,
 		"parent_id"			 : null,
 		"owner_name"		 : "Beijing OptAim Technology",
 		"aliases"			 : [],
@@ -919,7 +1006,7 @@
 		]
 	},
 	{
-		"id"				 : 64,
+		"id"				 : 70,
 		"parent_id"			 : null,
 		"owner_name"		 : "Bertelsmann",
 		"aliases"			 : [],
@@ -932,8 +1019,8 @@
 		]
 	},
 	{
-		"id"				 : 65,
-		"parent_id"			 : 180,
+		"id"				 : 71,
+		"parent_id"			 : 201,
 		"owner_name"		 : "Bidswitch",
 		"aliases"			 : ["Bid Switch"],
 		"homepage_url"		 : "http://www.bidswitch.com",
@@ -945,8 +1032,8 @@
 		]
 	},
 	{
-		"id"				 : 66,
-		"parent_id"			 : 216,
+		"id"				 : 72,
+		"parent_id"			 : 245,
 		"owner_name"		 : "Bing",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://secure.bingads.microsoft.com",
@@ -958,7 +1045,7 @@
 		]
 	},
 	{
-		"id"				 : 67,
+		"id"				 : 73,
 		"parent_id"			 : null,
 		"owner_name"		 : "Bizo",
 		"aliases"			 : [],
@@ -972,8 +1059,8 @@
 		]
 	},
 	{
-		"id"				 : 68,
-		"parent_id"			 : 260,
+		"id"				 : 74,
+		"parent_id"			 : 297,
 		"owner_name"		 : "Blinkx",
 		"aliases"			 : ["Blink X"],
 		"homepage_url"		 : "http://www.360daily.com",
@@ -989,8 +1076,8 @@
 		]
 	},
 	{
-		"id"				 : 69,
-		"parent_id"			 : 141,
+		"id"				 : 75,
+		"parent_id"			 : 156,
 		"owner_name"		 : "Blogger",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -1005,8 +1092,8 @@
 		]
 	},
 	{
-		"id"				 : 70,
-		"parent_id"			 : 240,
+		"id"				 : 76,
+		"parent_id"			 : 275,
 		"owner_name"		 : "Blue Kai",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.oracle.com/corporate/acquisitions/bluekai/index.html",
@@ -1019,8 +1106,8 @@
 		]
 	},
 	{
-		"id"				 : 71,
-		"parent_id"			 : 357,
+		"id"				 : 77,
+		"parent_id"			 : 406,
 		"owner_name"		 : "BlueLithium",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -1032,7 +1119,7 @@
 		]
 	},
 	{
-		"id"				 : 72,
+		"id"				 : 78,
 		"parent_id"			 : null,
 		"owner_name"		 : "Bridgeline Digital",
 		"aliases"			 : ["Bridgeline"],
@@ -1045,7 +1132,7 @@
 		]
 	},
 	{
-		"id"				 : 73,
+		"id"				 : 79,
 		"parent_id"			 : null,
 		"owner_name"		 : "Brightcove",
 		"aliases"			 : [],
@@ -1059,8 +1146,8 @@
 		]
 	},
 	{
-		"id"				 : 74,
-		"parent_id"			 : 357,
+		"id"				 : 80,
+		"parent_id"			 : 406,
 		"owner_name"		 : "BrightRoll",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://brightroll.com",
@@ -1073,7 +1160,7 @@
 		]
 	},
 	{
-		"id"				 : 75,
+		"id"				 : 81,
 		"parent_id"			 : null,
 		"owner_name"		 : "CallRail",
 		"aliases"			 : [],
@@ -1087,7 +1174,7 @@
 		]
 	},
 	{
-		"id"				 : 76,
+		"id"				 : 82,
 		"parent_id"			 : null,
 		"owner_name"		 : "CBS Corporation",
 		"aliases"			 : [],
@@ -1110,7 +1197,7 @@
 		]
 	},
 	{
-		"id"				 : 77,
+		"id"				 : 83,
 		"parent_id"			 : null,
 		"owner_name"		 : "Centro",
 		"aliases"			 : [],
@@ -1124,8 +1211,8 @@
 		]
 	},
 	{
-		"id"				 : 78,
-		"parent_id"			 : 262,
+		"id"				 : 84,
+		"parent_id"			 : 299,
 		"owner_name"		 : "Chango",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://rubiconproject.com",
@@ -1137,7 +1224,7 @@
 		]
 	},
 	{
-		"id"				 : 79,
+		"id"				 : 85,
 		"parent_id"			 : null,
 		"owner_name"		 : "Chartbeat",
 		"aliases"			 : ["Chart Beat"],
@@ -1151,7 +1238,7 @@
 		]
 	},
 	{
-		"id"				 : 80,
+		"id"				 : 86,
 		"parent_id"			 : null,
 		"owner_name"		 : "China InterActive",
 		"aliases"			 : [],
@@ -1165,7 +1252,7 @@
 		]
 	},
 	{
-		"id"				 : 81,
+		"id"				 : 87,
 		"parent_id"			 : null,
 		"owner_name"		 : "Chitika",
 		"aliases"			 : [],
@@ -1179,7 +1266,20 @@
 		]
 	},
 	{
-		"id"				 : 82,
+		"id"				 : 88,
+		"parent_id"			 : 266,
+		"owner_name"		 : "Cint",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.cint.com",
+		"privacy_policy_url" : "https://www.cint.com/privacy-notice/",
+		"notes"				 : null,
+		"country"			 : "SE",
+		"domains"			 : [
+			"cint.com"
+		]
+	},
+	{
+		"id"				 : 89,
 		"parent_id"			 : null,
 		"owner_name"		 : "Clarion Capital Partners",
 		"aliases"			 : [],
@@ -1192,7 +1292,7 @@
 		]
 	},
 	{
-		"id"				 : 83,
+		"id"				 : 90,
 		"parent_id"			 : null,
 		"owner_name"		 : "Cloudflare",
 		"aliases"			 : [],
@@ -1205,7 +1305,7 @@
 		]
 	},
 	{
-		"id"				 : 84,
+		"id"				 : 91,
 		"parent_id"			 : null,
 		"owner_name"		 : "Cludo",
 		"aliases"			 : [],
@@ -1218,7 +1318,7 @@
 		]
 	},
 	{
-		"id"				 : 85,
+		"id"				 : 92,
 		"parent_id"			 : null,
 		"owner_name"		 : "CNIC",
 		"aliases"			 : [],
@@ -1232,7 +1332,7 @@
 		]
 	},
 	{
-		"id"				 : 86,
+		"id"				 : 93,
 		"parent_id"			 : null,
 		"owner_name"		 : "CNISP",
 		"aliases"			 : [],
@@ -1245,7 +1345,7 @@
 		]
 	},
 	{
-		"id"				 : 87,
+		"id"				 : 94,
 		"parent_id"			 : null,
 		"owner_name"		 : "Collective",
 		"aliases"			 : [],
@@ -1259,7 +1359,7 @@
 		]
 	},
 	{
-		"id"				 : 88,
+		"id"				 : 95,
 		"parent_id"			 : null,
 		"owner_name"		 : "Comcast",
 		"aliases"			 : [],
@@ -1268,12 +1368,11 @@
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
-			"comcast.com",
-			"theplatform.com"
+			"comcast.com"
 		]
 	},
 	{
-		"id"				 : 89,
+		"id"				 : 96,
 		"parent_id"			 : null,
 		"owner_name"		 : "Community Health Systems",
 		"aliases"			 : [],
@@ -1287,7 +1386,7 @@
 		]
 	},
 	{
-		"id"				 : 90,
+		"id"				 : 97,
 		"parent_id"			 : null,
 		"owner_name"		 : "comScore",
 		"aliases"			 : [],
@@ -1300,7 +1399,48 @@
 		]
 	},
 	{
-		"id"				 : 91,
+		"id"				 : 98,
+		"parent_id"			 : 340,
+		"owner_name"		 : "Connexity",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://connexity.com",
+		"privacy_policy_url" : "http://connexity.com/privacy-policy/",
+		"notes"				 : "Per Crunchbase was acquired by Shopzilla which in turn was acquired by Symphony Technology Group",
+		"country"			 : "US",
+		"domains"			 : [
+			"connexity.com",
+			"connexity.net"
+		]
+	},
+	{
+		"id"				 : 99,
+		"parent_id"			 : 233,
+		"owner_name"		 : "Contact Impact",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.contactimpact.de/",
+		"privacy_policy_url" : null,
+		"notes"				 : "Ownership of df-srv.de drawn from Ghostery",
+		"country"			 : "DE",
+		"domains"			 : [
+			"contactimpact.de",
+			"df-srv.de"
+		]
+	},
+	{
+		"id"				 : 100,
+		"parent_id"			 : 259,
+		"owner_name"		 : "ContentStream",
+		"aliases"			 : ["Content Stream"],
+		"homepage_url"		 : "http://contentstream.pl",
+		"privacy_policy_url" : null,
+		"notes"				 : null,
+		"country"			 : "PL",
+		"domains"			 : [
+			"contentstream.pl"
+		]
+	},
+	{
+		"id"				 : 101,
 		"parent_id"			 : null,
 		"owner_name"		 : "Conversant Media",
 		"aliases"			 : [],
@@ -1317,8 +1457,8 @@
 		]
 	},
 	{
-		"id"				 : 92,
-		"parent_id"			 : 46,
+		"id"				 : 102,
+		"parent_id"			 : 48,
 		"owner_name"		 : "Convertro",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -1330,7 +1470,7 @@
 		]
 	},
 	{
-		"id"				 : 93,
+		"id"				 : 103,
 		"parent_id"			 : null,
 		"owner_name"		 : "Cox Enterprises",
 		"aliases"			 : [],
@@ -1344,7 +1484,7 @@
 		]
 	},
 	{
-		"id"				 : 94,
+		"id"				 : 104,
 		"parent_id"			 : null,
 		"owner_name"		 : "Crazy Egg",
 		"aliases"			 : ["CrazyEgg"],
@@ -1357,7 +1497,20 @@
 		]
 	},
 	{
-		"id"				 : 95,
+		"id"				 : 105,
+		"parent_id"			 : null,
+		"owner_name"		 : "CreateJS",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://createjs.com",
+		"privacy_policy_url" : null,
+		"notes"				 : null,
+		"country"			 : "CA",
+		"domains"			 : [
+			"createjs.com"
+		]
+	},
+	{
+		"id"				 : 106,
 		"parent_id"			 : null,
 		"owner_name"		 : "Criteo",
 		"aliases"			 : [],
@@ -1371,7 +1524,7 @@
 		]
 	},
 	{
-		"id"				 : 96,
+		"id"				 : 107,
 		"parent_id"			 : null,
 		"owner_name"		 : "Crownpeak",
 		"aliases"			 : [],
@@ -1384,8 +1537,22 @@
 		]
 	},
 	{
-		"id"				 : 97,
-		"parent_id"			 : 240,
+		"id"				 : 108,
+		"parent_id"			 : null,
+		"owner_name"		 : "Cxense",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.cxense.com",
+		"privacy_policy_url" : "https://www.cxense.com/about-us/privacy-policy",
+		"notes"				 : null,
+		"country"			 : "NO",
+		"domains"			 : [
+			"cxense.com",
+			"emediate.se"
+		]
+	},
+	{
+		"id"				 : 109,
+		"parent_id"			 : 275,
 		"owner_name"		 : "Datalogix",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.oracle.com/corporate/acquisitions/datalogix/index.html",
@@ -1398,7 +1565,7 @@
 		]
 	},
 	{
-		"id"				 : 98,
+		"id"				 : 110,
 		"parent_id"			 : null,
 		"owner_name"		 : "DataXu",
 		"aliases"			 : [],
@@ -1412,7 +1579,7 @@
 		]
 	},
 	{
-		"id"				 : 99,
+		"id"				 : 111,
 		"parent_id"			 : null,
 		"owner_name"		 : "Deutsche Telekom",
 		"aliases"			 : [],
@@ -1426,8 +1593,8 @@
 		]
 	},
 	{
-		"id"				 : 100,
-		"parent_id"			 : 164,
+		"id"				 : 112,
+		"parent_id"			 : 183,
 		"owner_name"		 : "Dictionary.com",
 		"aliases"			 : ["Dictionary"],
 		"homepage_url"		 : null,
@@ -1439,8 +1606,8 @@
 		]
 	},
 	{
-		"id"				 : 101,
-		"parent_id"			 : 364,
+		"id"				 : 113,
+		"parent_id"			 : 415,
 		"owner_name"		 : "Disqus",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -1453,7 +1620,7 @@
 		]
 	},
 	{
-		"id"				 : 102,
+		"id"				 : 114,
 		"parent_id"			 : null,
 		"owner_name"		 : "distil networks",
 		"aliases"			 : [],
@@ -1467,8 +1634,8 @@
 		]
 	},
 	{
-		"id"				 : 103,
-		"parent_id"			 : 91,
+		"id"				 : 115,
+		"parent_id"			 : 101,
 		"owner_name"		 : "Dotomi",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.conversantmedia.com/dotomi",
@@ -1480,7 +1647,7 @@
 		]
 	},
 	{
-		"id"				 : 104,
+		"id"				 : 116,
 		"parent_id"			 : null,
 		"owner_name"		 : "Double Verify",
 		"aliases"			 : [],
@@ -1493,8 +1660,8 @@
 		]
 	},
 	{
-		"id"				 : 105,
-		"parent_id"			 : 141,
+		"id"				 : 117,
+		"parent_id"			 : 156,
 		"owner_name"		 : "DoubleClick",
 		"aliases"			 : ["Double Click"],
 		"homepage_url"		 : "https://doubleclickbygoogle.com",
@@ -1509,7 +1676,7 @@
 		]
 	},
 	{
-		"id"				 : 106,
+		"id"				 : 118,
 		"parent_id"			 : null,
 		"owner_name"		 : "Dratio",
 		"aliases"			 : [],
@@ -1523,7 +1690,7 @@
 		]
 	},
 	{
-		"id"				 : 107,
+		"id"				 : 119,
 		"parent_id"			 : null,
 		"owner_name"		 : "Drawbridge",
 		"aliases"			 : [],
@@ -1538,7 +1705,7 @@
 		]
 	},
 	{
-		"id"				 : 108,
+		"id"				 : 120,
 		"parent_id"			 : null,
 		"owner_name"		 : "Drugsite Trust",
 		"aliases"			 : [],
@@ -1552,7 +1719,7 @@
 		]
 	},
 	{
-		"id"				 : 109,
+		"id"				 : 121,
 		"parent_id"			 : null,
 		"owner_name"		 : "Dstillery",
 		"aliases"			 : [],
@@ -1566,7 +1733,7 @@
 		]
 	},
 	{
-		"id"				 : 110,
+		"id"				 : 122,
 		"parent_id"			 : null,
 		"owner_name"		 : "DTScout",
 		"aliases"			 : [],
@@ -1579,7 +1746,7 @@
 		]
 	},
 	{
-		"id"				 : 111,
+		"id"				 : 123,
 		"parent_id"			 : null,
 		"owner_name"		 : "Dynadmic",
 		"aliases"			 : [],
@@ -1593,7 +1760,7 @@
 		]
 	},
 	{
-		"id"				 : 112,
+		"id"				 : 124,
 		"parent_id"			 : null,
 		"owner_name"		 : "Ebix",
 		"aliases"			 : [],
@@ -1607,8 +1774,8 @@
 		]
 	},
 	{
-		"id"				 : 113,
-		"parent_id"			 : 332,
+		"id"				 : 125,
+		"parent_id"			 : 377,
 		"owner_name"		 : "EdgeCast",
 		"aliases"			 : ["Edge Cast"],
 		"homepage_url"		 : null,
@@ -1620,8 +1787,8 @@
 		]
 	},
 	{
-		"id"				 : 114,
-		"parent_id"			 : 99,
+		"id"				 : 126,
+		"parent_id"			 : 111,
 		"owner_name"		 : "emetriq",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.emetriq.com",
@@ -1633,7 +1800,7 @@
 		]
 	},
 	{
-		"id"				 : 115,
+		"id"				 : 127,
 		"parent_id"			 : null,
 		"owner_name"		 : "Ensighten",
 		"aliases"			 : [],
@@ -1646,7 +1813,7 @@
 		]
 	},
 	{
-		"id"				 : 116,
+		"id"				 : 128,
 		"parent_id"			 : null,
 		"owner_name"		 : "Equifax",
 		"aliases"			 : [],
@@ -1659,7 +1826,7 @@
 		]
 	},
 	{
-		"id"				 : 117,
+		"id"				 : 129,
 		"parent_id"			 : null,
 		"owner_name"		 : "EroAdvertising",
 		"aliases"			 : [],
@@ -1673,7 +1840,7 @@
 		]
 	},
 	{
-		"id"				 : 118,
+		"id"				 : 130,
 		"parent_id"			 : null,
 		"owner_name"		 : "etracker",
 		"aliases"			 : [],
@@ -1687,8 +1854,8 @@
 		]
 	},
 	{
-		"id"				 : 119,
-		"parent_id"			 : 96,
+		"id"				 : 131,
+		"parent_id"			 : 107,
 		"owner_name"		 : "Evidon",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.evidon.com",
@@ -1701,8 +1868,8 @@
 		]
 	},
 	{
-		"id"				 : 120,
-		"parent_id"			 : 232,
+		"id"				 : 132,
+		"parent_id"			 : 264,
 		"owner_name"		 : "exelate",
 		"aliases"			 : [],
 		"homepage_url"		 : "http://exelate.com",
@@ -1715,7 +1882,7 @@
 		]
 	},
 	{
-		"id"				 : 121,
+		"id"				 : 133,
 		"parent_id"			 : null,
 		"owner_name"		 : "exoClick",
 		"aliases"			 : [],
@@ -1728,7 +1895,20 @@
 		]
 	},
 	{
-		"id"				 : 122,
+		"id"				 : 134,
+		"parent_id"			 : 183,
+		"owner_name"		 : "Expedia Group",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.expediagroup.com",
+		"privacy_policy_url" : "https://www.expediagroup.com/privacy-policy/",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"expediagroup.com"
+		]
+	},
+	{
+		"id"				 : 135,
 		"parent_id"			 : null,
 		"owner_name"		 : "Experian",
 		"aliases"			 : [],
@@ -1743,7 +1923,7 @@
 		]
 	},
 	{
-		"id"				 : 123,
+		"id"				 : 136,
 		"parent_id"			 : null,
 		"owner_name"		 : "Exponential Advertising Intelligence",
 		"aliases"			 : [],
@@ -1757,7 +1937,7 @@
 		]
 	},
 	{
-		"id"				 : 124,
+		"id"				 : 137,
 		"parent_id"			 : null,
 		"owner_name"		 : "Extreme Reach",
 		"aliases"			 : [],
@@ -1771,7 +1951,7 @@
 		]
 	},
 	{
-		"id"				 : 125,
+		"id"				 : 138,
 		"parent_id"			 : null,
 		"owner_name"		 : "Eyeota",
 		"aliases"			 : [],
@@ -1785,7 +1965,7 @@
 		]
 	},
 	{
-		"id"				 : 126,
+		"id"				 : 139,
 		"parent_id"			 : null,
 		"owner_name"		 : "Facebook",
 		"aliases"			 : [],
@@ -1801,7 +1981,7 @@
 		]
 	},
 	{
-		"id"				 : 127,
+		"id"				 : 140,
 		"parent_id"			 : null,
 		"owner_name"		 : "Farlex",
 		"aliases"			 : [],
@@ -1815,7 +1995,7 @@
 		]
 	},
 	{
-		"id"				 : 128,
+		"id"				 : 141,
 		"parent_id"			 : null,
 		"owner_name"		 : "Fast Health",
 		"aliases"			 : [],
@@ -1829,8 +2009,8 @@
 		]
 	},
 	{
-		"id"				 : 129,
-		"parent_id"			 : 91,
+		"id"				 : 142,
+		"parent_id"			 : 101,
 		"owner_name"		 : "FastClick",
 		"aliases"			 : ["Fast Click"],
 		"homepage_url"		 : null,
@@ -1842,7 +2022,7 @@
 		]
 	},
 	{
-		"id"				 : 130,
+		"id"				 : 143,
 		"parent_id"			 : null,
 		"owner_name"		 : "Federated Media",
 		"aliases"			 : [],
@@ -1855,7 +2035,7 @@
 		]
 	},
 	{
-		"id"				 : 131,
+		"id"				 : 144,
 		"parent_id"			 : null,
 		"owner_name"		 : "Flashtalking",
 		"aliases"			 : [],
@@ -1868,8 +2048,8 @@
 		]
 	},
 	{
-		"id"				 : 132,
-		"parent_id"			 : 357,
+		"id"				 : 145,
+		"parent_id"			 : 406,
 		"owner_name"		 : "Flickr",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -1881,7 +2061,7 @@
 		]
 	},
 	{
-		"id"				 : 133,
+		"id"				 : 146,
 		"parent_id"			 : null,
 		"owner_name"		 : "Flipp",
 		"aliases"			 : [],
@@ -1897,8 +2077,22 @@
 		]
 	},
 	{
-		"id"				 : 134,
-		"parent_id"			 : 31,
+		"id"				 : 147,
+		"parent_id"			 : 249,
+		"owner_name"		 : "Fonts.com",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.fonts.com",
+		"privacy_policy_url" : "https://www.monotype.com/legal/privacy-policy",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"fonts.com",
+			"fonts.net"
+		]
+	},
+	{
+		"id"				 : 148,
+		"parent_id"			 : 33,
 		"owner_name"		 : "ForeSee",
 		"aliases"			 : ["Fore See"],
 		"homepage_url"		 : null,
@@ -1912,8 +2106,8 @@
 		]
 	},
 	{
-		"id"				 : 135,
-		"parent_id"			 : 88,
+		"id"				 : 149,
+		"parent_id"			 : 95,
 		"owner_name"		 : "FreeWheel",
 		"aliases"			 : ["Free Wheel"],
 		"homepage_url"		 : null,
@@ -1925,8 +2119,8 @@
 		]
 	},
 	{
-		"id"				 : 136,
-		"parent_id"			 : 90,
+		"id"				 : 150,
+		"parent_id"			 : 97,
 		"owner_name"		 : "Full Circle Studies",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -1938,7 +2132,7 @@
 		]
 	},
 	{
-		"id"				 : 137,
+		"id"				 : 151,
 		"parent_id"			 : null,
 		"owner_name"		 : "Gannett",
 		"aliases"			 : [],
@@ -1952,7 +2146,7 @@
 		]
 	},
 	{
-		"id"				 : 138,
+		"id"				 : 152,
 		"parent_id"			 : null,
 		"owner_name"		 : "Gemius",
 		"aliases"			 : [],
@@ -1966,7 +2160,21 @@
 		]
 	},
 	{
-		"id"				 : 139,
+		"id"				 : 153,
+		"parent_id"			 : null,
+		"owner_name"		 : "Geniee",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://geniee.co.jp/",
+		"privacy_policy_url" : "http://en.geniee.co.jp/privacy/",
+		"notes"				 : null,
+		"country"			 : "JP",
+		"domains"			 : [
+			"geniee.co.jp",
+			"gssprt.jp"
+		]
+	},
+	{
+		"id"				 : 154,
 		"parent_id"			 : null,
 		"owner_name"		 : "Gigya",
 		"aliases"			 : [],
@@ -1979,7 +2187,7 @@
 		]
 	},
 	{
-		"id"				 : 140,
+		"id"				 : 155,
 		"parent_id"			 : null,
 		"owner_name"		 : "Golden Gate Capital",
 		"aliases"			 : [],
@@ -1992,8 +2200,8 @@
 		]
 	},
 	{
-		"id"				 : 141,
-		"parent_id"			 : 39,
+		"id"				 : 156,
+		"parent_id"			 : 41,
 		"owner_name"		 : "Google",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://google.com",
@@ -2242,8 +2450,8 @@
 		]
 	},
 	{
-		"id"				 : 142,
-		"parent_id"			 : 141,
+		"id"				 : 157,
+		"parent_id"			 : 156,
 		"owner_name"		 : "Google Analytics",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.google.com/analytics/",
@@ -2256,8 +2464,8 @@
 		]
 	},
 	{
-		"id"				 : 143,
-		"parent_id"			 : 141,
+		"id"				 : 158,
+		"parent_id"			 : 156,
 		"owner_name"		 : "Google APIs",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://developers.google.com/apis-explorer",
@@ -2269,8 +2477,21 @@
 		]
 	},
 	{
-		"id"				 : 144,
-		"parent_id"			 : 141,
+		"id"				 : 159,
+		"parent_id"			 : 156,
+		"owner_name"		 : "Google App Engine",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://cloud.google.com/appengine/",
+		"privacy_policy_url" : "https://zetaglobal.com/privacy-policy/",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"appspot.com"
+		]
+	},
+	{
+		"id"				 : 160,
+		"parent_id"			 : 156,
 		"owner_name"		 : "Google Tag Manager",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.google.com/analytics/tag-manager/",
@@ -2283,7 +2504,20 @@
 		]
 	},
 	{
-		"id"				 : 145,
+		"id"				 : 161,
+		"parent_id"			 : 156,
+		"owner_name"		 : "Google Video",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.google.com/videohp",
+		"privacy_policy_url" : "https://www.google.com/policies/privacy/",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"googlevideo.com"
+		]
+	},
+	{
+		"id"				 : 162,
 		"parent_id"			 : 6,
 		"owner_name"		 : "GovDelivery",
 		"aliases"			 : ["Gov Delivery"],
@@ -2296,7 +2530,7 @@
 		]
 	},
 	{
-		"id"				 : 146,
+		"id"				 : 163,
 		"parent_id"			 : null,
 		"owner_name"		 : "Grade Us",
 		"aliases"			 : [],
@@ -2310,8 +2544,22 @@
 		]
 	},
 	{
-		"id"				 : 147,
-		"parent_id"			 : 55,
+		"id"				 : 164,
+		"parent_id"			 : null,
+		"owner_name"		 : "Gratka",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://gratka.pl",
+		"privacy_policy_url" : "http://ofirmie.gratka.pl/polityka-prywatnosci/",
+		"notes"				 : null,
+		"country"			 : "PL",
+		"domains"			 : [
+			"gratka.pl",
+			"ppstatic.pl"
+		]
+	},
+	{
+		"id"				 : 165,
+		"parent_id"			 : 59,
 		"owner_name"		 : "Gravatar",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -2323,8 +2571,8 @@
 		]
 	},
 	{
-		"id"				 : 148,
-		"parent_id"			 : 46,
+		"id"				 : 166,
+		"parent_id"			 : 48,
 		"owner_name"		 : "Gravity Insights",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -2337,7 +2585,7 @@
 		]
 	},
 	{
-		"id"				 : 149,
+		"id"				 : 167,
 		"parent_id"			 : null,
 		"owner_name"		 : "Gridsum",
 		"aliases"			 : [],
@@ -2352,8 +2600,8 @@
 		]
 	},
 	{
-		"id"				 : 150,
-		"parent_id"			 : 352,
+		"id"				 : 168,
+		"parent_id"			 : 400,
 		"owner_name"		 : "GroupM",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -2365,7 +2613,20 @@
 		]
 	},
 	{
-		"id"				 : 151,
+		"id"				 : 169,
+		"parent_id"			 : 70,
+		"owner_name"		 : "Gruner + Jahr",
+		"aliases"			 : ["Gruner Jahr"],
+		"homepage_url"		 : "http://www.guj.de/",
+		"privacy_policy_url" : "https://www.guj.de/datenschutz/",
+		"notes"				 : null,
+		"country"			 : "DE",
+		"domains"			 : [
+			"guj.de"
+		]
+	},
+	{
+		"id"				 : 170,
 		"parent_id"			 : null,
 		"owner_name"		 : "GTCR",
 		"aliases"			 : [],
@@ -2378,7 +2639,7 @@
 		]
 	},
 	{
-		"id"				 : 152,
+		"id"				 : 171,
 		"parent_id"			 : null,
 		"owner_name"		 : "Harland Clarke",
 		"aliases"			 : [],
@@ -2391,7 +2652,7 @@
 		]
 	},
 	{
-		"id"				 : 153,
+		"id"				 : 172,
 		"parent_id"			 : null,
 		"owner_name"		 : "hdtMEDIA",
 		"aliases"			 : [],
@@ -2405,7 +2666,7 @@
 		]
 	},
 	{
-		"id"				 : 154,
+		"id"				 : 173,
 		"parent_id"			 : null,
 		"owner_name"		 : "Health Grades",
 		"aliases"			 : [],
@@ -2420,7 +2681,7 @@
 		]
 	},
 	{
-		"id"				 : 155,
+		"id"				 : 174,
 		"parent_id"			 : null,
 		"owner_name"		 : "Health On the Net Foundation",
 		"aliases"			 : [],
@@ -2434,7 +2695,7 @@
 		]
 	},
 	{
-		"id"				 : 156,
+		"id"				 : 175,
 		"parent_id"			 : null,
 		"owner_name"		 : "Hearst",
 		"aliases"			 : [],
@@ -2448,8 +2709,8 @@
 		]
 	},
 	{
-		"id"				 : 157,
-		"parent_id"			 : 314,
+		"id"				 : 176,
+		"parent_id"			 : 356,
 		"owner_name"		 : "HEIAS",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -2461,8 +2722,8 @@
 		]
 	},
 	{
-		"id"				 : 158,
-		"parent_id"			 : 36,
+		"id"				 : 177,
+		"parent_id"			 : 38,
 		"owner_name"		 : "HiChina",
 		"aliases"			 : ["Hi China"],
 		"homepage_url"		 : null,
@@ -2476,7 +2737,7 @@
 		]
 	},
 	{
-		"id"				 : 159,
+		"id"				 : 178,
 		"parent_id"			 : null,
 		"owner_name"		 : "HiMedia Group",
 		"aliases"			 : [],
@@ -2489,8 +2750,8 @@
 		]
 	},
 	{
-		"id"				 : 160,
-		"parent_id"			 : 350,
+		"id"				 : 179,
+		"parent_id"			 : 398,
 		"owner_name"		 : "HiStats",
 		"aliases"			 : [],
 		"homepage_url"		 : "http://histats.com/",
@@ -2502,7 +2763,7 @@
 		]
 	},
 	{
-		"id"				 : 161,
+		"id"				 : 180,
 		"parent_id"			 : null,
 		"owner_name"		 : "Hospital Corporation of America",
 		"aliases"			 : [],
@@ -2517,7 +2778,7 @@
 		]
 	},
 	{
-		"id"				 : 162,
+		"id"				 : 181,
 		"parent_id"			 : null,
 		"owner_name"		 : "Hotjar",
 		"aliases"			 : [],
@@ -2530,7 +2791,7 @@
 		]
 	},
 	{
-		"id"				 : 163,
+		"id"				 : 182,
 		"parent_id"			 : null,
 		"owner_name"		 : "Hubspot",
 		"aliases"			 : [],
@@ -2547,7 +2808,7 @@
 		]
 	},
 	{
-		"id"				 : 164,
+		"id"				 : 183,
 		"parent_id"			 : null,
 		"owner_name"		 : "IAC",
 		"aliases"			 : ["InterActiveCorp"],
@@ -2568,8 +2829,8 @@
 		]
 	},
 	{
-		"id"				 : 165,
-		"parent_id"			 : 189,
+		"id"				 : 184,
+		"parent_id"			 : 213,
 		"owner_name"		 : "iBehavior",
 		"aliases"			 : ["i-Behavior"],
 		"homepage_url"		 : "https://www.i-behavior.com",
@@ -2582,7 +2843,7 @@
 		]
 	},
 	{
-		"id"				 : 166,
+		"id"				 : 185,
 		"parent_id"			 : null,
 		"owner_name"		 : "IgnitionOne",
 		"aliases"			 : ["Ignition One"],
@@ -2595,7 +2856,7 @@
 		]
 	},
 	{
-		"id"				 : 167,
+		"id"				 : 186,
 		"parent_id"			 : null,
 		"owner_name"		 : "Improve Digital",
 		"aliases"			 : [],
@@ -2609,7 +2870,7 @@
 		]
 	},
 	{
-		"id"				 : 168,
+		"id"				 : 187,
 		"parent_id"			 : null,
 		"owner_name"		 : "Index Exchange",
 		"aliases"			 : [],
@@ -2624,7 +2885,21 @@
 		]
 	},
 	{
-		"id"				 : 169,
+		"id"				 : 188,
+		"parent_id"			 : 353,
+		"owner_name"		 : "Infolinks",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://www.infolinks.com/",
+		"privacy_policy_url" : "https://www.infolinks.com/privacy-policy/",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"infolinks.com",
+			"intextscript.com"
+		]
+	},
+	{
+		"id"				 : 189,
 		"parent_id"			 : null,
 		"owner_name"		 : "INFOnline",
 		"aliases"			 : [],
@@ -2638,7 +2913,7 @@
 		]
 	},
 	{
-		"id"				 : 170,
+		"id"				 : 190,
 		"parent_id"			 : null,
 		"owner_name"		 : "Inform",
 		"aliases"			 : [],
@@ -2654,7 +2929,7 @@
 		]
 	},
 	{
-		"id"				 : 171,
+		"id"				 : 191,
 		"parent_id"			 : null,
 		"owner_name"		 : "Innovid",
 		"aliases"			 : [],
@@ -2667,8 +2942,8 @@
 		]
 	},
 	{
-		"id"				 : 172,
-		"parent_id"			 : 295,
+		"id"				 : 192,
+		"parent_id"			 : 335,
 		"owner_name"		 : "InQuicker",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -2680,7 +2955,7 @@
 		]
 	},
 	{
-		"id"				 : 173,
+		"id"				 : 193,
 		"parent_id"			 : null,
 		"owner_name"		 : "Insight Express",
 		"aliases"			 : [],
@@ -2693,7 +2968,21 @@
 		]
 	},
 	{
-		"id"				 : 174,
+		"id"				 : 194,
+		"parent_id"			 : 139,
+		"owner_name"		 : "Instagram",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.instagram.com",
+		"privacy_policy_url" : "https://help.instagram.com/155833707900388",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"cdninstagram.com",
+			"instagram.com"
+		]
+	},
+	{
+		"id"				 : 195,
 		"parent_id"			 : null,
 		"owner_name"		 : "Integral Ad Science",
 		"aliases"			 : [],
@@ -2708,8 +2997,8 @@
 		]
 	},
 	{
-		"id"				 : 175,
-		"parent_id"			 : 357,
+		"id"				 : 196,
+		"parent_id"			 : 406,
 		"owner_name"		 : "Interclick",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -2721,7 +3010,7 @@
 		]
 	},
 	{
-		"id"				 : 176,
+		"id"				 : 197,
 		"parent_id"			 : null,
 		"owner_name"		 : "International Business Machines",
 		"aliases"			 : ["IBM"],
@@ -2737,8 +3026,8 @@
 		]
 	},
 	{
-		"id"				 : 177,
-		"parent_id"			 : 141,
+		"id"				 : 198,
+		"parent_id"			 : 156,
 		"owner_name"		 : "Invite Media",
 		"aliases"			 : ["invitemedia"],
 		"homepage_url"		 : "http://www.invitemedia.com",
@@ -2750,7 +3039,7 @@
 		]
 	},
 	{
-		"id"				 : 178,
+		"id"				 : 199,
 		"parent_id"			 : null,
 		"owner_name"		 : "iPerceptions",
 		"aliases"			 : [],
@@ -2763,7 +3052,7 @@
 		]
 	},
 	{
-		"id"				 : 179,
+		"id"				 : 200,
 		"parent_id"			 : null,
 		"owner_name"		 : "iPinYou",
 		"aliases"			 : [],
@@ -2776,7 +3065,7 @@
 		]
 	},
 	{
-		"id"				 : 180,
+		"id"				 : 201,
 		"parent_id"			 : null,
 		"owner_name"		 : "IPONWEB",
 		"aliases"			 : [],
@@ -2789,7 +3078,7 @@
 		]
 	},
 	{
-		"id"				 : 181,
+		"id"				 : 202,
 		"parent_id"			 : null,
 		"owner_name"		 : "iResearch Consulting Group",
 		"aliases"			 : [],
@@ -2805,7 +3094,7 @@
 		]
 	},
 	{
-		"id"				 : 182,
+		"id"				 : 203,
 		"parent_id"			 : null,
 		"owner_name"		 : "iTV Media",
 		"aliases"			 : [],
@@ -2820,8 +3109,21 @@
 		]
 	},
 	{
-		"id"				 : 183,
-		"parent_id"			 : 116,
+		"id"				 : 204,
+		"parent_id"			 : null,
+		"owner_name"		 : "iubenda",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.iubenda.com/",
+		"privacy_policy_url" : "https://www.iubenda.com/privacy-policy/252372",
+		"notes"				 : null,
+		"country"			 : "IT",
+		"domains"			 : [
+			"iubenda.com"
+		]
+	},
+	{
+		"id"				 : 205,
+		"parent_id"			 : 128,
 		"owner_name"		 : "IXI Corporation",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://datadrivenmarketing.equifax.com",
@@ -2834,7 +3136,7 @@
 		]
 	},
 	{
-		"id"				 : 184,
+		"id"				 : 206,
 		"parent_id"			 : null,
 		"owner_name"		 : "JD.com",
 		"aliases"			 : [],
@@ -2850,7 +3152,7 @@
 		]
 	},
 	{
-		"id"				 : 185,
+		"id"				 : 207,
 		"parent_id"			 : null,
 		"owner_name"		 : "Jivox",
 		"aliases"			 : [],
@@ -2863,7 +3165,7 @@
 		]
 	},
 	{
-		"id"				 : 186,
+		"id"				 : 208,
 		"parent_id"			 : null,
 		"owner_name"		 : "jQuery Foundation",
 		"aliases"			 : ["jQuery"],
@@ -2877,7 +3179,21 @@
 		]
 	},
 	{
-		"id"				 : 187,
+		"id"				 : 209,
+		"parent_id"			 : 288,
+		"owner_name"		 : "jsDelivr",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.jsdelivr.com/",
+		"privacy_policy_url" : null,
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"jsdelivr.com",
+			"jsdelivr.net"
+		]
+	},
+	{
+		"id"				 : 210,
 		"parent_id"			 : null,
 		"owner_name"		 : "JuicyAds",
 		"aliases"			 : [],
@@ -2890,7 +3206,7 @@
 		]
 	},
 	{
-		"id"				 : 188,
+		"id"				 : 211,
 		"parent_id"			 : null,
 		"owner_name"		 : "Kantar",
 		"aliases"			 : [],
@@ -2905,8 +3221,23 @@
 		]
 	},
 	{
-		"id"				 : 189,
-		"parent_id"			 : 361,
+		"id"				 : 212,
+		"parent_id"			 : 211,
+		"owner_name"		 : "Kantar Media",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.kantarmedia.com/",
+		"privacy_policy_url" : "https://www.kantarmedia.com/global/privacy-statement",
+		"notes"				 : "whois for spring-tns.net goes to spring.de which resolves to kantarmedia.com on web",
+		"country"			 : "UK",
+		"domains"			 : [
+			"kantarmedia.com",
+			"spring-tns.net",
+			"spring.de"
+		]
+	},
+	{
+		"id"				 : 213,
+		"parent_id"			 : 410,
 		"owner_name"		 : "KBM Group",
 		"aliases"			 : [],
 		"homepage_url"		 : "http://www.kbmg.com",
@@ -2918,7 +3249,7 @@
 		]
 	},
 	{
-		"id"				 : 190,
+		"id"				 : 214,
 		"parent_id"			 : null,
 		"owner_name"		 : "Kindred Healthcare",
 		"aliases"			 : [],
@@ -2932,7 +3263,7 @@
 		]
 	},
 	{
-		"id"				 : 191,
+		"id"				 : 215,
 		"parent_id"			 : null,
 		"owner_name"		 : "Knet",
 		"aliases"			 : [],
@@ -2945,7 +3276,7 @@
 		]
 	},
 	{
-		"id"				 : 192,
+		"id"				 : 216,
 		"parent_id"			 : null,
 		"owner_name"		 : "Knownsec",
 		"aliases"			 : [],
@@ -2959,8 +3290,8 @@
 		]
 	},
 	{
-		"id"				 : 193,
-		"parent_id"			 : 265,
+		"id"				 : 217,
+		"parent_id"			 : 302,
 		"owner_name"		 : "Krux Digital",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -2973,8 +3304,22 @@
 		]
 	},
 	{
-		"id"				 : 194,
-		"parent_id"			 : 188,
+		"id"				 : 218,
+		"parent_id"			 : 169,
+		"owner_name"		 : "Ligatus",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://www.ligatus.com/",
+		"privacy_policy_url" : "https://www.ligatus.com/en/privacy-policy",
+		"notes"				 : null,
+		"country"			 : "DE",
+		"domains"			 : [
+			"ligadx.com",
+			"ligatus.com"
+		]
+	},
+	{
+		"id"				 : 219,
+		"parent_id"			 : 211,
 		"owner_name"		 : "Lightspeed Research",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -2986,7 +3331,7 @@
 		]
 	},
 	{
-		"id"				 : 195,
+		"id"				 : 220,
 		"parent_id"			 : null,
 		"owner_name"		 : "LinkedIn",
 		"aliases"			 : [],
@@ -2995,12 +3340,27 @@
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
+			"licdn.com",
 			"linkedin.com"
 		]
 	},
 	{
-		"id"				 : 196,
-		"parent_id"			 : 126,
+		"id"				 : 221,
+		"parent_id"			 : 283,
+		"owner_name"		 : "Linkpulse",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://www.linkpulse.com",
+		"privacy_policy_url" : "http://www.linkpulse.com/privacy",
+		"notes"				 : "lp4.io per Ghostery",
+		"country"			 : "NO",
+		"domains"			 : [
+			"linkpulse.com",
+			"lp4.io"
+		]
+	},
+	{
+		"id"				 : 222,
+		"parent_id"			 : 139,
 		"owner_name"		 : "LiveRail",
 		"aliases"			 : ["Live Rail"],
 		"homepage_url"		 : null,
@@ -3013,7 +3373,7 @@
 		]
 	},
 	{
-		"id"				 : 197,
+		"id"				 : 223,
 		"parent_id"			 : 7,
 		"owner_name"		 : "LiveRamp",
 		"aliases"			 : ["Live Ramp"],
@@ -3028,7 +3388,7 @@
 		]
 	},
 	{
-		"id"				 : 198,
+		"id"				 : 224,
 		"parent_id"			 : null,
 		"owner_name"		 : "Lotame",
 		"aliases"			 : [],
@@ -3042,8 +3402,8 @@
 		]
 	},
 	{
-		"id"				 : 199,
-		"parent_id"			 : 82,
+		"id"				 : 225,
+		"parent_id"			 : 89,
 		"owner_name"		 : "Madison Logic",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.madisonlogic.com",
@@ -3056,8 +3416,8 @@
 		]
 	},
 	{
-		"id"				 : 200,
-		"parent_id"			 : 72,
+		"id"				 : 226,
+		"parent_id"			 : 78,
 		"owner_name"		 : "Magnetic",
 		"aliases"			 : ["Magnetic Media Online","MyBuys"],
 		"homepage_url"		 : "https://www.magnetic.com",
@@ -3068,12 +3428,11 @@
 			"cognitivematch.com",
 			"domdex.com",
 			"magnetic.com",
-			"mybuys.com",
 			"veruta.com"
 		]
 	},
 	{
-		"id"				 : 201,
+		"id"				 : 227,
 		"parent_id"			 : null,
 		"owner_name"		 : "Mapbox",
 		"aliases"			 : [],
@@ -3086,7 +3445,7 @@
 		]
 	},
 	{
-		"id"				 : 202,
+		"id"				 : 228,
 		"parent_id"			 : null,
 		"owner_name"		 : "Marimedia",
 		"aliases"			 : [],
@@ -3099,7 +3458,7 @@
 		]
 	},
 	{
-		"id"				 : 203,
+		"id"				 : 229,
 		"parent_id"			 : null,
 		"owner_name"		 : "Market Supervision Administration of Shenzhen Municipality",
 		"aliases"			 : [],
@@ -3112,7 +3471,7 @@
 		]
 	},
 	{
-		"id"				 : 204,
+		"id"				 : 230,
 		"parent_id"			 : null,
 		"owner_name"		 : "Marketo",
 		"aliases"			 : [],
@@ -3127,8 +3486,8 @@
 		]
 	},
 	{
-		"id"				 : 205,
-		"parent_id"			 : 328,
+		"id"				 : 231,
+		"parent_id"			 : 373,
 		"owner_name"		 : "MaxPoint Interactive",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.valassisdigital.com/us/",
@@ -3142,8 +3501,8 @@
 		]
 	},
 	{
-		"id"				 : 206,
-		"parent_id"			 : 297,
+		"id"				 : 232,
+		"parent_id"			 : 337,
 		"owner_name"		 : "mbr targeting",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -3155,8 +3514,21 @@
 		]
 	},
 	{
-		"id"				 : 207,
-		"parent_id"			 : 352,
+		"id"				 : 233,
+		"parent_id"			 : 63,
+		"owner_name"		 : "Media Impact",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.mediaimpact.de",
+		"privacy_policy_url" : "https://www.mediaimpact.de/artikel/-Hinweise-zum-Datenschutz_768445.html",
+		"notes"				 : null,
+		"country"			 : "DE",
+		"domains"			 : [
+			"mediaimpact.de"
+		]
+	},
+	{
+		"id"				 : 234,
+		"parent_id"			 : 400,
 		"owner_name"		 : "Media Innovation Group",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -3169,7 +3541,7 @@
 		]
 	},
 	{
-		"id"				 : 208,
+		"id"				 : 235,
 		"parent_id"			 : null,
 		"owner_name"		 : "Media Math",
 		"aliases"			 : [],
@@ -3183,7 +3555,20 @@
 		]
 	},
 	{
-		"id"				 : 209,
+		"id"				 : 236,
+		"parent_id"			 : null,
+		"owner_name"		 : "Media.net",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.media.net/",
+		"privacy_policy_url" : "https://www.media.net/en/privacy-policy",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"media.net"
+		]
+	},
+	{
+		"id"				 : 237,
 		"parent_id"			 : null,
 		"owner_name"		 : "MediaAV",
 		"aliases"			 : [],
@@ -3196,8 +3581,8 @@
 		]
 	},
 	{
-		"id"				 : 210,
-		"parent_id"			 : 91,
+		"id"				 : 238,
+		"parent_id"			 : 101,
 		"owner_name"		 : "Mediaplex",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -3209,7 +3594,20 @@
 		]
 	},
 	{
-		"id"				 : 211,
+		"id"				 : 239,
+		"parent_id"			 : null,
+		"owner_name"		 : "mediarithmics",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.mediarithmics.com/",
+		"privacy_policy_url" : "https://www.mediarithmics.com/en/legal-notice.html",
+		"notes"				 : null,
+		"country"			 : "FR",
+		"domains"			 : [
+			"mediarithmics.com"
+		]
+	},
+	{
+		"id"				 : 240,
 		"parent_id"			 : null,
 		"owner_name"		 : "Medscape",
 		"aliases"			 : [],
@@ -3222,7 +3620,7 @@
 		]
 	},
 	{
-		"id"				 : 212,
+		"id"				 : 241,
 		"parent_id"			 : null,
 		"owner_name"		 : "Medseek",
 		"aliases"			 : [],
@@ -3236,7 +3634,7 @@
 		]
 	},
 	{
-		"id"				 : 213,
+		"id"				 : 242,
 		"parent_id"			 : null,
 		"owner_name"		 : "Meetrics",
 		"aliases"			 : [],
@@ -3252,7 +3650,7 @@
 		]
 	},
 	{
-		"id"				 : 214,
+		"id"				 : 243,
 		"parent_id"			 : null,
 		"owner_name"		 : "Menlo Technologies",
 		"aliases"			 : [],
@@ -3266,7 +3664,7 @@
 		]
 	},
 	{
-		"id"				 : 215,
+		"id"				 : 244,
 		"parent_id"			 : null,
 		"owner_name"		 : "Miaozhen Systems",
 		"aliases"			 : [],
@@ -3279,7 +3677,7 @@
 		]
 	},
 	{
-		"id"				 : 216,
+		"id"				 : 245,
 		"parent_id"			 : null,
 		"owner_name"		 : "Microsoft",
 		"aliases"			 : [],
@@ -3296,12 +3694,13 @@
 			"msads.net",
 			"msn.com",
 			"s-microsoft.com",
-			"s-msn.com"
+			"s-msn.com",
+			"windows.net"
 		]
 	},
 	{
-		"id"				 : 217,
-		"parent_id"			 : 188,
+		"id"				 : 246,
+		"parent_id"			 : 211,
 		"owner_name"		 : "Millward Brown Digital",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -3314,8 +3713,8 @@
 		]
 	},
 	{
-		"id"				 : 218,
-		"parent_id"			 : 240,
+		"id"				 : 247,
+		"parent_id"			 : 275,
 		"owner_name"		 : "Moat",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://moat.com",
@@ -3328,7 +3727,7 @@
 		]
 	},
 	{
-		"id"				 : 219,
+		"id"				 : 248,
 		"parent_id"			 : null,
 		"owner_name"		 : "Mode Media",
 		"aliases"			 : [],
@@ -3341,7 +3740,7 @@
 		]
 	},
 	{
-		"id"				 : 220,
+		"id"				 : 249,
 		"parent_id"			 : null,
 		"owner_name"		 : "Monotype Imaging",
 		"aliases"			 : [],
@@ -3350,14 +3749,12 @@
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
-			"fonts.com",
-			"fonts.net",
 			"monotype.com",
 			"monotypeimaging.com"
 		]
 	},
 	{
-		"id"				 : 221,
+		"id"				 : 250,
 		"parent_id"			 : null,
 		"owner_name"		 : "Mozilla",
 		"aliases"			 : [],
@@ -3371,8 +3768,8 @@
 		]
 	},
 	{
-		"id"				 : 222,
-		"parent_id"			 : 200,
+		"id"				 : 251,
+		"parent_id"			 : 226,
 		"owner_name"		 : "MyBuys",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -3384,7 +3781,20 @@
 		]
 	},
 	{
-		"id"				 : 223,
+		"id"				 : 252,
+		"parent_id"			 : 249,
+		"owner_name"		 : "MyFonts",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://www.myfonts.com",
+		"privacy_policy_url" : "http://www.myfonts.com/info/legal/#Privacy",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"myfonts.net"
+		]
+	},
+	{
+		"id"				 : 253,
 		"parent_id"			 : null,
 		"owner_name"		 : "Native Ads",
 		"aliases"			 : [],
@@ -3397,7 +3807,7 @@
 		]
 	},
 	{
-		"id"				 : 224,
+		"id"				 : 254,
 		"parent_id"			 : null,
 		"owner_name"		 : "Nativo",
 		"aliases"			 : [],
@@ -3412,7 +3822,7 @@
 		]
 	},
 	{
-		"id"				 : 225,
+		"id"				 : 255,
 		"parent_id"			 : null,
 		"owner_name"		 : "Neodata Group",
 		"aliases"			 : ["Neodata"],
@@ -3425,7 +3835,7 @@
 		]
 	},
 	{
-		"id"				 : 226,
+		"id"				 : 256,
 		"parent_id"			 : null,
 		"owner_name"		 : "NetEase",
 		"aliases"			 : [],
@@ -3443,7 +3853,7 @@
 		]
 	},
 	{
-		"id"				 : 227,
+		"id"				 : 257,
 		"parent_id"			 : null,
 		"owner_name"		 : "NetIQ",
 		"aliases"			 : ["Net IQ"],
@@ -3456,8 +3866,8 @@
 		]
 	},
 	{
-		"id"				 : 228,
-		"parent_id"			 : 166,
+		"id"				 : 258,
+		"parent_id"			 : 185,
 		"owner_name"		 : "Netmining",
 		"aliases"			 : [],
 		"homepage_url"		 : "http://netmining.com",
@@ -3470,8 +3880,35 @@
 		]
 	},
 	{
-		"id"				 : 229,
-		"parent_id"			 : 140,
+		"id"				 : 259,
+		"parent_id"			 : null,
+		"owner_name"		 : "Netsprint",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://netsprint.eu",
+		"privacy_policy_url" : null,
+		"notes"				 : null,
+		"country"			 : "PL",
+		"domains"			 : [
+			"adkontekst.pl",
+			"netsprint.eu"
+		]
+	},
+	{
+		"id"				 : 260,
+		"parent_id"			 : 259,
+		"owner_name"		 : "Netsprint Audience",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://audience.netsprint.eu",
+		"privacy_policy_url" : "http://spoldzielnia.nsaudience.pl/opt-out/",
+		"notes"				 : null,
+		"country"			 : "PL",
+		"domains"			 : [
+			"nsaudience.pl"
+		]
+	},
+	{
+		"id"				 : 261,
+		"parent_id"			 : 155,
 		"owner_name"		 : "Neustar",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.home.neustar",
@@ -3479,14 +3916,13 @@
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
-			"adadvisor.net",
 			"home.neustar",
 			"neustar.biz"
 		]
 	},
 	{
-		"id"				 : 230,
-		"parent_id"			 : 229,
+		"id"				 : 262,
+		"parent_id"			 : 261,
 		"owner_name"		 : "Neustar Marketing",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.marketing.neustar",
@@ -3499,7 +3935,7 @@
 		]
 	},
 	{
-		"id"				 : 231,
+		"id"				 : 263,
 		"parent_id"			 : null,
 		"owner_name"		 : "New Relic",
 		"aliases"			 : [],
@@ -3513,7 +3949,7 @@
 		]
 	},
 	{
-		"id"				 : 232,
+		"id"				 : 264,
 		"parent_id"			 : null,
 		"owner_name"		 : "Nielsen Online",
 		"aliases"			 : [],
@@ -3528,8 +3964,8 @@
 		]
 	},
 	{
-		"id"				 : 233,
-		"parent_id"			 : 303,
+		"id"				 : 265,
+		"parent_id"			 : 344,
 		"owner_name"		 : "Nomao",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -3541,7 +3977,20 @@
 		]
 	},
 	{
-		"id"				 : 234,
+		"id"				 : 266,
+		"parent_id"			 : null,
+		"owner_name"		 : "Nordic Capital",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.nordiccapital.com",
+		"privacy_policy_url" : "https://www.nordiccapital.com/cookie-policy/",
+		"notes"				 : null,
+		"country"			 : "NO",
+		"domains"			 : [
+			"nordiccapital.com"
+		]
+	},
+	{
+		"id"				 : 267,
 		"parent_id"			 : null,
 		"owner_name"		 : "nugg.ad",
 		"aliases"			 : [],
@@ -3554,8 +4003,8 @@
 		]
 	},
 	{
-		"id"				 : 235,
-		"parent_id"			 : 332,
+		"id"				 : 268,
+		"parent_id"			 : 377,
 		"owner_name"		 : "Oath",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.oath.com",
@@ -3567,7 +4016,7 @@
 		]
 	},
 	{
-		"id"				 : 236,
+		"id"				 : 269,
 		"parent_id"			 : null,
 		"owner_name"		 : "Omnicom Media Group",
 		"aliases"			 : [],
@@ -3582,8 +4031,21 @@
 		]
 	},
 	{
-		"id"				 : 237,
-		"parent_id"			 : 46,
+		"id"				 : 270,
+		"parent_id"			 : null,
+		"owner_name"		 : "OMS Online",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://www.oms.eu",
+		"privacy_policy_url" : null,
+		"notes"				 : null,
+		"country"			 : "DE",
+		"domains"			 : [
+			"oms.eu"
+		]
+	},
+	{
+		"id"				 : 271,
+		"parent_id"			 : 48,
 		"owner_name"		 : "ONE by Aol",
 		"aliases"			 : ["America Online"],
 		"homepage_url"		 : "https://oneadserver.aol.com",
@@ -3598,7 +4060,21 @@
 		]
 	},
 	{
-		"id"				 : 238,
+		"id"				 : 272,
+		"parent_id"			 : null,
+		"owner_name"		 : "Onfocus",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://onfocus.io",
+		"privacy_policy_url" : null,
+		"notes"				 : null,
+		"country"			 : "FR",
+		"domains"			 : [
+			"fogl1onf.com",
+			"onfocus.io"
+		]
+	},
+	{
+		"id"				 : 273,
 		"parent_id"			 : null,
 		"owner_name"		 : "OpenX",
 		"aliases"			 : ["Open X"],
@@ -3613,7 +4089,7 @@
 		]
 	},
 	{
-		"id"				 : 239,
+		"id"				 : 274,
 		"parent_id"			 : null,
 		"owner_name"		 : "Optimizely",
 		"aliases"			 : [],
@@ -3626,7 +4102,7 @@
 		]
 	},
 	{
-		"id"				 : 240,
+		"id"				 : 275,
 		"parent_id"			 : null,
 		"owner_name"		 : "Oracle",
 		"aliases"			 : [],
@@ -3639,7 +4115,7 @@
 		]
 	},
 	{
-		"id"				 : 241,
+		"id"				 : 276,
 		"parent_id"			 : null,
 		"owner_name"		 : "Outbrain",
 		"aliases"			 : ["Sphere"],
@@ -3650,13 +4126,12 @@
 		"domains"			 : [
 			"outbrain.com",
 			"scribit.com",
-			"sphere.com",
 			"verticalacuity.com",
 			"visualrevenue.com"
 		]
 	},
 	{
-		"id"				 : 242,
+		"id"				 : 277,
 		"parent_id"			 : null,
 		"owner_name"		 : "OwnerIQ",
 		"aliases"			 : ["Owner IQ"],
@@ -3671,7 +4146,7 @@
 		]
 	},
 	{
-		"id"				 : 243,
+		"id"				 : 278,
 		"parent_id"			 : null,
 		"owner_name"		 : "Parrable.com",
 		"aliases"			 : [],
@@ -3684,7 +4159,7 @@
 		]
 	},
 	{
-		"id"				 : 244,
+		"id"				 : 279,
 		"parent_id"			 : null,
 		"owner_name"		 : "PC Group",
 		"aliases"			 : [],
@@ -3700,7 +4175,7 @@
 		]
 	},
 	{
-		"id"				 : 245,
+		"id"				 : 280,
 		"parent_id"			 : null,
 		"owner_name"		 : "Perion",
 		"aliases"			 : [],
@@ -3713,7 +4188,20 @@
 		]
 	},
 	{
-		"id"				 : 246,
+		"id"				 : 281,
+		"parent_id"			 : null,
+		"owner_name"		 : "Permutive",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://permutive.com",
+		"privacy_policy_url" : "http://permutive.com/privacy/index.html",
+		"notes"				 : null,
+		"country"			 : "UK",
+		"domains"			 : [
+			"permutive.com"
+		]
+	},
+	{
+		"id"				 : 282,
 		"parent_id"			 : null,
 		"owner_name"		 : "Pinterest",
 		"aliases"			 : [],
@@ -3727,8 +4215,8 @@
 		]
 	},
 	{
-		"id"				 : 247,
-		"parent_id"			 : 150,
+		"id"				 : 283,
+		"parent_id"			 : 168,
 		"owner_name"		 : "plista",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -3740,7 +4228,7 @@
 		]
 	},
 	{
-		"id"				 : 248,
+		"id"				 : 284,
 		"parent_id"			 : null,
 		"owner_name"		 : "PlugRush",
 		"aliases"			 : ["Plug Rush"],
@@ -3753,7 +4241,7 @@
 		]
 	},
 	{
-		"id"				 : 249,
+		"id"				 : 285,
 		"parent_id"			 : null,
 		"owner_name"		 : "PopAds",
 		"aliases"			 : [],
@@ -3766,7 +4254,7 @@
 		]
 	},
 	{
-		"id"				 : 250,
+		"id"				 : 286,
 		"parent_id"			 : null,
 		"owner_name"		 : "Progress Software",
 		"aliases"			 : [],
@@ -3779,8 +4267,8 @@
 		]
 	},
 	{
-		"id"				 : 251,
-		"parent_id"			 : 303,
+		"id"				 : 287,
+		"parent_id"			 : 344,
 		"owner_name"		 : "PromoDigital",
 		"aliases"			 : ["Promo Digital"],
 		"homepage_url"		 : null,
@@ -3792,7 +4280,20 @@
 		]
 	},
 	{
-		"id"				 : 252,
+		"id"				 : 288,
+		"parent_id"			 : null,
+		"owner_name"		 : "Prospect One",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://prospectone.io",
+		"privacy_policy_url" : null,
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"prospectone.io"
+		]
+	},
+	{
+		"id"				 : 289,
 		"parent_id"			 : null,
 		"owner_name"		 : "Publicis Groupe",
 		"aliases"			 : [],
@@ -3805,7 +4306,7 @@
 		]
 	},
 	{
-		"id"				 : 253,
+		"id"				 : 290,
 		"parent_id"			 : null,
 		"owner_name"		 : "PubMatic",
 		"aliases"			 : [],
@@ -3818,7 +4319,7 @@
 		]
 	},
 	{
-		"id"				 : 254,
+		"id"				 : 291,
 		"parent_id"			 : null,
 		"owner_name"		 : "PulsePoint",
 		"aliases"			 : ["Pulse Point"],
@@ -3833,7 +4334,7 @@
 		]
 	},
 	{
-		"id"				 : 255,
+		"id"				 : 292,
 		"parent_id"			 : null,
 		"owner_name"		 : "Quantcast",
 		"aliases"			 : [],
@@ -3848,8 +4349,8 @@
 		]
 	},
 	{
-		"id"				 : 256,
-		"parent_id"			 : 260,
+		"id"				 : 293,
+		"parent_id"			 : 297,
 		"owner_name"		 : "Radium One",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://radiumone.com",
@@ -3857,14 +4358,12 @@
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
-			"1rx.io",
 			"gwallet.com",
-			"radiumone.com",
-			"rhythmxchange.com"
+			"radiumone.com"
 		]
 	},
 	{
-		"id"				 : 257,
+		"id"				 : 294,
 		"parent_id"			 : null,
 		"owner_name"		 : "ReadSpeaker",
 		"aliases"			 : ["Read Speaker"],
@@ -3877,8 +4376,8 @@
 		]
 	},
 	{
-		"id"				 : 258,
-		"parent_id"			 : 80,
+		"id"				 : 295,
+		"parent_id"			 : 86,
 		"owner_name"		 : "Ren Ren",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -3890,7 +4389,7 @@
 		]
 	},
 	{
-		"id"				 : 259,
+		"id"				 : 296,
 		"parent_id"			 : null,
 		"owner_name"		 : "Resonate",
 		"aliases"			 : [],
@@ -3904,7 +4403,7 @@
 		]
 	},
 	{
-		"id"				 : 260,
+		"id"				 : 297,
 		"parent_id"			 : null,
 		"owner_name"		 : "RhythmOne",
 		"aliases"			 : ["Rhythm One"],
@@ -3918,8 +4417,8 @@
 		]
 	},
 	{
-		"id"				 : 261,
-		"parent_id"			 : 282,
+		"id"				 : 298,
+		"parent_id"			 : 320,
 		"owner_name"		 : "Rocketfuel",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -3934,7 +4433,7 @@
 		]
 	},
 	{
-		"id"				 : 262,
+		"id"				 : 299,
 		"parent_id"			 : null,
 		"owner_name"		 : "Rubicon Project",
 		"aliases"			 : [],
@@ -3943,13 +4442,12 @@
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
-			"chango.com",
 			"rubiconproject.com"
 		]
 	},
 	{
-		"id"				 : 263,
-		"parent_id"			 : 293,
+		"id"				 : 300,
+		"parent_id"			 : 333,
 		"owner_name"		 : "Run",
 		"aliases"			 : [],
 		"homepage_url"		 : "http://www.runads.com",
@@ -3962,8 +4460,8 @@
 		]
 	},
 	{
-		"id"				 : 264,
-		"parent_id"			 : 352,
+		"id"				 : 301,
+		"parent_id"			 : 400,
 		"owner_name"		 : "Safecount",
 		"aliases"			 : [],
 		"homepage_url"		 : "http://safecount.net",
@@ -3975,7 +4473,7 @@
 		]
 	},
 	{
-		"id"				 : 265,
+		"id"				 : 302,
 		"parent_id"			 : null,
 		"owner_name"		 : "Salesforce",
 		"aliases"			 : [],
@@ -3988,7 +4486,7 @@
 		]
 	},
 	{
-		"id"				 : 266,
+		"id"				 : 303,
 		"parent_id"			 : null,
 		"owner_name"		 : "Samsung",
 		"aliases"			 : [],
@@ -4001,8 +4499,8 @@
 		]
 	},
 	{
-		"id"				 : 267,
-		"parent_id"			 : 90,
+		"id"				 : 304,
+		"parent_id"			 : 97,
 		"owner_name"		 : "ScorecardResearch",
 		"aliases"			 : ["Scorecard Research"],
 		"homepage_url"		 : null,
@@ -4014,7 +4512,7 @@
 		]
 	},
 	{
-		"id"				 : 268,
+		"id"				 : 305,
 		"parent_id"			 : null,
 		"owner_name"		 : "Scorpion Internet Marketing",
 		"aliases"			 : [],
@@ -4028,8 +4526,8 @@
 		]
 	},
 	{
-		"id"				 : 269,
-		"parent_id"			 : 102,
+		"id"				 : 306,
+		"parent_id"			 : 114,
 		"owner_name"		 : "ScrapeSentry",
 		"aliases"			 : ["Scrape Sentry"],
 		"homepage_url"		 : "https://www.scrapesentry.com",
@@ -4041,7 +4539,7 @@
 		]
 	},
 	{
-		"id"				 : 270,
+		"id"				 : 307,
 		"parent_id"			 : 17,
 		"owner_name"		 : "Sedo",
 		"aliases"			 : [],
@@ -4055,7 +4553,7 @@
 		]
 	},
 	{
-		"id"				 : 271,
+		"id"				 : 308,
 		"parent_id"			 : null,
 		"owner_name"		 : "Sellpoints",
 		"aliases"			 : [],
@@ -4069,12 +4567,12 @@
 		]
 	},
 	{
-		"id"				 : 272,
+		"id"				 : 309,
 		"parent_id"			 : null,
 		"owner_name"		 : "Semasio",
 		"aliases"			 : [],
-		"homepage_url"		 : null,
-		"privacy_policy_url" : null,
+		"homepage_url"		 : "http://www.semasio.com",
+		"privacy_policy_url" : "http://www.semasio.com/privacy-policy/",
 		"notes"				 : null,
 		"country"			 : "DE",
 		"domains"			 : [
@@ -4083,7 +4581,7 @@
 		]
 	},
 	{
-		"id"				 : 273,
+		"id"				 : 310,
 		"parent_id"			 : null,
 		"owner_name"		 : "Shanghai 2345 Network Technology",
 		"aliases"			 : [],
@@ -4097,7 +4595,7 @@
 		]
 	},
 	{
-		"id"				 : 274,
+		"id"				 : 311,
 		"parent_id"			 : null,
 		"owner_name"		 : "Share This",
 		"aliases"			 : [],
@@ -4110,12 +4608,12 @@
 		]
 	},
 	{
-		"id"				 : 275,
+		"id"				 : 312,
 		"parent_id"			 : null,
 		"owner_name"		 : "Sharethrough",
 		"aliases"			 : [],
-		"homepage_url"		 : null,
-		"privacy_policy_url" : null,
+		"homepage_url"		 : "http://sharethrough.com",
+		"privacy_policy_url" : "http://platform-cdn.sharethrough.com/privacy-policy",
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
@@ -4124,7 +4622,21 @@
 		]
 	},
 	{
-		"id"				 : 276,
+		"id"				 : 313,
+		"parent_id"			 : 359,
+		"owner_name"		 : "ShinyStat",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.shinystat.com",
+		"privacy_policy_url" : "https://www.shinystat.com/en/informativa_sito.html",
+		"notes"				 : null,
+		"country"			 : "IT",
+		"domains"			 : [
+			"shinystat.com",
+			"shinystat.it"
+		]
+	},
+	{
+		"id"				 : 314,
 		"parent_id"			 : null,
 		"owner_name"		 : "Signal Digital",
 		"aliases"			 : [],
@@ -4138,8 +4650,8 @@
 		]
 	},
 	{
-		"id"				 : 277,
-		"parent_id"			 : 151,
+		"id"				 : 315,
+		"parent_id"			 : 170,
 		"owner_name"		 : "simpli.fi",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.simpli.fi",
@@ -4151,7 +4663,7 @@
 		]
 	},
 	{
-		"id"				 : 278,
+		"id"				 : 316,
 		"parent_id"			 : null,
 		"owner_name"		 : "Sina",
 		"aliases"			 : [],
@@ -4168,7 +4680,7 @@
 		]
 	},
 	{
-		"id"				 : 279,
+		"id"				 : 317,
 		"parent_id"			 : null,
 		"owner_name"		 : "Singtel",
 		"aliases"			 : [],
@@ -4181,7 +4693,7 @@
 		]
 	},
 	{
-		"id"				 : 280,
+		"id"				 : 318,
 		"parent_id"			 : null,
 		"owner_name"		 : "Siteimprove",
 		"aliases"			 : [],
@@ -4195,8 +4707,8 @@
 		]
 	},
 	{
-		"id"				 : 281,
-		"parent_id"			 : 77,
+		"id"				 : 319,
+		"parent_id"			 : 83,
 		"owner_name"		 : "SiteScout",
 		"aliases"			 : ["Site Scout"],
 		"homepage_url"		 : null,
@@ -4209,8 +4721,8 @@
 		]
 	},
 	{
-		"id"				 : 282,
-		"parent_id"			 : 331,
+		"id"				 : 320,
+		"parent_id"			 : 376,
 		"owner_name"		 : "Sizmek",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.sizmek.com",
@@ -4224,7 +4736,21 @@
 		]
 	},
 	{
-		"id"				 : 283,
+		"id"				 : 321,
+		"parent_id"			 : null,
+		"owner_name"		 : "Skimlinks",
+		"aliases"			 : ["Skim Links"],
+		"homepage_url"		 : "http://www.skimlinks.com/",
+		"privacy_policy_url" : "https://skimlinks.com/privacy-policy",
+		"notes"				 : "skimresources.com per Ghostery",
+		"country"			 : "UK",
+		"domains"			 : [
+			"skimlinks.com",
+			"skimresources.com"
+		]
+	},
+	{
+		"id"				 : 322,
 		"parent_id"			 : 5,
 		"owner_name"		 : "SkyMotion",
 		"aliases"			 : ["Sky Motion"],
@@ -4237,21 +4763,37 @@
 		]
 	},
 	{
-		"id"				 : 284,
+		"id"				 : 323,
 		"parent_id"			 : null,
-		"owner_name"		 : "Smart Ad Server",
-		"aliases"			 : [],
-		"homepage_url"		 : null,
-		"privacy_policy_url" : null,
+		"owner_name"		 : "Smart AdServer",
+		"aliases"			 : ["Smart Ad Server"],
+		"homepage_url"		 : "http://www.smartadserver.co.uk/",
+		"privacy_policy_url" : "http://smartadserver.com/company/privacy-policy/",
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
+			"sascdn.com",
 			"smartadserver.com"
 		]
 	},
 	{
-		"id"				 : 285,
-		"parent_id"			 : 33,
+		"id"				 : 324,
+		"parent_id"			 : 360,
+		"owner_name"		 : "SmarterTravel",
+		"aliases"			 : ["Smarter Travel"],
+		"homepage_url"		 : "https://www.wearesmartertravel.com",
+		"privacy_policy_url" : null,
+		"notes"				 : "Part of tripadvisor widget",
+		"country"			 : "US",
+		"domains"			 : [
+			"smartertravelmedia.com",
+			"travelsmarter.net",
+			"wearesmartertravel.com"
+		]
+	},
+	{
+		"id"				 : 325,
+		"parent_id"			 : 35,
 		"owner_name"		 : "Soasta",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.soasta.com",
@@ -4264,7 +4806,7 @@
 		]
 	},
 	{
-		"id"				 : 286,
+		"id"				 : 326,
 		"parent_id"			 : null,
 		"owner_name"		 : "Sogou",
 		"aliases"			 : [],
@@ -4278,7 +4820,7 @@
 		]
 	},
 	{
-		"id"				 : 287,
+		"id"				 : 327,
 		"parent_id"			 : null,
 		"owner_name"		 : "Sohu",
 		"aliases"			 : [],
@@ -4294,7 +4836,7 @@
 		]
 	},
 	{
-		"id"				 : 288,
+		"id"				 : 328,
 		"parent_id"			 : null,
 		"owner_name"		 : "Sonobi",
 		"aliases"			 : [],
@@ -4307,7 +4849,7 @@
 		]
 	},
 	{
-		"id"				 : 289,
+		"id"				 : 329,
 		"parent_id"			 : null,
 		"owner_name"		 : "Sovrn",
 		"aliases"			 : [],
@@ -4321,8 +4863,8 @@
 		]
 	},
 	{
-		"id"				 : 290,
-		"parent_id"			 : 241,
+		"id"				 : 330,
+		"parent_id"			 : 276,
 		"owner_name"		 : "Sphere",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -4334,7 +4876,7 @@
 		]
 	},
 	{
-		"id"				 : 291,
+		"id"				 : 331,
 		"parent_id"			 : null,
 		"owner_name"		 : "Spot X Change",
 		"aliases"			 : [],
@@ -4349,7 +4891,7 @@
 		]
 	},
 	{
-		"id"				 : 292,
+		"id"				 : 332,
 		"parent_id"			 : null,
 		"owner_name"		 : "StackPath",
 		"aliases"			 : ["BootstrapCDN","MaxCDN"],
@@ -4364,8 +4906,8 @@
 		]
 	},
 	{
-		"id"				 : 293,
-		"parent_id"			 : 252,
+		"id"				 : 333,
+		"parent_id"			 : 289,
 		"owner_name"		 : "Starcom Worldwide",
 		"aliases"			 : [],
 		"homepage_url"		 : "http://www.starcomww.com",
@@ -4377,7 +4919,7 @@
 		]
 	},
 	{
-		"id"				 : 294,
+		"id"				 : 334,
 		"parent_id"			 : null,
 		"owner_name"		 : "Statcounter",
 		"aliases"			 : [],
@@ -4390,7 +4932,7 @@
 		]
 	},
 	{
-		"id"				 : 295,
+		"id"				 : 335,
 		"parent_id"			 : null,
 		"owner_name"		 : "Stericycle",
 		"aliases"			 : [],
@@ -4403,8 +4945,8 @@
 		]
 	},
 	{
-		"id"				 : 296,
-		"parent_id"			 : 88,
+		"id"				 : 336,
+		"parent_id"			 : 95,
 		"owner_name"		 : "StickyADS.tv",
 		"aliases"			 : ["Sticky ADS","StickyAds"],
 		"homepage_url"		 : null,
@@ -4416,21 +4958,22 @@
 		]
 	},
 	{
-		"id"				 : 297,
+		"id"				 : 337,
 		"parent_id"			 : null,
 		"owner_name"		 : "Ströer",
 		"aliases"			 : ["mbr targeting"],
-		"homepage_url"		 : null,
-		"privacy_policy_url" : null,
+		"homepage_url"		 : "https://www.stroeer.de",
+		"privacy_policy_url" : "https://www.stroeer.de/service/datenschutz.html",
 		"notes"				 : null,
 		"country"			 : "DE",
 		"domains"			 : [
 			"m6r.eu",
-			"stroeer.de"
+			"stroeer.de",
+			"stroeerdigitalmedia.de"
 		]
 	},
 	{
-		"id"				 : 298,
+		"id"				 : 338,
 		"parent_id"			 : null,
 		"owner_name"		 : "Suning Corporation",
 		"aliases"			 : [],
@@ -4444,7 +4987,7 @@
 		]
 	},
 	{
-		"id"				 : 299,
+		"id"				 : 339,
 		"parent_id"			 : null,
 		"owner_name"		 : "Switch Concepts",
 		"aliases"			 : [],
@@ -4457,7 +5000,20 @@
 		]
 	},
 	{
-		"id"				 : 300,
+		"id"				 : 340,
+		"parent_id"			 : null,
+		"owner_name"		 : "Symphony Technology Group",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://www.symphonytg.com",
+		"privacy_policy_url" : "http://www.symphonytg.com/wp-content/uploads/2016/05/terms_of_use.pdf",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"symphonytg.com"
+		]
+	},
+	{
+		"id"				 : 341,
 		"parent_id"			 : null,
 		"owner_name"		 : "Taboola",
 		"aliases"			 : [],
@@ -4466,13 +5022,12 @@
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
-			"basebanner.com",
 			"perfectmarket.com",
 			"taboola.com"
 		]
 	},
 	{
-		"id"				 : 301,
+		"id"				 : 342,
 		"parent_id"			 : null,
 		"owner_name"		 : "TapAd",
 		"aliases"			 : ["Tap Ad"],
@@ -4485,8 +5040,8 @@
 		]
 	},
 	{
-		"id"				 : 302,
-		"parent_id"			 : 202,
+		"id"				 : 343,
+		"parent_id"			 : 228,
 		"owner_name"		 : "Taptica",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.taptica.com/",
@@ -4498,8 +5053,8 @@
 		]
 	},
 	{
-		"id"				 : 303,
-		"parent_id"			 : 40,
+		"id"				 : 344,
+		"parent_id"			 : 42,
 		"owner_name"		 : "Teads",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://teads.tv",
@@ -4514,7 +5069,7 @@
 		]
 	},
 	{
-		"id"				 : 304,
+		"id"				 : 345,
 		"parent_id"			 : null,
 		"owner_name"		 : "Tealium",
 		"aliases"			 : [],
@@ -4529,8 +5084,8 @@
 		]
 	},
 	{
-		"id"				 : 305,
-		"parent_id"			 : 250,
+		"id"				 : 346,
+		"parent_id"			 : 286,
 		"owner_name"		 : "Telerik",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -4543,7 +5098,7 @@
 		]
 	},
 	{
-		"id"				 : 306,
+		"id"				 : 347,
 		"parent_id"			 : null,
 		"owner_name"		 : "Tencent",
 		"aliases"			 : [],
@@ -4565,7 +5120,7 @@
 		]
 	},
 	{
-		"id"				 : 307,
+		"id"				 : 348,
 		"parent_id"			 : null,
 		"owner_name"		 : "Terren Technology Development Company",
 		"aliases"			 : [],
@@ -4578,7 +5133,7 @@
 		]
 	},
 	{
-		"id"				 : 308,
+		"id"				 : 349,
 		"parent_id"			 : null,
 		"owner_name"		 : "The ADEX",
 		"aliases"			 : [],
@@ -4591,7 +5146,7 @@
 		]
 	},
 	{
-		"id"				 : 309,
+		"id"				 : 350,
 		"parent_id"			 : null,
 		"owner_name"		 : "The E.W. Scripps Company",
 		"aliases"			 : [],
@@ -4601,17 +5156,15 @@
 		"country"			 : "US",
 		"domains"			 : [
 			"bizrate.com",
-			"connexity.net",
 			"cracked.com",
 			"midroll.com",
 			"newsy.com",
-			"shopzilla.com",
 			"uswitch.com",
 			"weathersphere.com"
 		]
 	},
 	{
-		"id"				 : 310,
+		"id"				 : 351,
 		"parent_id"			 : null,
 		"owner_name"		 : "The Trade Desk",
 		"aliases"			 : [],
@@ -4625,8 +5178,8 @@
 		]
 	},
 	{
-		"id"				 : 311,
-		"parent_id"			 : 176,
+		"id"				 : 352,
+		"parent_id"			 : 197,
 		"owner_name"		 : "The Weather Company",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -4638,7 +5191,20 @@
 		]
 	},
 	{
-		"id"				 : 312,
+		"id"				 : 353,
+		"parent_id"			 : null,
+		"owner_name"		 : "Thrive Plus",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.thrive.plus",
+		"privacy_policy_url" : "https://www.thrive.plus/privacy-policy",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"hrive.plus"
+		]
+	},
+	{
+		"id"				 : 354,
 		"parent_id"			 : null,
 		"owner_name"		 : "Tout",
 		"aliases"			 : [],
@@ -4651,7 +5217,7 @@
 		]
 	},
 	{
-		"id"				 : 313,
+		"id"				 : 355,
 		"parent_id"			 : null,
 		"owner_name"		 : "TownNews.com",
 		"aliases"			 : [],
@@ -4665,7 +5231,7 @@
 		]
 	},
 	{
-		"id"				 : 314,
+		"id"				 : 356,
 		"parent_id"			 : null,
 		"owner_name"		 : "Tradedoubler",
 		"aliases"			 : [],
@@ -4680,8 +5246,8 @@
 		]
 	},
 	{
-		"id"				 : 315,
-		"parent_id"			 : 302,
+		"id"				 : 357,
+		"parent_id"			 : 343,
 		"owner_name"		 : "Tremor Video",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.tremorvideodsp.com",
@@ -4695,7 +5261,7 @@
 		]
 	},
 	{
-		"id"				 : 316,
+		"id"				 : 358,
 		"parent_id"			 : null,
 		"owner_name"		 : "Tribal Fusion",
 		"aliases"			 : [],
@@ -4708,7 +5274,52 @@
 		]
 	},
 	{
-		"id"				 : 317,
+		"id"				 : 359,
+		"parent_id"			 : null,
+		"owner_name"		 : "Triboo",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://triboo.com",
+		"privacy_policy_url" : "http://triboo.com/informativa-privacy-contacts/",
+		"notes"				 : null,
+		"country"			 : "IT",
+		"domains"			 : [
+			"triboo.com"
+		]
+	},
+	{
+		"id"				 : 360,
+		"parent_id"			 : 134,
+		"owner_name"		 : "TripAdvisor",
+		"aliases"			 : ["Trip Advisor"],
+		"homepage_url"		 : "https://www.tripadvisor.com",
+		"privacy_policy_url" : "https://tripadvisor.mediaroom.com/us-privacy-policy",
+		"notes"				 : "See here for info on widgets: https://www.tripadvisor.com/Widgets",
+		"country"			 : "US",
+		"domains"			 : [
+			"tacdn.com",
+			"tamgrt.com",
+			"tripadvisor.com",
+			"tripadvisor.de",
+			"tripadvisor.fr",
+			"tripadvisor.it"
+		]
+	},
+	{
+		"id"				 : 361,
+		"parent_id"			 : null,
+		"owner_name"		 : "TripleLift",
+		"aliases"			 : ["Triple Lift"],
+		"homepage_url"		 : "https://triplelift.com",
+		"privacy_policy_url" : "https://triplelift.com/privacy/",
+		"notes"				 : "3lift.com per Ghostery",
+		"country"			 : "US",
+		"domains"			 : [
+			"3lift.com",
+			"triplelift.com"
+		]
+	},
+	{
+		"id"				 : 362,
 		"parent_id"			 : null,
 		"owner_name"		 : "TRUSTe",
 		"aliases"			 : [],
@@ -4721,7 +5332,7 @@
 		]
 	},
 	{
-		"id"				 : 318,
+		"id"				 : 363,
 		"parent_id"			 : null,
 		"owner_name"		 : "Trusted Shops",
 		"aliases"			 : [],
@@ -4735,7 +5346,7 @@
 		]
 	},
 	{
-		"id"				 : 319,
+		"id"				 : 364,
 		"parent_id"			 : 23,
 		"owner_name"		 : "Tube Mogul",
 		"aliases"			 : [],
@@ -4748,8 +5359,8 @@
 		]
 	},
 	{
-		"id"				 : 320,
-		"parent_id"			 : 357,
+		"id"				 : 365,
+		"parent_id"			 : 406,
 		"owner_name"		 : "Tumblr",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -4761,8 +5372,8 @@
 		]
 	},
 	{
-		"id"				 : 321,
-		"parent_id"			 : 44,
+		"id"				 : 366,
+		"parent_id"			 : 46,
 		"owner_name"		 : "Turn",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -4774,7 +5385,7 @@
 		]
 	},
 	{
-		"id"				 : 322,
+		"id"				 : 367,
 		"parent_id"			 : null,
 		"owner_name"		 : "Twitter",
 		"aliases"			 : [],
@@ -4790,7 +5401,7 @@
 		]
 	},
 	{
-		"id"				 : 323,
+		"id"				 : 368,
 		"parent_id"			 : 23,
 		"owner_name"		 : "Typekit",
 		"aliases"			 : ["Type Kit"],
@@ -4804,8 +5415,8 @@
 		]
 	},
 	{
-		"id"				 : 324,
-		"parent_id"			 : 245,
+		"id"				 : 369,
+		"parent_id"			 : 280,
 		"owner_name"		 : "Undertone",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -4817,7 +5428,7 @@
 		]
 	},
 	{
-		"id"				 : 325,
+		"id"				 : 370,
 		"parent_id"			 : null,
 		"owner_name"		 : "United Internet Media",
 		"aliases"			 : [],
@@ -4834,8 +5445,8 @@
 		]
 	},
 	{
-		"id"				 : 326,
-		"parent_id"			 : 245,
+		"id"				 : 371,
+		"parent_id"			 : 280,
 		"owner_name"		 : "Upfront Media",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -4848,7 +5459,7 @@
 		]
 	},
 	{
-		"id"				 : 327,
+		"id"				 : 372,
 		"parent_id"			 : null,
 		"owner_name"		 : "V12 Data",
 		"aliases"			 : [],
@@ -4862,8 +5473,8 @@
 		]
 	},
 	{
-		"id"				 : 328,
-		"parent_id"			 : 152,
+		"id"				 : 373,
+		"parent_id"			 : 171,
 		"owner_name"		 : "Valassis Digital",
 		"aliases"			 : ["Valassis"],
 		"homepage_url"		 : "https://www.valassisdigital.com",
@@ -4875,8 +5486,8 @@
 		]
 	},
 	{
-		"id"				 : 329,
-		"parent_id"			 : 91,
+		"id"				 : 374,
+		"parent_id"			 : 101,
 		"owner_name"		 : "Valueclick",
 		"aliases"			 : ["Value Click"],
 		"homepage_url"		 : null,
@@ -4888,7 +5499,7 @@
 		]
 	},
 	{
-		"id"				 : 330,
+		"id"				 : 375,
 		"parent_id"			 : null,
 		"owner_name"		 : "Ve Interactive",
 		"aliases"			 : [],
@@ -4901,7 +5512,7 @@
 		]
 	},
 	{
-		"id"				 : 331,
+		"id"				 : 376,
 		"parent_id"			 : null,
 		"owner_name"		 : "Vector Capital",
 		"aliases"			 : [],
@@ -4914,7 +5525,7 @@
 		]
 	},
 	{
-		"id"				 : 332,
+		"id"				 : 377,
 		"parent_id"			 : null,
 		"owner_name"		 : "Verizon",
 		"aliases"			 : [],
@@ -4923,13 +5534,12 @@
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
-			"edgecastcdn.net",
 			"verizon.com"
 		]
 	},
 	{
-		"id"				 : 333,
-		"parent_id"			 : 332,
+		"id"				 : 378,
+		"parent_id"			 : 377,
 		"owner_name"		 : "Vessel",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -4941,7 +5551,7 @@
 		]
 	},
 	{
-		"id"				 : 334,
+		"id"				 : 379,
 		"parent_id"			 : null,
 		"owner_name"		 : "Vibrant Media",
 		"aliases"			 : [],
@@ -4955,7 +5565,7 @@
 		]
 	},
 	{
-		"id"				 : 335,
+		"id"				 : 380,
 		"parent_id"			 : null,
 		"owner_name"		 : "Videology Group",
 		"aliases"			 : [],
@@ -4969,8 +5579,8 @@
 		]
 	},
 	{
-		"id"				 : 336,
-		"parent_id"			 : 164,
+		"id"				 : 381,
+		"parent_id"			 : 183,
 		"owner_name"		 : "Vimeo",
 		"aliases"			 : ["Vimeo"],
 		"homepage_url"		 : null,
@@ -4978,12 +5588,13 @@
 		"notes"				 : null,
 		"country"			 : "US",
 		"domains"			 : [
-			"vimeo.com"
+			"vimeo.com",
+			"vimeocdn.com"
 		]
 	},
 	{
-		"id"				 : 337,
-		"parent_id"			 : 349,
+		"id"				 : 382,
+		"parent_id"			 : 397,
 		"owner_name"		 : "Visual Website Optimizer",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://vwo.com",
@@ -4996,8 +5607,22 @@
 		]
 	},
 	{
-		"id"				 : 338,
-		"parent_id"			 : 232,
+		"id"				 : 383,
+		"parent_id"			 : 264,
+		"owner_name"		 : "VisualDNA",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.visualdna.com",
+		"privacy_policy_url" : "https://www.visualdna.com/privacy-policy/",
+		"notes"				 : "'psychographic personality quiz'",
+		"country"			 : "UK",
+		"domains"			 : [
+			"vdna-assets.com",
+			"visualdna.com"
+		]
+	},
+	{
+		"id"				 : 384,
+		"parent_id"			 : 264,
 		"owner_name"		 : "Vizu",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -5009,8 +5634,8 @@
 		]
 	},
 	{
-		"id"				 : 339,
-		"parent_id"			 : 90,
+		"id"				 : 385,
+		"parent_id"			 : 97,
 		"owner_name"		 : "VoiceFive",
 		"aliases"			 : ["Voice Five"],
 		"homepage_url"		 : null,
@@ -5022,8 +5647,21 @@
 		]
 	},
 	{
-		"id"				 : 340,
-		"parent_id"			 : 176,
+		"id"				 : 386,
+		"parent_id"			 : null,
+		"owner_name"		 : "Walmart",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.walmart.com",
+		"privacy_policy_url" : "https://corporate.walmart.com/privacy-security/walmart-privacy-policy",
+		"notes"				 : "Part of Walmart SDK https://affil.walmart.com/buttons/assets/docs/web.html",
+		"country"			 : "US",
+		"domains"			 : [
+			"walmart.com"
+		]
+	},
+	{
+		"id"				 : 387,
+		"parent_id"			 : 197,
 		"owner_name"		 : "Weather Underground",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -5035,7 +5673,7 @@
 		]
 	},
 	{
-		"id"				 : 341,
+		"id"				 : 388,
 		"parent_id"			 : null,
 		"owner_name"		 : "Weather.com.cn",
 		"aliases"			 : [],
@@ -5048,8 +5686,8 @@
 		]
 	},
 	{
-		"id"				 : 342,
-		"parent_id"			 : 31,
+		"id"				 : 389,
+		"parent_id"			 : 33,
 		"owner_name"		 : "Webcollage",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -5061,7 +5699,7 @@
 		]
 	},
 	{
-		"id"				 : 343,
+		"id"				 : 390,
 		"parent_id"			 : null,
 		"owner_name"		 : "WebMD",
 		"aliases"			 : [],
@@ -5074,22 +5712,44 @@
 		]
 	},
 	{
-		"id"				 : 344,
+		"id"				 : 391,
 		"parent_id"			 : null,
-		"owner_name"		 : "Webtrekk",
+		"owner_name"		 : "weborama",
 		"aliases"			 : [],
-		"homepage_url"		 : null,
-		"privacy_policy_url" : null,
-		"notes"				 : null,
-		"country"			 : "DE",
+		"homepage_url"		 : "https://weborama.fr",
+		"privacy_policy_url" : "https://weborama.com/e-privacy/",
+		"notes"				 : "Additional domains per Ghostery.",
+		"country"			 : "FR",
 		"domains"			 : [
-			"wbtrk.net",
-			"webtrekk.com"
+			"adrcdn.com",
+			"adrcntr.com",
+			"weborama.com",
+			"weborama.fr"
 		]
 	},
 	{
-		"id"				 : 345,
-		"parent_id"			 : 227,
+		"id"				 : 392,
+		"parent_id"			 : null,
+		"owner_name"		 : "Webtrekk",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://www.webtrekk.com/",
+		"privacy_policy_url" : "https://www.webtrekk.com/en/legal/opt-out-webtrekk/",
+		"notes"				 : "Additional domains per Ghostery",
+		"country"			 : "DE",
+		"domains"			 : [
+			"mateti.net",
+			"wbtrk.net",
+			"wcfbc.net",
+			"webtrekk-asia.net",
+			"webtrekk.com",
+			"webtrekk.net",
+			"wt-eu02.net",
+			"wt-safetag.com"
+		]
+	},
+	{
+		"id"				 : 393,
+		"parent_id"			 : 257,
 		"owner_name"		 : "WebTrends",
 		"aliases"			 : ["Web Trends"],
 		"homepage_url"		 : null,
@@ -5102,8 +5762,8 @@
 		]
 	},
 	{
-		"id"				 : 346,
-		"parent_id"			 : 278,
+		"id"				 : 394,
+		"parent_id"			 : 316,
 		"owner_name"		 : "Weibo",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -5115,7 +5775,7 @@
 		]
 	},
 	{
-		"id"				 : 347,
+		"id"				 : 395,
 		"parent_id"			 : null,
 		"owner_name"		 : "whos.amung.us",
 		"aliases"			 : [],
@@ -5128,7 +5788,7 @@
 		]
 	},
 	{
-		"id"				 : 348,
+		"id"				 : 396,
 		"parent_id"			 : null,
 		"owner_name"		 : "Wikimedia Foundation",
 		"aliases"			 : [],
@@ -5141,7 +5801,7 @@
 		]
 	},
 	{
-		"id"				 : 349,
+		"id"				 : 397,
 		"parent_id"			 : null,
 		"owner_name"		 : "Wingify",
 		"aliases"			 : [],
@@ -5154,7 +5814,7 @@
 		]
 	},
 	{
-		"id"				 : 350,
+		"id"				 : 398,
 		"parent_id"			 : null,
 		"owner_name"		 : "Wisecode",
 		"aliases"			 : [],
@@ -5167,8 +5827,8 @@
 		]
 	},
 	{
-		"id"				 : 351,
-		"parent_id"			 : 55,
+		"id"				 : 399,
+		"parent_id"			 : 59,
 		"owner_name"		 : "Wordpress",
 		"aliases"			 : ["Word Press"],
 		"homepage_url"		 : null,
@@ -5181,7 +5841,7 @@
 		]
 	},
 	{
-		"id"				 : 352,
+		"id"				 : 400,
 		"parent_id"			 : null,
 		"owner_name"		 : "WPP",
 		"aliases"			 : [],
@@ -5194,8 +5854,8 @@
 		]
 	},
 	{
-		"id"				 : 353,
-		"parent_id"			 : 261,
+		"id"				 : 401,
+		"parent_id"			 : 298,
 		"owner_name"		 : "x+1",
 		"aliases"			 : [],
 		"homepage_url"		 : null,
@@ -5207,8 +5867,8 @@
 		]
 	},
 	{
-		"id"				 : 354,
-		"parent_id"			 : 352,
+		"id"				 : 402,
+		"parent_id"			 : 400,
 		"owner_name"		 : "Xaxis",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.xaxis.com",
@@ -5220,8 +5880,21 @@
 		]
 	},
 	{
-		"id"				 : 355,
-		"parent_id"			 : 114,
+		"id"				 : 403,
+		"parent_id"			 : 54,
+		"owner_name"		 : "XiTi",
+		"aliases"			 : [],
+		"homepage_url"		 : "http://xiti.com/",
+		"privacy_policy_url" : null,
+		"notes"				 : null,
+		"country"			 : "FR",
+		"domains"			 : [
+			"xiti.com"
+		]
+	},
+	{
+		"id"				 : 404,
+		"parent_id"			 : 126,
 		"owner_name"		 : "xplosion Interactive",
 		"aliases"			 : ["xplosion"],
 		"homepage_url"		 : "https://www.emetriq.com",
@@ -5233,7 +5906,7 @@
 		]
 	},
 	{
-		"id"				 : 356,
+		"id"				 : 405,
 		"parent_id"			 : null,
 		"owner_name"		 : "Yadro",
 		"aliases"			 : [],
@@ -5246,8 +5919,8 @@
 		]
 	},
 	{
-		"id"				 : 357,
-		"parent_id"			 : 235,
+		"id"				 : 406,
+		"parent_id"			 : 268,
 		"owner_name"		 : "Yahoo",
 		"aliases"			 : ["Yahoo!"],
 		"homepage_url"		 : "https://yahoo.com/",
@@ -5256,12 +5929,13 @@
 		"country"			 : "US",
 		"domains"			 : [
 			"yahoo.com",
+			"yahooapis.com",
 			"yieldmanager.com",
 			"yimg.com"
 		]
 	},
 	{
-		"id"				 : 358,
+		"id"				 : 407,
 		"parent_id"			 : null,
 		"owner_name"		 : "Yandex",
 		"aliases"			 : [],
@@ -5275,7 +5949,7 @@
 		]
 	},
 	{
-		"id"				 : 359,
+		"id"				 : 408,
 		"parent_id"			 : null,
 		"owner_name"		 : "Yieldlab",
 		"aliases"			 : [],
@@ -5289,7 +5963,7 @@
 		]
 	},
 	{
-		"id"				 : 360,
+		"id"				 : 409,
 		"parent_id"			 : null,
 		"owner_name"		 : "Youku Tudou",
 		"aliases"			 : [],
@@ -5306,8 +5980,8 @@
 		]
 	},
 	{
-		"id"				 : 361,
-		"parent_id"			 : 352,
+		"id"				 : 410,
+		"parent_id"			 : 400,
 		"owner_name"		 : "Young & Rubicam",
 		"aliases"			 : [],
 		"homepage_url"		 : "https://www.yr.com",
@@ -5319,8 +5993,8 @@
 		]
 	},
 	{
-		"id"				 : 362,
-		"parent_id"			 : 141,
+		"id"				 : 411,
+		"parent_id"			 : 156,
 		"owner_name"		 : "YouTube",
 		"aliases"			 : ["You Tube"],
 		"homepage_url"		 : "https://youtube.com",
@@ -5329,13 +6003,14 @@
 		"country"			 : "US",
 		"domains"			 : [
 			"youtu.be",
+			"youtube-nocookie.com",
 			"youtube.com",
 			"youtubeeducation.com",
 			"ytimg.com"
 		]
 	},
 	{
-		"id"				 : 363,
+		"id"				 : 412,
 		"parent_id"			 : null,
 		"owner_name"		 : "Zamplus Advertising",
 		"aliases"			 : [],
@@ -5350,7 +6025,33 @@
 		]
 	},
 	{
-		"id"				 : 364,
+		"id"				 : 413,
+		"parent_id"			 : null,
+		"owner_name"		 : "Zendesk",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.zendesk.com/",
+		"privacy_policy_url" : "https://www.zendesk.com/company/customers-partners/privacy-policy/",
+		"notes"				 : null,
+		"country"			 : "US",
+		"domains"			 : [
+			"zendesk.com"
+		]
+	},
+	{
+		"id"				 : 414,
+		"parent_id"			 : 413,
+		"owner_name"		 : "Zendesk Chat",
+		"aliases"			 : [],
+		"homepage_url"		 : "https://www.zopim.com",
+		"privacy_policy_url" : "https://www.zendesk.com/company/customers-partners/privacy-policy/",
+		"notes"				 : "Formerly called 'zopim'",
+		"country"			 : "US",
+		"domains"			 : [
+			"zopim.com"
+		]
+	},
+	{
+		"id"				 : 415,
 		"parent_id"			 : null,
 		"owner_name"		 : "Zeta Global",
 		"aliases"			 : [],
