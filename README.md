@@ -18,7 +18,7 @@ Python 3.4+ is required:
 	
 If you want to use Google Chrome as your browser engine you must install:
 
-	Chrome 64+				https://www.google.com/chrome/
+	Chrome 66+				https://www.google.com/chrome/
 	Chrome Driver			https://sites.google.com/a/chromium.org/chromedriver/
 	Selenium				https://pypi.python.org/pypi/selenium
 	
