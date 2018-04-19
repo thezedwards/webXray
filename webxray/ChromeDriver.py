@@ -312,7 +312,7 @@ class ChromeDriver:
 		try:
 			conn = sqlite3.connect(driver.capabilities['chrome']['userDataDir']+'/Default/Cookies')
 			c = conn.cursor()
-			c.execute("SELECT name,secure,path,host_key,expires_utc,httponly,value FROM cookies")
+			c.execute("SELECT name,is_secure,path,host_key,expires_utc,is_httponly,value FROM cookies")
 			for cookie in c.fetchall():
 				cookies.append({
 					'name': 		cookie[0],
