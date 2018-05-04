@@ -8,15 +8,17 @@ from urllib.parse import urlparse
 
 # custom webxray classes
 from webxray.ParseURL import ParseURL
+from webxray.Utilities import Utilities
 
 class OutputStore:
 	"""	
-		this class receives data from the browser, processes it, and stores it in the db
+		This class receives data from the browser, processes it, and stores it in the db
 	"""
 
 	def __init__(self, db_engine, db_name):
 		self.db_engine	= db_engine
 		self.db_name	= db_name
+		self.utilities	= Utilities()
 		self.url_parser = ParseURL()
 	# init
 
@@ -70,6 +72,34 @@ class OutputStore:
 		# if it is already in db just return the existing id
 		page_domain_id = sql_driver.add_domain(origin_ip, origin_fqdn, origin_domain, origin_pubsuffix, origin_tld)
 
+		# figure out the privacy policy url and text, starts null
+		priv_policy_url = None
+		priv_policy_url_text = None
+
+		# read in our list of privacy link terms from the json file in webxray/resources/policyxray
+		privacy_policy_term_list = self.utilities.get_privacy_policy_term_list()
+
+		# we reverse links return from browser to check footer links first as that is where policy links tend to be
+		all_links = browser_output['all_links']
+		all_links.reverse()
+
+		# if we have links search for privacy policy
+		if len(all_links) > 0:
+			# links are tuple
+			for link_text,link_url in all_links:
+				# makes sure we have text, skip links without
+				if link_text:
+					# need lower for string matching
+					link_text = link_text.lower().strip()
+					# not a link we can use
+					if 'javascript' in link_text: continue
+					# see if the link_text is in our term list
+					if link_text in privacy_policy_term_list:
+							# if the link_url is relative this will convert to absolute
+							priv_policy_url = self.utilities.get_absolute_url_from_page_link(url,link_url)
+							priv_policy_url_text = link_text
+							break
+
 		# if the final page is https (often after a redirect), mark it appropriately
 		if browser_output['final_url'][:5] == 'https':
 			page_is_ssl = True
@@ -91,8 +121,8 @@ class OutputStore:
 			browser_output['meta_desc'],
 			url, 
 			browser_output['final_url'],
-			None,
-			None,
+			priv_policy_url,
+			priv_policy_url_text,
 			page_is_ssl,
 			source,
 			browser_output['load_time'],
@@ -337,7 +367,7 @@ class OutputStore:
 			else:
 				file_md5 = None
 
-			# all done with this request
+			# store request
 			sql_driver.add_element(
 				page_id,
 				request, element_url,

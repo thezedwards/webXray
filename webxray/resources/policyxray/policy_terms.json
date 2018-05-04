@@ -1,0 +1,109 @@
+[
+	{
+		"lang"				: "en",
+		"policy_terms"		: [
+			"privacy policy",
+			"privacy",
+			"terms of service",
+			"terms of use"
+		],
+		"note"				: "en is listed first as most common"
+	},
+	{
+		"lang"				: "de",
+		"policy_terms"		: [
+			"datenschutz",
+			"datenschutzbestimmungen",
+			"datenschutzerklärung",
+			"datenschutzerklarung"
+		]
+	},
+	{
+		"lang"				: "es",
+		"policy_terms"		: [
+			"privacidad",
+			"términos legales",
+			"terminos legales",
+			"términos y condiciones de uso",
+			"terminos y condiciones de uso",
+			"condiciones de uso",
+			"política de privacidad",
+			"politica de privacidad",
+			"aviso legal",
+			"política de cookies",
+			"politica de cookies"
+		]
+	},
+	{
+		"lang"				: "fi",
+		"policy_terms"		: [
+			"tietosuojaseloste",
+			"tietosuojalausekkeesta",
+			"tietosuoja",
+			"käyttöehdot",
+			"kayttoehdot"
+		]
+	},
+	{
+		"lang"				: "fr",
+		"policy_terms"		: [
+			"politique de confidentialité",
+			"confidentialité et conditions",
+			"conditions d’utilisation",
+			"données personnelles"
+		]
+	},
+	{
+		"lang"				: "id",
+		"policy_terms"		: [
+			"kode etik",
+			"kebijakan privasi",
+			"kebijakan tentang privasi",
+			"kerahasiaan pribadi"
+		]
+	},
+	{
+		"lang"				: "it",
+		"policy_terms"		: [
+			"condizioni",
+			"termini e normative",
+			"condizioni generali",
+			"trattamento dati",
+			"dati personali",
+			"informativa privacy",
+			"informativa dati personali"
+		]
+	},	
+	{
+		"lang"				: "pl",
+		"policy_terms"		: [
+			"polityka prywatności",
+			"polityka prywatnosci",
+			"ochrona prywatności",
+			"ochrona prywatnosci",
+			"regulamin"
+		]
+	},
+	{
+		"lang"				: "ru",
+		"policy_terms"		: [
+			"политика конфиденциальности",
+			"политика использования данных",
+			"условия использования"
+		]
+	},
+	{
+		"lang"				: "zh",
+		"policy_terms"		: [
+			"隐私",
+			"隐私条款",
+			"隐私权",
+			"条件",
+			"条款",
+			"权限",
+			"使用协议",
+			"用户协议",
+			"隐私政策"
+		]
+	}
+]
