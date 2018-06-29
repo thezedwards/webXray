@@ -60,19 +60,20 @@ The raison d'être of webxray is to allow you to analyze pages of your choosing.
 
 Use the interactive mode to guide you to generating an analysis once you have completed your data collection.  When it is completed it will be output to the '/reports' directory.  This will contain a number of csv files:
 
-db\_summary.csv: a basic report of what is in the database and how many pages loaded
-stats.csv: provides top-level stats on how many domains are contacted, cookies, javascript, etc.
-aggregated\_tracking\_attribution.csv: details on percentages of sites tracked by different companies and their subsidiaries
-3p\_domain.csv: most frequently occurring third-party domains
-3p\_element.csv: most frequently occurring third-party elements of all types
-3p\_image: most frequently occurring third-party images
-3p\_javascript: most frequently occurring third-party javascript
-3p\_ssl\_use.csv: rates at which detected third-parties encrypt requests
-data\_xfer\_summary.csv: volume and percentage of data received from first- and third-party domains
-data\_xfer\_aggregated.csv: volume and percentage of data received from various companies
-data\_xfer\_by\_domain.csv: volume and percentage of data received from specific third-party domains
-network: pairings between page domains and third-party domains, you can import this info to network visualization software
-per\_page\_data\_flow.csv: one giant file that lists the requests made for each page, off by default
+* __db\_summary.csv__: a basic report of what is in the database and how many pages loaded
+* __stats.csv__: provides top-level stats on how many domains are contacted, cookies, javascript, etc.
+* __aggregated\_tracking\_attribution.csv__: details on percentages of sites tracked by different companies and their subsidiaries
+* __3p\_domain.csv__: most frequently occurring third-party domains
+* __3p\_element.csv__: most frequently occurring third-party elements of all types
+* __3p\_image.csv__: most frequently occurring third-party images
+* __3p\_javascript.csv__: most frequently occurring third-party javascript
+* __3p_uses.csv__: high-levels stats on what first-parties use third-party services for as well as rates of cookies being set for different types of services.  Note that first-party use may be different than the ultimate third-party use.  For example, a site may use audience measurement tools from a third-party to gain insights into traffic, but the third-party may use this data for marketing.
+* __3p\_ssl\_use.csv__: rates at which detected third-parties encrypt requests
+* __data\_xfer\_summary.csv__: volume and percentage of data received from first- and third-party domains
+* __data\_xfer\_aggregated.csv__: volume and percentage of data received from various companies
+* __data\_xfer\_by\_domain.csv__: volume and percentage of data received from specific third-party domains
+* __network__: pairings between page domains and third-party domains, you can import this info to network visualization software
+* __per\_page\_data\_flow.csv__: one giant file that lists the requests made for each page, off by default
 
 # Important Note on Speed and Parallelization
 
