@@ -105,5 +105,12 @@
 			"用户协议",
 			"隐私政策"
 		]
+	},
+	{
+		"lang"				: "cat",
+		"policy_terms"		: [
+			"politico de privacitat",
+			"político de privacitat",
+		]
 	}
 ]
