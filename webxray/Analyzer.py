@@ -13,7 +13,7 @@ class Analyzer:
 	"""
 	webXray stores data in a relational db, but that isn't human-readable
 	so what this class does is analyze the data and exports it to csv files that can be
-	opened in other programs (e.g. excel)
+	opened in other programs (e.g. excel, r, gephi)
 
 	Most of the reports may also be run on the top tlds (off by default), so you will be able to
 	see if there are variations between tlds ('org' and 'com' usually differ quite a bit)
@@ -393,10 +393,9 @@ class Analyzer:
 
 		# run query to get all page id, page domain, and element domain entries
 		# there is no third-party filter so each page will have at least one entry for first-party domain
-		for row in self.sql_driver.get_page_id_page_domain_element_domain(tld_filter):
+		for row in self.sql_driver.get_page_id_3p_element_domain_pairs(tld_filter):
 			page_id 		= row[0]
-			page_domain 	= row[1]
-			element_domain 	= row[2]
+			element_domain 	= row[1]
 
 			# if the page id is not yet seen enter the current element as a fresh list
 			#	otherwise, we add to the existing list
@@ -585,7 +584,7 @@ class Analyzer:
 
 	def generate_stats_report(self):
 		"""
-		high level stats
+		High level stats
 		"""
 		print('\t=============================')
 		print('\t Processing High-Level Stats ')
@@ -961,7 +960,7 @@ class Analyzer:
 
 	def generate_data_transfer_report(self):
 		"""
-		this report tells us how much data was transferred across several dimensions
+		these reports tell us how much data was transferred across several dimensions
 		"""
 		
 		print('\t==================================')
@@ -1071,6 +1070,178 @@ class Analyzer:
 				))
 			self.write_csv(aggregated_file_name, owner_data_csv)
 	# generate_data_transfer_report
+
+	def get_3p_use_data(self,tld_filter=None):
+		""""
+		For some domains we know what they are used for on a first-party basis (eg marketing).
+		This function examines the data we have collected in order to determine what percentage
+			of pages include a request to a third-party domain with a given use, how many
+			such requests are made on a per-use basis per-page, and finally, what percentage
+			of requests per-page set a third-party cookie.
+
+		Data is returned as a dict, the first field of which is a set of all the
+			uses we know of.
+		"""
+
+		# we first need to create a dict whereby each domain 
+		#	corresponds to a list of known uses
+		# domains with no known uses are not in the list
+		#
+		# IMPORTANT NOTE:
+		#	some domains may have several uses!
+		domain_to_use_map = {}
+
+		# a list of all known uses
+		all_uses = set()
+
+		# we read this from our normal domain_owners file
+		infile	= open('./webxray/resources/domain_owners/domain_owners.json', 'r')
+		domain_data	= json.load(infile)
+		infile.close()
+
+		# process all entries from the domain_owners file
+		for item in domain_data:
+			for domain in item['domains']:
+				# if we have uses, enter them with domain
+				if len(item['uses']) > 0:
+					domain_to_use_map[domain] = item['uses']
+					# make sure we have the uses in all_uses
+					for use in item['uses']:
+						all_uses.add(use)
+
+		# now that our domain to use mapping is done we have to 
+		#	process the actual data!
+
+		# for each page, create a list of the set of domains 
+		#	which set a cookie
+		#
+		# note that due to currently unresolved chrome issues we sometimes 
+		# 	can get cookies which don't have a corresponding 3p request
+		# 	this approach handles that gracefully
+		page_cookie_domains = {}
+		for page_id, cookie_domain in self.sql_driver.get_page_id_3p_cookie_domain_pairs(tld_filter):
+			if page_id not in page_cookie_domains:
+				page_cookie_domains[page_id] = [cookie_domain]
+			else:
+				page_cookie_domains[page_id] = page_cookie_domains[page_id] + [cookie_domain]
+
+		# next, for each page we want a list of uses for domains and if
+		#	that domain corresponds to a cookie being set
+		# NOTE: the same use may occur many times, this is desired
+		# 	as it gives us our counts later on
+		page_3p_uses = {}
+		for page_id, element_domain in self.sql_driver.get_page_id_3p_element_domain_pairs(tld_filter):
+			# if this 3p domain has a known use we add it to a list of uses keyed to page id
+			if element_domain in domain_to_use_map:
+				# check if the domain of this element has a cookie for this page
+				if page_id in page_cookie_domains and element_domain in page_cookie_domains[page_id]: 
+					sets_cookie = True
+				else:
+					sets_cookie = False
+
+				# add in a tuple of (use,sets_cookie) to a list for this page_id
+				for use in domain_to_use_map[element_domain]:
+					if page_id not in page_3p_uses:
+						page_3p_uses[page_id] = [(use,sets_cookie)]
+					else:
+						page_3p_uses[page_id] = page_3p_uses[page_id] + [(use,sets_cookie)]
+
+		# for each use we will produce summary counts, we 
+		#	initialize everyting to zero here
+		total_pages_w_use 				= {}
+		total_use_occurances 			= {}
+		total_use_occurances_w_cookie 	= {}
+
+		for use in all_uses:
+			total_pages_w_use[use] 				= 0
+			total_use_occurances[use] 			= 0
+			total_use_occurances_w_cookie[use] 	= 0
+
+		# process each page and update the relevant counts
+		for page_id in page_3p_uses:
+			# we only want to count use once per-page, so
+			#	create a set and add to it as we go along
+			this_page_use_set = set()
+
+			# upate the use occurance counters
+			for use, has_cookie in page_3p_uses[page_id]:
+				this_page_use_set.add(use)
+				total_use_occurances[use] = total_use_occurances[use] + 1
+				if has_cookie == True:
+					total_use_occurances_w_cookie[use] = total_use_occurances_w_cookie[use] + 1
+			
+			# each use in the set adds one to the total page count
+			for use in this_page_use_set:
+				total_pages_w_use[use] = total_pages_w_use[use] + 1
+
+
+		# the last step is to calculate the relevant percentages and averages
+
+		# used to get percentage by use
+		total_pages = self.sql_driver.get_complex_page_count(tld_filter)
+
+		percentage_by_use 				= {}
+		average_use_occurance_per_page 	= {}
+		percentage_use_w_cookie 		= {}
+		
+		for use in all_uses:
+			percentage_by_use[use] 				= 0
+			average_use_occurance_per_page[use] = 0
+			percentage_use_w_cookie[use] 		= 0
+
+		for use in total_pages_w_use:
+			if total_pages_w_use[use] > 0:
+				percentage_by_use[use] 				= 100*(total_pages_w_use[use]/total_pages)
+				average_use_occurance_per_page[use] = total_use_occurances[use]/total_pages_w_use[use]
+				percentage_use_w_cookie[use]		= 100*(total_use_occurances_w_cookie[use]/total_use_occurances[use])
+			else:
+				percentage_by_use[use] 				= None
+				average_use_occurance_per_page[use] = None
+				percentage_use_w_cookie[use]		= None
+
+		# send back everyting as a keyed dict
+		return({
+			'all_uses'							: all_uses,
+			'percentage_by_use'					: percentage_by_use,
+			'average_use_occurance_per_page'	: average_use_occurance_per_page,
+			'percentage_use_w_cookie' 			: percentage_use_w_cookie
+			})
+	# get_3p_use_data
+
+	def generate_use_report(self):
+		"""
+		This function handles the process of generating a csv report which details
+			what percentage of pages use third-party content for specific uses,
+			the number of requests made for a given type of use on a per-page basis,
+			and the percentage of such requests which correspond to a third-party
+			cookie.
+		"""
+
+		print('\t==========================')
+		print('\t Processing 3P Use Report ')
+		print('\t==========================')
+
+		use_data 						= self.get_3p_use_data()
+		all_uses						= use_data['all_uses']
+		percentage_by_use 				= use_data['percentage_by_use']
+		average_use_occurance_per_page 	= use_data['average_use_occurance_per_page']
+		percentage_use_w_cookie 		= use_data['percentage_use_w_cookie']
+
+		csv_rows = []
+		csv_rows.append(('use category','percent pages with use','ave occurances per page with use','percentage of use with cookie'))
+		for use in sorted(all_uses):
+			if percentage_by_use[use] != None:
+				csv_rows.append((
+					use,
+					round(percentage_by_use[use],self.num_decimals),
+					round(average_use_occurance_per_page[use],self.num_decimals),
+					round(percentage_use_w_cookie[use],self.num_decimals)
+				))
+			else:
+				csv_rows.append((use,None,None,None))
+
+		self.write_csv('3p_uses.csv', csv_rows)
+	# generate_use_report
 
 	def generate_network_report(self):
 		"""

@@ -15,9 +15,7 @@ class ParseURL:
 			public suffix:	ac.uk
 			tld:			uk
 
-		Note: the mozilla public suffix list is used for identifying pub suffixes, this list is incomplete
-			so I have patched it with additional ccTLD info, look into the dir /webxray/resources/pubsuffix 
-			to find relevant files
+		Note: the mozilla public suffix list is used for identifying pub suffixes, see https://publicsuffix.org
 
 	"""
 
@@ -33,7 +31,7 @@ class ParseURL:
 		"""
 
 		# path is relative from root webxray directory
-		pubsuffix_raw_list = open(os.path.dirname(os.path.abspath(__file__))+'/resources/pubsuffix/wbxrPubSuffixList.txt', mode='r', encoding='utf8')
+		pubsuffix_raw_list = open(os.path.dirname(os.path.abspath(__file__))+'/resources/pubsuffix/public_suffix_list.dat', mode='r', encoding='utf8')
 		pubsuffix_list = []
 
 		for line in pubsuffix_raw_list:
@@ -64,8 +62,8 @@ class ParseURL:
 				domain, public suffix, and top-level domain as a tuple.
 		"""
 
-		# first make sure it is actually an https? request we can parse
-		if not (re.match('^https?://.+', url)):
+		# first make sure it is actually an https? or wss? request we can parse
+		if not (re.match('^(https?|wss?)://.+', url)):
 			return None
 
 		try:

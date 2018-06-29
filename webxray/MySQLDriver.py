@@ -57,7 +57,7 @@ class MySQLDriver:
 				print('Error: %s ' % err)
 				exit()
 
-		self.db = self.db_conn.cursor()
+		self.db = self.db_conn.cursor(buffered=True)
 
 		# mysql's version of utf8 isn't real utf8 as it doesn' support emoji/etc
 		#	so the hack on the mysql side is utf8mb4, we have to enforce it here
@@ -797,17 +797,13 @@ class MySQLDriver:
 		return self.db.fetchall()
 	# get_page_domain_element_domain_pairs
 	
-	def get_page_id_page_domain_element_domain(self, tld_filter):
+	def get_page_id_3p_element_domain_pairs(self, tld_filter=None):
 		"""
-		return data needed for determing average number of 3p per page, etc.
-
-		pages with no elements return a single record with (page.final_url, 'None')
-			this is necessary to see which pages have no trackers and why we do not
-			use a tracker filter here
+		returns all of the unique pairings between the id of a given page load
+			and that of a third-party element domain
 		"""
-		
 		query = '''
-			SELECT DISTINCT page.id, page_domain.domain, element_domain.domain
+			SELECT DISTINCT page.id, element_domain.domain
 			FROM page
 			JOIN domain page_domain ON page_domain.id = page.domain_id
 			JOIN element ON element.page_id = page.id
@@ -820,11 +816,12 @@ class MySQLDriver:
 	
 		self.db.execute(query)
 		return self.db.fetchall()
-	# end get_page_element_domain_pairs
+	# get_page_id_3p_element_domain_pairs
 
-	def get_page_id_3p_cookie_id_3p_cookie_domain(self, tld_filter):
+	def get_page_id_3p_cookie_id_3p_cookie_domain(self, tld_filter=None):
 		"""
-		returns all of the page id and third-party cookie id
+		returns all of the page id and third-party cookie id and 
+			cookie domain
 		"""
 		query = '''
 			SELECT DISTINCT page.id, cookie.id, cookie_domain.domain
@@ -841,6 +838,28 @@ class MySQLDriver:
 		self.db.execute(query)
 		return self.db.fetchall()
 	# get_page_id_3p_cookie_id_3p_cookie_domain
+
+	def get_page_id_3p_cookie_domain_pairs(self, tld_filter=None):
+		"""
+		returns all of the unique pairings between the id of a given page load
+			and that of a third-party cookie domain
+		"""
+		
+		query = '''
+			SELECT DISTINCT page.id, cookie_domain.domain
+			FROM page
+			JOIN domain page_domain ON page_domain.id = page.domain_id
+			JOIN cookie on cookie.page_id = page.id
+			JOIN domain cookie_domain ON cookie_domain.id = cookie.domain_id
+			WHERE cookie.is_3p IS TRUE
+		'''
+
+		if tld_filter: 
+			query += " AND page_domain.tld = '"+tld_filter+"'"
+	
+		self.db.execute(query)
+		return self.db.fetchall()
+	# get_page_id_3p_cookie_domain_pairs
 
 	def get_3p_network_ties(self, domain_owner_is_known = False):
 		"""

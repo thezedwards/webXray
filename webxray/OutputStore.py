@@ -227,7 +227,7 @@ class OutputStore:
 			if is_3p_element is False and store_1p is False:
 				continue
 			
-			if request[:5] == 'https':
+			if request[:5] == 'https' or request[:3] == 'wss':
 				element_is_ssl = True
 			else:
 				element_is_ssl = False
@@ -366,6 +366,16 @@ class OutputStore:
 					file_md5 = None
 			else:
 				file_md5 = None
+
+			# final tasks is to truncate the request if it is 
+			#	over 2k characters as it is likely
+			#	binary data and may cause problems inserting
+			#	into TEXT fields in database
+			#
+			#  TODO:
+			#	better handle binary data in general
+			if len(request) >= 2000: request = request[:2000]
+			if len(element_url) >= 2000: element_url = element_url[:2000]
 
 			# store request
 			sql_driver.add_element(

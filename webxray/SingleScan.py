@@ -52,6 +52,11 @@ class SingleScan:
 		print('\tBrowser type is %s' % self.browser_type)
 		print('\tBrowser wait time is %s seconds' % browser_wait)
 
+		# make sure it is an http(s) address
+		if not re.match('^https?://', url): 
+			print('\tNot a valid url, aborting')
+			return None
+
 		# import and set up specified browser driver
 		if self.browser_type == 'phantomjs':
 			browser_driver 	= PhantomDriver()
@@ -60,10 +65,13 @@ class SingleScan:
 
 		# attempt to get the page
 		browser_output = browser_driver.get_webxray_scan_data(url, browser_wait)
-	
-		if browser_output == None:
-			print('\t\t%-50s Browser Did Not Return.' % url[:50])
+
+		# if there was a problem we print the error
+		if browser_output['success'] == False:
+			print('\t\t%-50s Browser Error: %s' % (url[:50], browser_output['result']))
 			return
+		else:
+			browser_output = browser_output['result']
 
 		# get the ip, fqdn, domain, pubsuffix, and tld from the URL
 		# we need the domain to figure out if cookies/elements are third-party

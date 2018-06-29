@@ -98,14 +98,17 @@ class Collector:
 				print('\t\t%-50s Browser %s Did Not Return' % (url[:50], browser_type))
 				sql_driver.log_error(url, 'Unable to load page')
 				sql_driver.close()
-				return		
+				return
 			
-			# if there was a problem browser_output will be None
-			if browser_output == None:
-				print('\t\t%-50s Browser %s Did Not Return' % (url[:50], browser_type))
+			# if there was a problem we log the error
+			if browser_output['success'] == False:
+				print('\t\t%-50s Browser %s Error: %s' % (url[:50], browser_type, browser_output['result']))
 				sql_driver.log_error(url, 'Unable to load page')
 				sql_driver.close()
 				return
+			else:
+				# no error, treat result as browser output
+				browser_output = browser_output['result']
 
 			# attempt to store the output
 			if output_store.store(url, browser_output):

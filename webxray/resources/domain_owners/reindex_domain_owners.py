@@ -1,5 +1,5 @@
 import json
-		
+
 if __name__ == '__main__':
 	"""
 	reindexes the domain_owners file
@@ -14,6 +14,7 @@ if __name__ == '__main__':
 	old_id_to_new_id = {}
 
 	new_id = 0
+
 	for item in data_sorted:
 		old_id_to_new_id[item['id']] = new_id
 		
@@ -31,10 +32,13 @@ if __name__ == '__main__':
 			"privacy_policy_url"	: item['privacy_policy_url'],
 			"notes"					: item['notes'],
 			"country"				: item['country'],
+			"uses"					: item['uses'],
+			"platforms"				: item['platforms'],
 			"domains"				: item['domains']
 		})
 
 		new_id +=1
+
 	out_string = '['
 	for item in data_reindexed:
 		if item['old_parent_id'] != None:
@@ -49,6 +53,22 @@ if __name__ == '__main__':
 			aliases_string = aliases_string[:-1]
 		else:
 			aliases_string = ''
+
+		if len(item['platforms']) != 0:
+			platforms_string = ''
+			for platform in sorted(item['platforms']):
+				platforms_string += '"'+platform+'",'
+			platforms_string = platforms_string[:-1]
+		else:
+			platforms_string = ''
+
+		if len(item['uses']) != 0:
+			uses_string = ''
+			for use in sorted(item['uses']):
+				uses_string += '"'+use+'",'
+			uses_string = uses_string[:-1]
+		else:
+			uses_string = ''
 
 		if len(item['domains']) != 0:
 			domains_string = ''
@@ -82,11 +102,13 @@ if __name__ == '__main__':
 		"id"				 : %s,
 		"parent_id"			 : %s,
 		"owner_name"		 : "%s",
-		"aliases"			 : [%s],
+		"aliases"		 	 : [%s],
 		"homepage_url"		 : %s,
 		"privacy_policy_url" : %s,
 		"notes"				 : %s,
 		"country"			 : %s,
+		"uses"				 : [%s],
+		"platforms"			 : [%s],
 		"domains"			 : [%s
 		]
 	},""" % (
@@ -97,6 +119,8 @@ if __name__ == '__main__':
 			privacy_policy_url,
 			notes,
 			country,
+			uses_string,
+			platforms_string,
 			domains_string
 		))
 	# end loop

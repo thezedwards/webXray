@@ -81,7 +81,10 @@ class PhantomDriver:
 			output, errors = process.communicate(timeout=timeout)
 		except Exception as e:
 			process.kill()
-			return None
+			return {
+				'success': False,
+				'result': 'PhantomJS process did not return'
+			}
 
 		# output can be messy, decode utf-8 to save heartache
 		phantom_output = ''
@@ -92,7 +95,10 @@ class PhantomDriver:
 		try:
 			data = json.loads(re.search('(\{.+\})', phantom_output).group(1))
 		except:
-			return None
+			return {
+				'success': False,
+				'result': 'Unable to parse PhantomJS data'
+			}
 
 		# other parts of webxray expect this data format, common to all browser drivers used
 		return_dict = {
@@ -103,6 +109,7 @@ class PhantomDriver:
 			'final_url': 			data['final_url'],
 			'title': 				data['title'],
 			'meta_desc': 			data['meta_desc'],
+			'lang':					data['lang'],
 			'load_time': 			data['load_time'],
 			'processed_requests': 	data['processed_requests'],
 			'cookies': 				data['cookies'],
@@ -110,6 +117,9 @@ class PhantomDriver:
 			'source':				data['source']
 		}
 		
-		return return_dict
+		return {
+			'success': True,
+			'result': return_dict
+		}
 	# get_webxray_scan_data
 # PhantomDriver

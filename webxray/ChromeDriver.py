@@ -16,6 +16,8 @@ except:
 	print('*****************************************************************')
 	exit()
 
+from webxray.Utilities import Utilities
+
 class ChromeDriver:
 	"""
 	This class allows for using the production Chrome browser with webXray.
@@ -45,7 +47,7 @@ class ChromeDriver:
 
 		# if you have trouble getting chrome to start
 		#	change these values manually
-		self.chromedriver_path = None
+		self.chromedriver_path  = None
 		self.chrome_binary_path = None
 
 		# we want to give our browsers a full minute to try to
@@ -56,6 +58,9 @@ class ChromeDriver:
 		#	for details
 		self.ua = ua
 		
+		# useful for various tasks
+		self.utilities = Utilities()
+
 		return None
 	# init
 
@@ -106,7 +111,6 @@ class ChromeDriver:
 					chrome_options=chrome_options
 				)
 		except:
-			print('Unable to start Chrome!')
 			return None
 
 		# allow one minute before we kill it, seperate from browser_wait
@@ -148,19 +152,25 @@ class ChromeDriver:
 
 		driver = self.create_chromedriver()
 
-		# browser hasn't started and error already printed to cli
-		if driver == None: return None
+		# we can't start Chrome, return error message as result
+		if driver == None:
+			return({
+				'success': False,
+				'result': 'Unable to launch Chrome instance'
+			})
 
 		# allow one minute before we kill it, seperate from browser_wait
 		driver.set_page_load_timeout(60)
 
-		# start the page load process, return nothing if we fail
+		# start the page load process, return error message if we fail
 		try:
 			driver.get(url)
 		except:
-			# quit the driver or it will never die!
 			driver.quit()
-			return None
+			return({
+				'success': False,
+				'result': 'Unable to load page'
+			})
 
 		# if the page has an alert window open it will throw the following exception when trying
 		#	to get the current_url: selenium.common.exceptions.UnexpectedAlertPresentException
@@ -169,13 +179,16 @@ class ChromeDriver:
 		# in some cases we can catch the items we need before an alert fires, otherwise
 		# 	we fail gracefully, but this is a bug that needs resolution
 		try:
-			final_url = driver.current_url
-			title = driver.title
+			final_url 	= driver.current_url
+			title 		= driver.title
 			page_source = driver.page_source
 		except:
 			# quit the driver or it will never die!
 			driver.quit()
-			return None
+			return({
+				'success': False,
+				'result': 'Unable to load page, possible javascript alert issue'
+			})
 
 		# handle odd bug where title is a 'webelement' object
 		if not isinstance(title, str): title = None
@@ -184,109 +197,226 @@ class ChromeDriver:
 		# 	additional requests, so we wait to let all that finish
 		time.sleep(browser_wait)
 
-		# keep all requests in a dict keyed to the requestID
-		# before export we re-key the requests to the url
-		requests = {}
+		# We use the Chrome performance log get network traffic. Chrome performance log outputs a 
+		#	number of independent 'message' events which are keyed to a 'requestId'.  What we want
+		#	to send upstream is a dictionary keyed on the requested url so we do a lot of processing
+		#	here to stitch together a coherent log in the format expected by wbxr.
+		#
+		# There are two types of network events we are concerned with: normal http 
+		#	requests (initiated by Network.requestWillBeSent) and websocket requests (initiated
+		#	by Network.webSocketCreated).
+		#
+		# For normal events, we add entries to the 'requests' dictionary which we key to the requested
+		#	url.  The reason for this is a single requestId may correspond with many urls in
+		#	cases where a request results in redirects occuring.  However, data from the 
+		#	Network.loadingFinished event does not include the url, so we key that seperately
+		#	in the load_finish_data dict and then attach it later on.  Note that if a request to
+		#	x.com results in redirects to y.com and z.com, all three will end up sharing
+		#	the same loadingFinished data.
+		#
+		# webSocket events are a special case in that they are not strictly HTTP events, but 
+		#	they do two things we are concerned with: potentially linking a user to 
+		#	a third-party domain and setting cookies.  The url contacted is only exposed in the
+		#	first event, Network.webSocketCreated, so we must use the requestId to tie together
+		#	subsequent Network.webSocketWillSendHandshakeRequest and 
+		#	Network.webSocketHandshakeResponseReceived events.  We use the dictionary websocket_requests
+		#	to keep track of such events, and we then reprocess them to be keyed to the url in our
+		#	normal requests log.  Note that to keep track of websocket request we use 'websocket'
+		#	for content type, and there may be a better way to handle this.
 
-		# use the chrome performance log to find Network events for requests sent, received, and loading finished
-		for item in driver.get_log('performance'):
-			for key,val in item.items():
-				if key == 'message':
-					data = json.loads(val)
-
-					if data['message']['method'] == 'Network.requestWillBeSent':
-						# initialize the key in the dict so we can add to it
-						if data['message']['params']['requestId'] not in requests:
-							requests[data['message']['params']['requestId']] = {}
-						
-						# we set received to false to start with
-						requests[data['message']['params']['requestId']].update({'received':False})
-
-						# this will be the new key before we return
-						requests[data['message']['params']['requestId']].update({'url':data['message']['params']['request']['url']})
-
-						# each request has a start_time, we use this to figure out the time it took to download
-						requests[data['message']['params']['requestId']].update({'start_time':data['message']['params']['timestamp']})
-						
-						# get the request headers
-						requests[data['message']['params']['requestId']].update({'request_headers':data['message']['params']['request']['headers']})
-
-						# these can fail, insert null and move on
-						try:
-							requests[data['message']['params']['requestId']].update({'user_agent':data['message']['params']['request']['headers']['User-Agent']})
-						except:
-							requests[data['message']['params']['requestId']].update({'user_agent':None})
-
-						try:
-							requests[data['message']['params']['requestId']].update({'referer':data['message']['params']['request']['headers']['Referer']})
-						except:
-							requests[data['message']['params']['requestId']].update({'referer':None})
-					
-					if data['message']['method'] == 'Network.responseReceived':
-						# initialize the key in the dict so we can add to it
-						if data['message']['params']['requestId'] not in requests:
-							requests[data['message']['params']['requestId']] = {}
-
-						# the request was received, mark it
-						requests[data['message']['params']['requestId']].update({'received':True})
-
-						# record status code and text
-						requests[data['message']['params']['requestId']].update({'status':data['message']['params']['response']['status']})
-						requests[data['message']['params']['requestId']].update({'status_text':data['message']['params']['response']['statusText']})
-						
-						# try to get reponse headers, fail gracefully
-						try:
-							requests[data['message']['params']['requestId']].update({'response_headers':data['message']['params']['response']['headersText']})
-						except:
-							requests[data['message']['params']['requestId']].update({'response_headers':None})
-						
-						try:
-							requests[data['message']['params']['requestId']].update({'content_type':data['message']['params']['response']['headers']['Content-Type']})
-						except:
-							requests[data['message']['params']['requestId']].update({'content_type':None})
-
-					if data['message']['method'] == 'Network.loadingFinished':
-						# initialize the key in the dict so we can add to it
-						if data['message']['params']['requestId'] not in requests:
-							requests[data['message']['params']['requestId']] = {}
-
-						# size is updated during loading and is shown in logs, but we only want the final size which is here
-						requests[data['message']['params']['requestId']].update({'body_size':data['message']['params']['encodedDataLength']})
-
-						# we use this to calculate the total time for all requests
-						requests[data['message']['params']['requestId']].update({'endTime':data['message']['params']['timestamp']})
-		# end log processing loop
+		# http requests are keyed to URL
+		requests 		   = {}
+		
+		# these events are keyed to requestID
+		load_finish_data   = {}
+		websocket_requests = {}
 
 		# to get page load time we will figure out when the first request and final load finished occured
-		first_start_time = 0
-		last_endTime = 0
+		first_start_time = None
+		last_end_time 	 = None
 
-		# figure out per-request timings
-		for item in requests:
-			try:
-				# multiply load difference by 1k to convert to miliseconds
-				requests[item].update({'load_time':(requests[item]['endTime'] - requests[item]['start_time'])*1000})
+		# for debuging
+		duplicate_keys = []
 
-				# update globals
-				if first_start_time == 0 or requests[item]['start_time'] < first_start_time:
-					first_start_time = requests[item]['start_time']
+		# crunch through all the chrome logs here, the main event!
+		for log_item in driver.get_log('performance'):
+			for key, this_log_item in log_item.items():
+				# we are only interested in message events
+				if key == 'message':
+					# we have to read in this value to get json data
+					log_item_data 	= json.loads(this_log_item)
+					message_type	= log_item_data['message']['method']
 
-				if last_endTime == 0 or requests[item]['endTime'] > last_endTime:
-					last_endTime = requests[item]['endTime']
-			except:
-				requests[item].update({'load_time':None})
+					################################
+					# normal http event processing #
+					################################
 
-		# this dict is keyed by url, reprocess the extant requestID-keyed dict
-		processed_requests = {}
+					# we have a new http event, create new empty entry keyed to url
+					# and keep track of start time info
+					if message_type == 'Network.requestWillBeSent':
+						this_request = log_item_data['message']['params']['request']
+						this_url 	 = this_request['url']
+						
+						# skip if not http(s)
+						if not re.match('^https?://', this_url): continue
 
-		for item in requests:
-			# why does this sometimes fail...?
-			try:
-				processed_requests[requests[item]['url']] = requests[item]
-			except:
-				continue
+						# if a new request we initialize entry
+						if this_url not in requests:
+							requests[this_url] = {}
 
-			processed_requests[requests[item]['url']]['start_time_offset'] = int((processed_requests[requests[item]['url']]['start_time'] - first_start_time) * 1000)
+							# we use this to get the load_finish_data later on
+							requests[this_url].update({'request_id': log_item_data['message']['params']['requestId']})
+	
+							# we set received to false to start with
+							requests[this_url].update({'received':			False})
+
+							# initialze response values to None in case we don't get response
+							requests[this_url].update({'end_time':			None})
+							requests[this_url].update({'status':			None})
+							requests[this_url].update({'status_text':		None})
+							requests[this_url].update({'response_headers':	None})
+							requests[this_url].update({'content_type':		None})
+							requests[this_url].update({'body_size':			None})
+							requests[this_url].update({'end_time':			None})
+							requests[this_url].update({'user_agent':		None})
+							requests[this_url].update({'referer':			None})
+
+							# each request has a start_time, we use this to figure out the time it took to download
+							this_start_time = log_item_data['message']['params']['timestamp']
+							requests[this_url].update({'start_time':this_start_time})
+							
+							# update global start time to measure page load time
+							if first_start_time == None or this_start_time < first_start_time:
+								first_start_time = this_start_time
+
+							# get the request headers
+							requests[this_url].update({'request_headers':this_request['headers']})
+
+							# these can fail, if so, we ignore
+							try:
+								requests[this_url].update({'user_agent':this_request['headers']['User-Agent']})
+							except:
+								pass
+
+							try:
+								requests[this_url].update({'referer':this_request['headers']['Referer']})
+							except:
+								pass
+						# this_url already exists, log
+						else:
+							duplicate_keys.append(this_url)
+							continue
+
+					# we have received a response to our request, update appropriately
+					if message_type == 'Network.responseReceived':
+						this_response 	= log_item_data['message']['params']['response']
+						this_url 	 	= this_response['url']
+
+						# skip if not http(s)
+						if not re.match('^https?://', this_url): continue
+
+						# the request was received, mark it
+						requests[this_url].update({'received':		True})
+
+						# record status code and text
+						requests[this_url].update({'status':		this_response['status']})
+						requests[this_url].update({'status_text':	this_response['statusText']})
+						
+						# try to get response headers, fail gracefully as they are already None
+						try:
+							requests[this_url].update({'response_headers':this_response['headersText']})
+						except:
+							pass
+						
+						try:
+							requests[this_url].update({'content_type':this_response['headers']['Content-Type']})
+						except:
+							pass
+
+					# load finish events are keyed to requestId and may apply to many requested urls
+					#	so we keep this in a seperate dictionary to be relinked when we're done
+					if message_type == 'Network.loadingFinished':
+						this_request_id = log_item_data['message']['params']['requestId']
+						this_end_time	= log_item_data['message']['params']['timestamp']
+
+						# update global end time
+						if last_end_time == None or this_end_time > last_end_time:
+							last_end_time = this_end_time
+
+						if this_request_id not in load_finish_data:
+							load_finish_data[this_request_id] = {}
+
+						# size is updated during loading and is shown in logs, but we only want the final size which is here
+						load_finish_data[this_request_id].update({'body_size':log_item_data['message']['params']['encodedDataLength']})
+
+						# we use this to calculate the total time for all requests
+						load_finish_data[this_request_id].update({'end_time':this_end_time})
+
+					##############################
+					# webSocket event processing #
+					##############################
+
+					# we have a new websocket, create new empty entry keyed to requestId
+					# 	this will be rekeyed to url
+					# note we ignore timing data for websockets
+					if message_type == 'Network.webSocketCreated':
+						this_url 		= log_item_data['message']['params']['url']
+						this_request_id = log_item_data['message']['params']['requestId']
+
+						if this_request_id not in websocket_requests:
+							websocket_requests[this_request_id] = {}
+							websocket_requests[this_request_id].update({'url': 				this_url})
+							websocket_requests[this_request_id].update({'content_type':		'websocket'})
+							websocket_requests[this_request_id].update({'received':			False})
+							websocket_requests[this_request_id].update({'end_time':			None})
+							websocket_requests[this_request_id].update({'status':			None})
+							websocket_requests[this_request_id].update({'status_text':		None})
+							websocket_requests[this_request_id].update({'response_headers':	None})
+							websocket_requests[this_request_id].update({'body_size':		None})
+							websocket_requests[this_request_id].update({'end_time':			None})
+							websocket_requests[this_request_id].update({'start_time':		None})
+							websocket_requests[this_request_id].update({'user_agent':		None})
+							websocket_requests[this_request_id].update({'referer':			None})
+
+					# websocket request made, update relevant fields
+					if message_type == 'Network.webSocketWillSendHandshakeRequest':
+						this_request 	= log_item_data['message']['params']['request']
+						this_request_id = log_item_data['message']['params']['requestId']
+						websocket_requests[this_request_id].update({'request_headers':	this_request['headers']})
+						websocket_requests[this_request_id].update({'user_agent':		this_request['headers']['User-Agent']})
+
+					# websocket response received, update relevant fields
+					if message_type == 'Network.webSocketHandshakeResponseReceived':
+						this_response 	= log_item_data['message']['params']['response']
+						this_request_id = log_item_data['message']['params']['requestId']
+						websocket_requests[this_request_id].update({'received':			True})
+						websocket_requests[this_request_id].update({'status':			this_response['status']})
+						websocket_requests[this_request_id].update({'status_text':		this_response['statusText']})
+						websocket_requests[this_request_id].update({'response_headers':	this_response['headersText']})
+		# end log processing loop
+
+		# append load finish info to requests
+		for this_url in requests:
+			this_request_id = requests[this_url]['request_id']
+			if this_request_id in load_finish_data:
+				requests[this_url].update({'body_size': load_finish_data[this_request_id]['body_size']})
+				
+				# load_time is start time minus end time,
+				# 	multiplied by 1k to convert to miliseconds
+				load_time = (load_finish_data[this_request_id]['end_time'] - requests[this_url]['start_time'])*1000
+				
+				# we shouldn't be getting <=0, but make it null if this happens
+				if load_time <= 0:
+					requests[this_url].update({'load_time': load_time})
+				else:
+					requests[this_url].update({'load_time': None})
+			else:
+				requests[this_url].update({'body_size': None})
+				requests[this_url].update({'load_time': None})
+
+		# append websocket data to requests data
+		for item in websocket_requests:
+			requests[websocket_requests[item]['url']] = websocket_requests[item]
 
 		# return all the links for later processing
 		all_links = []
@@ -302,6 +432,12 @@ class ChromeDriver:
 			meta_desc = driver.find_element_by_xpath("//meta[@name='description']").get_attribute("content")
 		except:
 			meta_desc = None
+
+		# get the language of the page
+		try:
+			lang = driver.find_element_by_xpath('/html').get_attribute('lang')
+		except:
+			lang = None
 
 		# get all the cookies
 		# 	the selenium get_cookies method does not return third-party cookies
@@ -324,8 +460,10 @@ class ChromeDriver:
 					'value':		cookie[6]
 				})
 		except:
-			print('Could not load Chrome cookie database for %s, if this message appears often something is fundamentally wrong and requires attention!' % url)
-			return None
+			return({
+				'success': False,
+				'result': 'Cookie database not loaded, if this message appears often something is fundamentally wrong and requires attention!'
+			})
 
 		if self.headless == True:
 			browser_version = driver.capabilities['version'] + ' [headless]'
@@ -341,8 +479,9 @@ class ChromeDriver:
 			'final_url': 			final_url,
 			'title': 				title,
 			'meta_desc': 			meta_desc,
-			'load_time': 			int((last_endTime - first_start_time)*1000),
-			'processed_requests': 	processed_requests,
+			'lang':					lang,
+			'load_time': 			int((last_end_time - first_start_time)*1000),
+			'processed_requests': 	requests,
 			'cookies': 				cookies,
 			'all_links':			all_links,
 			'source':				page_source
@@ -351,6 +490,9 @@ class ChromeDriver:
 		# quit the driver or it will never die!
 		driver.quit()
 
-		return return_dict
+		return ({
+			'success': True,
+			'result': return_dict
+		})
 	# get_webxray_scan_data
 # ChromeDriver

@@ -312,6 +312,7 @@ def analyze(db_name):
 	analyzer.generate_db_summary_report()
 	analyzer.generate_stats_report()
 	analyzer.generate_aggregated_tracking_attribution_report()
+	analyzer.generate_use_report()
 	analyzer.generate_3p_domain_report()
 	analyzer.generate_3p_element_report()
 	analyzer.generate_3p_element_report('javascript')
@@ -344,7 +345,7 @@ if __name__ == '__main__':
 	  \_/\_/ \___|_.__/_/\_\_|  \__,_|\__, |
 	                                   __/ |
 	                                  |___/ 
-                            	   [v 2.0]
+                            	   	  [v 2.1]
     ''')
 
 	# set up cli args
