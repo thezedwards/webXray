@@ -262,12 +262,19 @@ setTimeout(function() {
 		title = null;
 	}
 
+	// get the language of the page
+	lang = document.getElementsByTagName('html')[0].getAttribute('lang');
+	if (!lang){
+		lang = null
+	}
+
 	// build the JSON format python will expect
 	return_dict = {
 		final_url: final_url,
 		title: title,
 		load_time: load_time,
 		meta_desc: meta_desc,
+		lang: lang,
 		processed_requests: processed_requests,
 		cookies: phantom.cookies,
 		all_links: all_links,
