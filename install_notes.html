@@ -276,7 +276,7 @@ __      _____| |____  ___ __ __ _ _   _
 					<p>Sometimes you just want to run a single quick scan, to do so, use the command below.  Be sure to replace "http://example.com" with the address of the site you want to scan.</p>
 					<p class="cli">python3 run_webxray.py -s http://example.com</p>
 
-				<h3>Run Many Browsers in Paralell to Increase Speed</h3>
+				<h3>Run Many Browsers in Parallell to Increase Speed</h3>
 					<p>By default, webxray will only run a single browser at a time.  Given webxray waits 30 seconds for a page to load, this means it will take over 8 hours to scan 1,000 pages.  However, most systems can handle running many more browsers at a time, resulting in significant speed gains.</p>
 
 					<p>To use one browser per available processor core open run_webxray.py and change "pool_size = 1" to "pool_size = None" - this is the most straight-forward way to increase speed.  Since webxray spends most of its time waiting for pages to load you may also experiment with setting pool_size <em>above</em> the number of available cores.</p>
