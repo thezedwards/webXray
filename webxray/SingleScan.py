@@ -10,7 +10,6 @@ from webxray.ParseURL import ParseURL
 from webxray.PhantomDriver	import PhantomDriver
 from webxray.ChromeDriver	import ChromeDriver
 
-
 class SingleScan:
 	"""
 	Loads and analyzes a single page, print outputs to cli
@@ -25,7 +24,7 @@ class SingleScan:
 		self.id_to_parent	= {}
 
 		# set up the domain ownership dictionary
-		for item in json.load(open(os.path.dirname(os.path.abspath(__file__))+'/resources/domain_owners/domain_owners.json', 'r')):
+		for item in json.load(open(os.path.dirname(os.path.abspath(__file__))+'/resources/domain_owners/domain_owners.json', 'r', encoding='utf-8')):
 			self.id_to_owner[item['id']] 	= item['owner_name']
 			self.id_to_parent[item['id']] 	= item['parent_id']
 			for domain in item['domains']:

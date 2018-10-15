@@ -495,4 +495,178 @@ class ChromeDriver:
 			'result': return_dict
 		})
 	# get_webxray_scan_data
+
+	def get_page_source_text_title_lang(self, url):
+		"""
+		Given a url, this function attempts to load the page, inject
+			the Readability.js library, execute it, and extract
+			only the text of a given page.
+
+		Function returns the success value (True/False), page source, the 
+			extracted text, and the page title in case of success; in 
+			case of failure returns an error message.
+		"""
+
+		# set up sql_driver for logging errors
+		driver = self.create_chromedriver()
+
+		# browser hasn't started and error already printed to cli
+		if driver == None:
+			return({
+				'success': False,
+				'result': 'Unable to launch Chrome instance'
+			})
+
+		# starts the page load process, quits driver and returns nothing if we fail
+		try:
+			driver.get(url)
+		except:
+			driver.quit()
+			return({
+				'success': False,
+				'result': 'Unable to load page'
+			})
+
+		# if we can't get source something is wrong, return None
+		try:
+			page_source = driver.page_source
+		except:
+			driver.quit()
+			return({
+				'success': False,
+				'result': 'Unable to read page source'
+			})
+
+		# if page title fails put in a null value
+		try:
+			page_title = driver.title
+		except:
+			page_title = None
+
+		# get the language of the page
+		try:
+			page_lang = driver.find_element_by_xpath('/html').get_attribute('lang')
+		except:
+			page_lang = None
+
+		# inject the locally downloaded copy of readability into the page
+		#	and extract the content
+		#
+		# NOTE: you must download readability on your own and place in the 
+		#	appropriate directory
+		readability_js = open(os.path.dirname(os.path.abspath(__file__))+'/resources/policyxray/readability.js').read()
+		try:
+			readabilty_result = json.loads(driver.execute_script("""
+				%s
+				var readabilityObj = new Readability("%s", document);
+				return JSON.stringify(readabilityObj.parse(), null, 2);
+			""" % (readability_js,url)))
+			driver.quit()
+		except:
+			driver.quit()
+			return({
+				'success': False,
+				'result': 'Unable to inject Readability.js'
+			})
+
+		# readability failure, return None
+		if readabilty_result == None:
+			return({
+				'success': False,
+				'result': 'Empty Readability result'
+			})
+
+		# readability has HTML formatting, remove it (and extra spaces), return None on failure
+		try:
+			page_text = re.sub('\s+', ' ', re.sub('&.+?;', ' ', re.sub('<.+?>', ' ', readabilty_result['content'])))
+		except:
+			return({
+				'success': False,
+				'result': 'Unable to remove HTML from Readability result'
+			})
+
+		# the page text is empty, return None
+		if len(page_text) == 0: 
+			return({
+				'success': False,
+				'result': 'Empty result after HTML removal'
+			})
+
+		# looks good, return tuple
+		return({
+			'success': True,
+			'result': {
+				'page_source': 	page_source,
+				'page_text': 	page_text,
+				'page_title': 	page_title,
+				'page_lang': 	page_lang
+			}
+		})
+	# get_page_source_text_title_lang
+
+	def get_absolute_page_links(self,url):
+		"""
+		Returns all links on the page, changes relative links to
+			absolute links as well.
+		"""
+
+		# initialize browser instance
+		driver = self.create_chromedriver()
+
+		# browser hasn't started and error already printed to cli
+		if driver == None:
+			return({
+				'success': False,
+				'result': 'Unable to launch Chrome instance'
+			})
+
+		# allow one minute before we kill it
+		driver.set_page_load_timeout(60)
+
+		# starts the page load process, quits driver and returns nothing if we fail
+		try:
+			driver.get(url)
+		except:
+			driver.quit()
+			return({
+				'success': False,
+				'result': 'Unable to load page'
+			})
+
+		# page has now been loaded, we process all the links
+		all_links = set()
+		
+		# either there are no links or something has gone wrong
+		try:
+			links = driver.find_elements_by_tag_name('a')
+		except:
+			driver.quit()
+			return({
+				'success': False,
+				'result': 'Unable to extract links'
+			})
+
+		# process the links
+		for link in links:
+			# to cope with:
+			# selenium.common.exceptions.StaleElementReferenceException: Message: stale element reference: element is not attached to the page document
+			try:
+				this_link = link.get_attribute('href')
+				this_link_text = re.sub('\s+', ' ', re.sub('[\\n|\\r|\\t]',' ',link.get_attribute('text').strip()))
+			except:
+				continue
+
+			# sometimes can be empty
+			if this_link == None: continue
+			if len(this_link) == 0: continue
+
+			# add in the absolute url from the link to our set
+			all_links.add((this_link_text,self.utilities.get_absolute_url_from_page_link(url,this_link)))
+		driver.quit()
+
+		return({
+			'success': True,
+			'result': all_links
+		})
+	# get_absolute_page_links
 # ChromeDriver

@@ -203,7 +203,7 @@ class Analyzer:
 		# next we pull the owner/domain pairings from the json file in 
 		# 	the resources dir and add to the db
 		print('\t\tPatching with new domain owner data...', end='', flush=True)
-		domain_owner_data = json.load(open(os.path.dirname(os.path.abspath(__file__))+'/resources/domain_owners/domain_owners.json', 'r'))
+		domain_owner_data = json.load(open(os.path.dirname(os.path.abspath(__file__))+'/resources/domain_owners/domain_owners.json', 'r', encoding='utf-8'))
 		for item in domain_owner_data:
 			aliases = ''
 			for alias in item['aliases']:
@@ -1095,7 +1095,7 @@ class Analyzer:
 		all_uses = set()
 
 		# we read this from our normal domain_owners file
-		infile	= open('./webxray/resources/domain_owners/domain_owners.json', 'r')
+		infile	= open('./webxray/resources/domain_owners/domain_owners.json', 'r', encoding='utf-8')
 		domain_data	= json.load(infile)
 		infile.close()
 
