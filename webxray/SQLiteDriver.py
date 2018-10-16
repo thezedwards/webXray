@@ -147,7 +147,7 @@ class SQLiteDriver:
 			self.db = self.db_conn.cursor()
 
 			# initialize webxray formatted database
-			db_init_file = open(self.db_root_path+'sqlite_db_init.schema', 'r')
+			db_init_file = open(self.db_root_path+'sqlite_db_init.schema', 'r', encoding='utf-8')
 			for query in db_init_file:
 				# skip lines that are comments
 				if "-" in query[0]: continue

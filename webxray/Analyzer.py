@@ -157,7 +157,7 @@ class Analyzer:
 		basic utility function to write list of csv rows to a file
 		"""
 		full_file_path = self.report_path+'/'+file_name
-		with open(full_file_path, 'w', newline='') as csvfile:
+		with open(full_file_path, 'w', newline='', encoding='utf-8') as csvfile:
 			csv_writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
 			for row in csv_rows:
 				csv_writer.writerow(row)

@@ -172,7 +172,7 @@ class MySQLDriver:
 		self.db.execute('USE %s' % self.db_name)
 
 		# initialize webxray formatted database
-		db_init_file = open(os.path.dirname(os.path.abspath(__file__))+'/resources/db/mysql/mysql_db_init.sql', 'r')
+		db_init_file = open(os.path.dirname(os.path.abspath(__file__))+'/resources/db/mysql/mysql_db_init.sql', 'r', encoding='utf-8')
 		for query in db_init_file:
 			# skip lines that are comments
 			if "-" in query[0]: continue

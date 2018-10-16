@@ -135,7 +135,7 @@ class Collector:
 
 		# the list of url MUST be in the page_lists directory!
 		try:
-			url_list = open(os.path.dirname(os.path.abspath(__file__)) + '/../page_lists/' + self.pages_file_name, 'r')
+			url_list = open(os.path.dirname(os.path.abspath(__file__)) + '/../page_lists/' + self.pages_file_name, 'r', encoding='utf-8')
 		except:
 			print('File "%s" does not exist, file must be in ./page_lists directory.  Exiting.' % self.pages_file_name)
 			exit()

@@ -554,7 +554,7 @@ class ChromeDriver:
 		#
 		# NOTE: you must download readability on your own and place in the 
 		#	appropriate directory
-		readability_js = open(os.path.dirname(os.path.abspath(__file__))+'/resources/policyxray/readability.js').read()
+		readability_js = open(os.path.dirname(os.path.abspath(__file__))+'/resources/policyxray/readability.js', 'r', encoding='utf-8').read()
 		try:
 			readabilty_result = json.loads(driver.execute_script("""
 				%s
