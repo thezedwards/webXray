@@ -25,7 +25,7 @@ class PostgreSQLDriver:
 		"""
 
 		# modify this per your install
-		self.db_user = 'wbxr'
+		self.db_user = 'timlibert'
 		self.db_pass = ''
 
 		# the db_prefix can be overridden if you like
@@ -900,4 +900,25 @@ class PostgreSQLDriver:
 
 		return self.db.fetchall()
 	# get_3p_element_domain_owner_id_ssl_use
+
+	def get_3p_element_domain_ssl_use(self):
+		"""
+		for each received third-party request returns
+			the domain and true/false value for ssl
+		"""
+		self.db.execute('''
+			SELECT 
+				domain.domain,
+				element.is_ssl
+			FROM 
+				element 
+			JOIN 
+				domain on element.domain_id = domain.id 
+			WHERE
+				element.is_3p = TRUE
+		''')
+
+		return self.db.fetchall()
+	# get_3p_element_domain_owner_id_ssl_use
+
 # class PostgreSQLDriver

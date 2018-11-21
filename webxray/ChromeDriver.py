@@ -260,6 +260,31 @@ class ChromeDriver:
 						# skip if not http(s)
 						if not re.match('^https?://', this_url): continue
 
+						# the presence of 'redirectResponse' means a prior request is redirected
+						#	so we update the status of the original request here and
+						#	then continue processing the new request
+						if 'redirectResponse' in log_item_data['message']['params']:
+							redirect_info = log_item_data['message']['params']['redirectResponse']
+							original_url = redirect_info['url']
+							
+							# the request was received, mark it
+							requests[original_url].update({'received':		True})
+
+							# record status code and text
+							requests[original_url].update({'status':		redirect_info['status']})
+							requests[original_url].update({'status_text':	redirect_info['statusText']})
+						
+							# try to get response headers, fail gracefully as they are already None
+							try:
+								requests[this_url].update({'response_headers':this_response['headersText']})
+							except:
+								pass
+						
+							try:
+								requests[this_url].update({'content_type':this_response['headers']['Content-Type']})
+							except:
+								pass
+
 						# if a new request we initialize entry
 						if this_url not in requests:
 							requests[this_url] = {}

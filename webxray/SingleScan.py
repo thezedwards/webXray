@@ -61,6 +61,8 @@ class SingleScan:
 			browser_driver 	= PhantomDriver()
 		elif self.browser_type == 'chrome':
 			browser_driver 	= ChromeDriver()
+			chrome_ua = browser_driver.get_ua_for_headless()
+			browser_driver 	= ChromeDriver(ua=chrome_ua)
 
 		# attempt to get the page
 		browser_output = browser_driver.get_webxray_scan_data(url, browser_wait)

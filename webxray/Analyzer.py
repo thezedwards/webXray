@@ -1146,6 +1146,31 @@ class Analyzer:
 					else:
 						page_3p_uses[page_id] = page_3p_uses[page_id] + [(use,sets_cookie)]
 
+		# determine how often requests for a give use are encrypted with ssl
+		# 	- note that on the same page multiple requests for a single use may be made
+		# 		and each request may or may not be ssl
+		use_ssl 	= {}
+		use_total 	= {}
+		total_classified = 0
+		for domain,is_ssl in self.sql_driver.get_3p_element_domain_ssl_use():
+			# only analyze domains we know the use for
+			if domain in domain_to_use_map:
+				total_classified += 1
+				# each domain may have several uses, add for all
+				for use in domain_to_use_map[domain]:
+					# increment count of ssl usage
+					if is_ssl:
+						if use not in use_ssl:
+							use_ssl[use] = 1
+						else:
+							use_ssl[use] = use_ssl[use] + 1
+					
+					# keep track of total occurances of this use
+					if use not in use_total:
+						use_total[use] = 1
+					else:
+						use_total[use] = use_total[use] + 1
+
 		# for each use we will produce summary counts, we 
 		#	initialize everyting to zero here
 		total_pages_w_use 				= {}
@@ -1174,7 +1199,6 @@ class Analyzer:
 			for use in this_page_use_set:
 				total_pages_w_use[use] = total_pages_w_use[use] + 1
 
-
 		# the last step is to calculate the relevant percentages and averages
 
 		# used to get percentage by use
@@ -1183,6 +1207,7 @@ class Analyzer:
 		percentage_by_use 				= {}
 		average_use_occurance_per_page 	= {}
 		percentage_use_w_cookie 		= {}
+		percentage_use_ssl 				= {}
 		
 		for use in all_uses:
 			percentage_by_use[use] 				= 0
@@ -1199,12 +1224,19 @@ class Analyzer:
 				average_use_occurance_per_page[use] = None
 				percentage_use_w_cookie[use]		= None
 
+			# conditional to account for cases where no instance of a given use is ssl
+			if use in use_ssl:
+				percentage_use_ssl[use] 			= 100*(use_ssl[use]/use_total[use])
+			else:
+				percentage_use_ssl[use] 			= 0
+
 		# send back everyting as a keyed dict
 		return({
 			'all_uses'							: all_uses,
 			'percentage_by_use'					: percentage_by_use,
 			'average_use_occurance_per_page'	: average_use_occurance_per_page,
-			'percentage_use_w_cookie' 			: percentage_use_w_cookie
+			'percentage_use_w_cookie' 			: percentage_use_w_cookie,
+			'percentage_use_ssl'				: percentage_use_ssl
 			})
 	# get_3p_use_data
 
@@ -1226,19 +1258,21 @@ class Analyzer:
 		percentage_by_use 				= use_data['percentage_by_use']
 		average_use_occurance_per_page 	= use_data['average_use_occurance_per_page']
 		percentage_use_w_cookie 		= use_data['percentage_use_w_cookie']
+		percentage_use_ssl				= use_data['percentage_use_ssl']
 
 		csv_rows = []
-		csv_rows.append(('use category','percent pages with use','ave occurances per page with use','percentage of use with cookie'))
+		csv_rows.append(('use category','percent pages with use','ave occurances per page with use','percentage of use with cookie', 'percentage of use ssl'))
 		for use in sorted(all_uses):
 			if percentage_by_use[use] != None:
 				csv_rows.append((
 					use,
 					round(percentage_by_use[use],self.num_decimals),
 					round(average_use_occurance_per_page[use],self.num_decimals),
-					round(percentage_use_w_cookie[use],self.num_decimals)
+					round(percentage_use_w_cookie[use],self.num_decimals),
+					round(percentage_use_ssl[use],self.num_decimals)
 				))
 			else:
-				csv_rows.append((use,None,None,None))
+				csv_rows.append((use,None,None,None,None))
 
 		self.write_csv('3p_uses.csv', csv_rows)
 	# generate_use_report
