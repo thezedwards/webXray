@@ -25,7 +25,7 @@ class PostgreSQLDriver:
 		"""
 
 		# modify this per your install
-		self.db_user = 'timlibert'
+		self.db_user = 'wbxr'
 		self.db_pass = ''
 
 		# the db_prefix can be overridden if you like
