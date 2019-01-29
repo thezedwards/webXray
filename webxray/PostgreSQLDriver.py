@@ -27,6 +27,8 @@ class PostgreSQLDriver:
 		# modify this per your install
 		self.db_user = 'wbxr'
 		self.db_pass = ''
+		self.db_host = 'localhost'
+		self.db_port = '5432'
 
 		# the db_prefix can be overridden if you like
 		self.db_prefix = db_prefix
@@ -42,7 +44,9 @@ class PostgreSQLDriver:
 		self.db_conn = psycopg2.connect(
 			database=self.db_name,
 			user=self.db_user,
-			password=self.db_pass
+			password=self.db_pass,
+			host=self.db_host,
+			port=self.db_port
 		)
 
 		# allows us to create new dbs in postgres
@@ -70,8 +74,12 @@ class PostgreSQLDriver:
 		# open the new connection
 		self.db_conn = psycopg2.connect(
 			database=self.db_name,
-			user=self.db_user
+			user=self.db_user,
+			password=self.db_pass,
+			host=self.db_host,
+			port=self.db_port
 		)
+		
 		self.db_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 		self.db = self.db_conn.cursor()
 	# db_switch
