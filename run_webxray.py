@@ -53,7 +53,7 @@ browser_wait = 45
 #
 #	note that with manual tweaking the pool can be larger than the number
 #		of available cores, but proceed with caution
-pool_size = None
+pool_size = 1
 
 # DATABASE ENGINE SELECTION
 # 	db_engine can be 'mysql', 'postgres', or 'sqlite'
