@@ -96,18 +96,29 @@ class ChromeDriver:
 		if self.ua: 
 			chrome_options.add_argument('user-agent='+self.ua)
 
+		# 'desired_capabilities' is essentially a second way to set options for chrome
+		# we set loggingPrefs to turn on the performance log which we need to analyze network traffic
+		# see: https://sites.google.com/a/chromium.org/chromedriver/logging/performance-log
+		# pageLoadStrategy is set to 'none' to make sure we don't get stuck on pages that never finish loading
+		# once 'eager' is implemented in chromedriver that may be preferable
+		# see: https://w3c.github.io/webdriver/#dfn-table-of-page-load-strategies
+		chrome_capabilities = {
+			'loggingPrefs': {'performance': 'ALL'}, 
+			'pageLoadStrategy': 'none'
+		}
+
 		# attempt to start driver, fail gracefull otherwise
 		try:
 			# if we have chromedriver path set it up
 			if self.chromedriver_path:
 				driver = webdriver.Chrome(
 					self.chromedriver_path,
-					desired_capabilities={'loggingPrefs': {'performance': 'ALL'}},
+					desired_capabilities=chrome_capabilities,
 					chrome_options=chrome_options
 				)
 			else:
 				driver = webdriver.Chrome(
-					desired_capabilities={'loggingPrefs': {'performance': 'ALL'}},
+					desired_capabilities=chrome_capabilities,
 					chrome_options=chrome_options
 				)
 		except:
@@ -160,17 +171,21 @@ class ChromeDriver:
 			})
 
 		# allow one minute before we kill it, seperate from browser_wait
-		driver.set_page_load_timeout(60)
+		driver.set_page_load_timeout(self.page_timeout_seconds)
 
 		# start the page load process, return error message if we fail
 		try:
 			driver.get(url)
-		except:
+		except Exception as e:
 			driver.quit()
 			return({
 				'success': False,
-				'result': 'Unable to load page'
+				'result': 'Unable to load page: '+str(e).replace('\n', ' ')
 			})
+
+		# while the browser may be finished loading the page, scripts may still making
+		# 	additional requests, so we wait to let all that finish
+		time.sleep(browser_wait)
 
 		# if the page has an alert window open it will throw the following exception when trying
 		#	to get the current_url: selenium.common.exceptions.UnexpectedAlertPresentException
@@ -192,10 +207,6 @@ class ChromeDriver:
 
 		# handle odd bug where title is a 'webelement' object
 		if not isinstance(title, str): title = None
-
-		# while the browser may be finished loading the page, scripts may still making
-		# 	additional requests, so we wait to let all that finish
-		time.sleep(browser_wait)
 
 		# We use the Chrome performance log get network traffic. Chrome performance log outputs a 
 		#	number of independent 'message' events which are keyed to a 'requestId'.  What we want
@@ -545,11 +556,11 @@ class ChromeDriver:
 		# starts the page load process, quits driver and returns nothing if we fail
 		try:
 			driver.get(url)
-		except:
+		except Exception as e:
 			driver.quit()
 			return({
 				'success': False,
-				'result': 'Unable to load page'
+				'result': 'Unable to load page: '+str(e).replace('\n', ' ')
 			})
 
 		# if we can't get source something is wrong, return None

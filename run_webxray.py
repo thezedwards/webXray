@@ -38,12 +38,12 @@ browser_type = 'chrome'
 #	 DECREASING means faster collection, but you may miss slow-loading elements
 #	 INCREASING means slower collection, but higher likelihood of getting slow-loading elements
 #
-#	extensive testing has determined 30 seconds performs well, and you are advised to keep it there,
+#	extensive testing has determined 45 seconds performs well, and you are advised to keep it there,
 #		but you may adjust to taste and network conditions
 #		for example, on a very slow connection you may want to use 60 seconds
 #
 #	when using chrome a wait time below 30 seconds often results in lost cookies and is NOT RECCOMENDED!
-browser_wait = 30
+browser_wait = 45
 
 # PERFORMANCE: RUNNING PARALLEL BROWSING ENGINES
 #	'pool_size' sets how many browser processes get run in parallel, 
@@ -53,7 +53,7 @@ browser_wait = 30
 #
 #	note that with manual tweaking the pool can be larger than the number
 #		of available cores, but proceed with caution
-pool_size = 1
+pool_size = None
 
 # DATABASE ENGINE SELECTION
 # 	db_engine can be 'mysql', 'postgres', or 'sqlite'
