@@ -29,11 +29,8 @@ if __name__ == '__main__':
 			"owner_name"			: item['owner_name'],
 			"aliases"				: item['aliases'],
 			"homepage_url"			: item['homepage_url'],
-			"privacy_policy_url"	: item['privacy_policy_url'],
 			"notes"					: item['notes'],
 			"country"				: item['country'],
-			"uses"					: item['uses'],
-			"platforms"				: item['platforms'],
 			"domains"				: item['domains']
 		})
 
@@ -54,22 +51,6 @@ if __name__ == '__main__':
 		else:
 			aliases_string = ''
 
-		if len(item['platforms']) != 0:
-			platforms_string = ''
-			for platform in sorted(item['platforms']):
-				platforms_string += '"'+platform+'",'
-			platforms_string = platforms_string[:-1]
-		else:
-			platforms_string = ''
-
-		if len(item['uses']) != 0:
-			uses_string = ''
-			for use in sorted(item['uses']):
-				uses_string += '"'+use+'",'
-			uses_string = uses_string[:-1]
-		else:
-			uses_string = ''
-
 		if len(item['domains']) != 0:
 			domains_string = ''
 			for domain in sorted(item['domains']):
@@ -82,11 +63,6 @@ if __name__ == '__main__':
 			homepage_url = 'null'
 		else:
 			homepage_url = '"'+item['homepage_url']+'"'
-
-		if item['privacy_policy_url'] is None:
-			privacy_policy_url = 'null'
-		else:
-			privacy_policy_url = '"'+item['privacy_policy_url']+'"'
 
 		if item['notes'] is None:
 			notes = 'null'
@@ -104,11 +80,8 @@ if __name__ == '__main__':
 		"owner_name"		 : "%s",
 		"aliases"		 	 : [%s],
 		"homepage_url"		 : %s,
-		"privacy_policy_url" : %s,
 		"notes"				 : %s,
 		"country"			 : %s,
-		"uses"				 : [%s],
-		"platforms"			 : [%s],
 		"domains"			 : [%s
 		]
 	},""" % (
@@ -116,11 +89,8 @@ if __name__ == '__main__':
 			parent_id,item['owner_name'],
 			aliases_string,
 			homepage_url,
-			privacy_policy_url,
 			notes,
 			country,
-			uses_string,
-			platforms_string,
 			domains_string
 		))
 	# end loop

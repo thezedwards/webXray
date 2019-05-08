@@ -21,15 +21,13 @@ class Analyzer:
 	See the readme for details on all of the available reports.
 	"""
 
-	def __init__(self, db_engine, db_name, num_tlds, num_results, tracker_threshold = None, flush_owner_db = True):
+	def __init__(self, db_engine, db_name, num_tlds, num_results, flush_owner_db = True):
 		"""
 		This performs a few start-up tasks:
 			- sets up some useful global variables
 			- makes sure we have a directory to store the reports
 			- flushes the existing domain_owner mappings (this can be disabled)
 			- if we want to do per-tld reports, figures out the most common
-			- if we want to filter against a given tracker threshold, sets it 
-				up here (see documentation below for tracker threshold)
 		"""
 
 		# set various global vars
@@ -38,22 +36,15 @@ class Analyzer:
 		self.num_tlds 			= num_tlds
 		self.top_tlds 			= []
 		self.num_results 		= num_results
-		self.tracker_threshold	= tracker_threshold
 		self.start_time			= datetime.now()
 		
 		# number of decimal places to round to in reports
 		self.num_decimals		= 2
 
 		# set up global db connection
-		if self.db_engine == 'mysql':
-			from webxray.MySQLDriver import MySQLDriver
-			self.sql_driver = MySQLDriver(self.db_name)
-		elif self.db_engine == 'sqlite':
+		if self.db_engine == 'sqlite':
 			from webxray.SQLiteDriver import SQLiteDriver
 			self.sql_driver = SQLiteDriver(self.db_name)
-		elif db_engine == 'postgres':
-			from webxray.PostgreSQLDriver import PostgreSQLDriver
-			self.sql_driver = PostgreSQLDriver(self.db_name)
 		else:
 			print('INVALID DB ENGINE FOR %s, QUITTING!' % db_engine)
 			exit()
@@ -96,37 +87,6 @@ class Analyzer:
 		else:
 			# othewise we push in a single empty entry
 			self.top_tlds.append((None,self.get_pages_ok_count))
-
-		# SPECIAL FEATURE FOR EXPERTS: tracker domain filter
-		#
-		# you can set a threshold of the number of sites a given 3p domain 
-		#	is connected to - domains connecting to many sites may correlate those visits
-		#	so we call these 'tracker domains' 
-		#
-		# the 'tracker_threshold' variable set above controls the filtering level
-		#
-		# on large set of sites (e.g. >10k) this works well but on small samples
-		#  (e.g. <500) it doesn't work as well as known tracker domains may only
-		#  appear on a single site
-		# 
-		# this is off by default and unless you understand what you are doing 
-		# 	don't use this...but because you are reading the source code for an otherwise
-		#	undocumented feature you are probably competent to use it ;-)
-		#
-		# longer-term we may want to train off a bigger corpus to find tracker domains and
-		#	have them prepackaged
-		#
-		# use at your own risk!
-		if tracker_threshold:
-			print('\t===================================================')
-			print('\t Getting tracker domains with threshold level of %s' % self.tracker_threshold)
-			print('\t===================================================')
-			print('\t\tProcessing...', end='', flush=True)
-			self.tracker_domains = self.get_tracker_domains(self.tracker_threshold)
-			print('done!')
-		else:
-			# set to None so various downstream operations get skipped
-			self.tracker_domains = None
 	# __init__
 
 	#################
@@ -214,7 +174,6 @@ class Analyzer:
 				item['owner_name'], 
 				aliases,
 				item['homepage_url'],
-				item['privacy_policy_url'],
 				item['notes'], 
 				item['country']
 			)
@@ -249,9 +208,8 @@ class Analyzer:
 					'owner_name' :			item[2],
 					'aliases' :				aliases,
 					'homepage_url' :		item[4],
-					'privacy_policy_url' :	item[5],
-					'notes' :				item[6],
-					'country' :				item[7],
+					'notes' :				item[5],
+					'country' :				item[6],
 				}
 		return domain_owners
 	# get_domain_owner_dict
@@ -337,42 +295,6 @@ class Analyzer:
 		return top_tlds
 	# get_top_tlds
 
-	def get_tracker_domains(self, threshold):
-		"""
-		NOTE: first determines all pairings of page domains and element domains
-			note this is then unique on SITES, not on PAGES
-			e.g. if you have several pages from the same site these links only
-			count once
-		
-		returns a list of domains which link at least the threshold number of sites
-		"""
-		all_domains = []
-		for page_domain_element_domain in self.sql_driver.get_page_domain_element_domain_pairs():
-			all_domains.append(page_domain_element_domain[1])
-
-		# count up all the pairs, convert to items() so can process as tuples
-		domain_counts = collections.Counter(all_domains).items()
-
-		# put the return values here
-		tracker_domains = []
-
-		# check against threshold
-		for domain_count in domain_counts:
-			if domain_count[1] >= threshold:
-				tracker_domains.append(domain_count[0])
-
-		# EDGE CASE
-		# 	likely due to a large threshold we have no tracker domains,
-		#	so we throw warning and log error
-		if len(tracker_domains) == 0:
-			self.sql_driver.log_error('Analaysis Warning', 'Tracker Threshold of %s resulted in no tracking domains.' % threshold)
-			print('\t\t-----------WARNING-----------')
-			print('\t\tTracker Threshold of %s resulted in no tracking domains.' % threshold)
-			print('\t\t-----------------------------')
-
-		return tracker_domains
-	# get_tracker_domains
-
 	#####################
 	# 	REPORT HELPERS	#
 	#####################
@@ -383,9 +305,6 @@ class Analyzer:
 		
 		note this is distinct domain+pubsuffix, not fqdns (e.g. 'sub.example.com' 
 			and sub2.example.com' only count as 'example.com')
-
-		if tracker_domains have been set the stats will reflect only third-parties
-			which have crossed the threshold (see get_tracker_domains())
 		"""
 
 		# each page id corresponds to a list of domains belonging to page elements
@@ -399,20 +318,10 @@ class Analyzer:
 
 			# if the page id is not yet seen enter the current element as a fresh list
 			#	otherwise, we add to the existing list
-			# in both cases, if there is a tracker_domain list we only add
-			#	domains that are in the list
 			if page_id not in page_id_to_domains_dict:
-				if self.tracker_domains:
-					if element_domain in self.tracker_domains:
-						page_id_to_domains_dict[page_id] = [element_domain]
-				else:
-					page_id_to_domains_dict[page_id] = [element_domain]
+				page_id_to_domains_dict[page_id] = [element_domain]
 			else:
-				if self.tracker_domains:
-					if element_domain in self.tracker_domains:
-						page_id_to_domains_dict[page_id] = page_id_to_domains_dict[page_id] + [element_domain]
-				else:
-					page_id_to_domains_dict[page_id] = page_id_to_domains_dict[page_id] + [element_domain]
+				page_id_to_domains_dict[page_id] = page_id_to_domains_dict[page_id] + [element_domain]
 
 		# now we determine the number of domains each page is connected to by looking at len of list of 3p domains
 		per_page_3p_element_counts = []
@@ -443,9 +352,6 @@ class Analyzer:
 		"""
 		determines basic stats for the number of 3p cookies contacted per-page
 			note that a single 3p many set more than one cookie
-
-		if tracker_domains have been set the stats will reflect only third-parties
-			which have crossed the threshold (see get_tracker_domains())
 		"""
 
 		# each page id corresponds to a list of cookie ids
@@ -459,20 +365,10 @@ class Analyzer:
 
 			# if the page id is not yet seen enter the current cookie id as a fresh list
 			#	otherwise, we add to the existing list
-			# in both cases, if there is a tracker_domain list we do not count cookies
-			#	set by domains which are not trackers 
 			if page_id not in page_id_to_cookie_id_dict:
-				if self.tracker_domains:
-					if cookie_domain in self.tracker_domains:
-						page_id_to_cookie_id_dict[page_id] = [cookie_id]
-				else:
-					page_id_to_cookie_id_dict[page_id] = [cookie_id]
+				page_id_to_cookie_id_dict[page_id] = [cookie_id]
 			else:
-				if self.tracker_domains:
-					if cookie_domain in self.tracker_domains:
-						page_id_to_cookie_id_dict[page_id] = page_id_to_cookie_id_dict[page_id] + [cookie_id]
-				else:
-					page_id_to_cookie_id_dict[page_id] = page_id_to_cookie_id_dict[page_id] + [cookie_id]
+				page_id_to_cookie_id_dict[page_id] = page_id_to_cookie_id_dict[page_id] + [cookie_id]
 
 		# determine the number of 3p cookies each page has by looking at len of list of cookie ids
 		per_page_3p_cookie_counts = []
@@ -603,11 +499,11 @@ class Analyzer:
 			# page info
 			total_pages 			= self.sql_driver.get_complex_page_count(tld_filter)
 			total_pages_percent 	= (total_pages/self.get_pages_ok_count)*100
-			total_pages_elements 	= self.sql_driver.get_complex_page_count(tld_filter, 'elements', self.tracker_domains)
+			total_pages_elements 	= self.sql_driver.get_complex_page_count(tld_filter, 'elements')
 			percent_with_elements 	= (total_pages_elements/total_pages)*100
-			total_pages_cookies 	= self.sql_driver.get_complex_page_count(tld_filter, 'cookies', self.tracker_domains)
+			total_pages_cookies 	= self.sql_driver.get_complex_page_count(tld_filter, 'cookies')
 			percent_with_cookies 	= (total_pages_cookies/total_pages)*100
-			total_pages_js 			= self.sql_driver.get_complex_page_count(tld_filter, 'javascript', self.tracker_domains)
+			total_pages_js 			= self.sql_driver.get_complex_page_count(tld_filter, 'javascript')
 			percent_with_js 		= (total_pages_js/total_pages)*100
 			total_pages_ssl 		= self.sql_driver.get_pages_ok_count(is_ssl = True)
 			percent_pages_ssl		= (total_pages_ssl/total_pages)*100
@@ -628,11 +524,6 @@ class Analyzer:
 				all_load_times_sum += load_time
 
 			average_page_load_time =  all_load_times_sum/len(all_load_times)
-
-			if self.tracker_threshold:
-				filter_depth = self.tracker_threshold
-			else:
-				filter_depth = 'No Filter Used'
 
 			domain_stats	= self.get_3p_domain_stats(total_pages, tld_filter)
 			domain_mean 	= domain_stats[0]
@@ -668,8 +559,6 @@ class Analyzer:
 			csv_rows.append(('Mean 3p Cookies',round(cookie_mean,self.num_decimals)))
 			csv_rows.append(('Median 3p Cookies',cookie_median))
 			csv_rows.append(('Mode 3p Cookies',cookie_mode))
-
-			csv_rows.append(('Filter Depth Used',filter_depth))
 
 			self.write_csv(file_name,csv_rows)
 	# generate_stats_report
@@ -1070,212 +959,6 @@ class Analyzer:
 				))
 			self.write_csv(aggregated_file_name, owner_data_csv)
 	# generate_data_transfer_report
-
-	def get_3p_use_data(self,tld_filter=None):
-		""""
-		For some domains we know what they are used for on a first-party basis (eg marketing).
-		This function examines the data we have collected in order to determine what percentage
-			of pages include a request to a third-party domain with a given use, how many
-			such requests are made on a per-use basis per-page, and finally, what percentage
-			of requests per-page set a third-party cookie.
-
-		Data is returned as a dict, the first field of which is a set of all the
-			uses we know of.
-		"""
-
-		# we first need to create a dict whereby each domain 
-		#	corresponds to a list of known uses
-		# domains with no known uses are not in the list
-		#
-		# IMPORTANT NOTE:
-		#	some domains may have several uses!
-		domain_to_use_map = {}
-
-		# a list of all known uses
-		all_uses = set()
-
-		# we read this from our normal domain_owners file
-		infile	= open('./webxray/resources/domain_owners/domain_owners.json', 'r', encoding='utf-8')
-		domain_data	= json.load(infile)
-		infile.close()
-
-		# process all entries from the domain_owners file
-		for item in domain_data:
-			for domain in item['domains']:
-				# if we have uses, enter them with domain
-				if len(item['uses']) > 0:
-					domain_to_use_map[domain] = item['uses']
-					# make sure we have the uses in all_uses
-					for use in item['uses']:
-						all_uses.add(use)
-
-		# now that our domain to use mapping is done we have to 
-		#	process the actual data!
-
-		# for each page, create a list of the set of domains 
-		#	which set a cookie
-		#
-		# note that due to currently unresolved chrome issues we sometimes 
-		# 	can get cookies which don't have a corresponding 3p request
-		# 	this approach handles that gracefully
-		page_cookie_domains = {}
-		for page_id, cookie_domain in self.sql_driver.get_page_id_3p_cookie_domain_pairs(tld_filter):
-			if page_id not in page_cookie_domains:
-				page_cookie_domains[page_id] = [cookie_domain]
-			else:
-				page_cookie_domains[page_id] = page_cookie_domains[page_id] + [cookie_domain]
-
-		# next, for each page we want a list of uses for domains and if
-		#	that domain corresponds to a cookie being set
-		# NOTE: the same use may occur many times, this is desired
-		# 	as it gives us our counts later on
-		page_3p_uses = {}
-		for page_id, element_domain in self.sql_driver.get_page_id_3p_element_domain_pairs(tld_filter):
-			# if this 3p domain has a known use we add it to a list of uses keyed to page id
-			if element_domain in domain_to_use_map:
-				# check if the domain of this element has a cookie for this page
-				if page_id in page_cookie_domains and element_domain in page_cookie_domains[page_id]: 
-					sets_cookie = True
-				else:
-					sets_cookie = False
-
-				# add in a tuple of (use,sets_cookie) to a list for this page_id
-				for use in domain_to_use_map[element_domain]:
-					if page_id not in page_3p_uses:
-						page_3p_uses[page_id] = [(use,sets_cookie)]
-					else:
-						page_3p_uses[page_id] = page_3p_uses[page_id] + [(use,sets_cookie)]
-
-		# determine how often requests for a give use are encrypted with ssl
-		# 	- note that on the same page multiple requests for a single use may be made
-		# 		and each request may or may not be ssl
-		use_ssl 	= {}
-		use_total 	= {}
-		total_classified = 0
-		for domain,is_ssl in self.sql_driver.get_3p_element_domain_ssl_use():
-			# only analyze domains we know the use for
-			if domain in domain_to_use_map:
-				total_classified += 1
-				# each domain may have several uses, add for all
-				for use in domain_to_use_map[domain]:
-					# increment count of ssl usage
-					if is_ssl:
-						if use not in use_ssl:
-							use_ssl[use] = 1
-						else:
-							use_ssl[use] = use_ssl[use] + 1
-					
-					# keep track of total occurances of this use
-					if use not in use_total:
-						use_total[use] = 1
-					else:
-						use_total[use] = use_total[use] + 1
-
-		# for each use we will produce summary counts, we 
-		#	initialize everyting to zero here
-		total_pages_w_use 				= {}
-		total_use_occurances 			= {}
-		total_use_occurances_w_cookie 	= {}
-
-		for use in all_uses:
-			total_pages_w_use[use] 				= 0
-			total_use_occurances[use] 			= 0
-			total_use_occurances_w_cookie[use] 	= 0
-
-		# process each page and update the relevant counts
-		for page_id in page_3p_uses:
-			# we only want to count use once per-page, so
-			#	create a set and add to it as we go along
-			this_page_use_set = set()
-
-			# upate the use occurance counters
-			for use, has_cookie in page_3p_uses[page_id]:
-				this_page_use_set.add(use)
-				total_use_occurances[use] = total_use_occurances[use] + 1
-				if has_cookie == True:
-					total_use_occurances_w_cookie[use] = total_use_occurances_w_cookie[use] + 1
-			
-			# each use in the set adds one to the total page count
-			for use in this_page_use_set:
-				total_pages_w_use[use] = total_pages_w_use[use] + 1
-
-		# the last step is to calculate the relevant percentages and averages
-
-		# used to get percentage by use
-		total_pages = self.sql_driver.get_complex_page_count(tld_filter)
-
-		percentage_by_use 				= {}
-		average_use_occurance_per_page 	= {}
-		percentage_use_w_cookie 		= {}
-		percentage_use_ssl 				= {}
-		
-		for use in all_uses:
-			percentage_by_use[use] 				= 0
-			average_use_occurance_per_page[use] = 0
-			percentage_use_w_cookie[use] 		= 0
-
-		for use in total_pages_w_use:
-			if total_pages_w_use[use] > 0:
-				percentage_by_use[use] 				= 100*(total_pages_w_use[use]/total_pages)
-				average_use_occurance_per_page[use] = total_use_occurances[use]/total_pages_w_use[use]
-				percentage_use_w_cookie[use]		= 100*(total_use_occurances_w_cookie[use]/total_use_occurances[use])
-			else:
-				percentage_by_use[use] 				= None
-				average_use_occurance_per_page[use] = None
-				percentage_use_w_cookie[use]		= None
-
-			# conditional to account for cases where no instance of a given use is ssl
-			if use in use_ssl:
-				percentage_use_ssl[use] 			= 100*(use_ssl[use]/use_total[use])
-			else:
-				percentage_use_ssl[use] 			= 0
-
-		# send back everyting as a keyed dict
-		return({
-			'all_uses'							: all_uses,
-			'percentage_by_use'					: percentage_by_use,
-			'average_use_occurance_per_page'	: average_use_occurance_per_page,
-			'percentage_use_w_cookie' 			: percentage_use_w_cookie,
-			'percentage_use_ssl'				: percentage_use_ssl
-			})
-	# get_3p_use_data
-
-	def generate_use_report(self):
-		"""
-		This function handles the process of generating a csv report which details
-			what percentage of pages use third-party content for specific uses,
-			the number of requests made for a given type of use on a per-page basis,
-			and the percentage of such requests which correspond to a third-party
-			cookie.
-		"""
-
-		print('\t==========================')
-		print('\t Processing 3P Use Report ')
-		print('\t==========================')
-
-		use_data 						= self.get_3p_use_data()
-		all_uses						= use_data['all_uses']
-		percentage_by_use 				= use_data['percentage_by_use']
-		average_use_occurance_per_page 	= use_data['average_use_occurance_per_page']
-		percentage_use_w_cookie 		= use_data['percentage_use_w_cookie']
-		percentage_use_ssl				= use_data['percentage_use_ssl']
-
-		csv_rows = []
-		csv_rows.append(('use category','percent pages with use','ave occurances per page with use','percentage of use with cookie', 'percentage of use ssl'))
-		for use in sorted(all_uses):
-			if percentage_by_use[use] != None:
-				csv_rows.append((
-					use,
-					round(percentage_by_use[use],self.num_decimals),
-					round(average_use_occurance_per_page[use],self.num_decimals),
-					round(percentage_use_w_cookie[use],self.num_decimals),
-					round(percentage_use_ssl[use],self.num_decimals)
-				))
-			else:
-				csv_rows.append((use,None,None,None,None))
-
-		self.write_csv('3p_uses.csv', csv_rows)
-	# generate_use_report
 
 	def generate_network_report(self):
 		"""

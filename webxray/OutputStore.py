@@ -2,7 +2,6 @@
 import os
 import re
 import json
-import hashlib
 import urllib.request
 from urllib.parse import urlparse
 
@@ -22,7 +21,7 @@ class OutputStore:
 		self.url_parser = ParseURL()
 	# init
 
-	def store(self, url, browser_output, store_source=False, store_1p=True, get_file_hashes=False, hash_3p_only=False):
+	def store(self, url, browser_output, store_source=False, store_1p=True):
 		"""
 		this is the primary function of this class,
 		
@@ -40,15 +39,9 @@ class OutputStore:
 		"""
 
 		# open up a sql connection
-		if self.db_engine == 'mysql':
-			from webxray.MySQLDriver import MySQLDriver
-			sql_driver = MySQLDriver(self.db_name)
-		elif self.db_engine == 'sqlite':
+		if self.db_engine == 'sqlite':
 			from webxray.SQLiteDriver import SQLiteDriver
 			sql_driver = SQLiteDriver(self.db_name)
-		elif self.db_engine == 'postgres':
-			from webxray.PostgreSQLDriver import PostgreSQLDriver
-			sql_driver = PostgreSQLDriver(self.db_name)
 		else:
 			print('INVALED DB ENGINE FOR %s, QUITTING!' % db_engine)
 			exit()
@@ -72,34 +65,6 @@ class OutputStore:
 		# if it is already in db just return the existing id
 		page_domain_id = sql_driver.add_domain(origin_ip, origin_fqdn, origin_domain, origin_pubsuffix, origin_tld)
 
-		# figure out the privacy policy url and text, starts null
-		priv_policy_url = None
-		priv_policy_url_text = None
-
-		# read in our list of privacy link terms from the json file in webxray/resources/policyxray
-		privacy_policy_term_list = self.utilities.get_privacy_policy_term_list()
-
-		# we reverse links return from browser to check footer links first as that is where policy links tend to be
-		all_links = browser_output['all_links']
-		all_links.reverse()
-
-		# if we have links search for privacy policy
-		if len(all_links) > 0:
-			# links are tuple
-			for link_text,link_url in all_links:
-				# makes sure we have text, skip links without
-				if link_text:
-					# need lower for string matching
-					link_text = link_text.lower().strip()
-					# not a link we can use
-					if 'javascript' in link_text: continue
-					# see if the link_text is in our term list
-					if link_text in privacy_policy_term_list:
-							# if the link_url is relative this will convert to absolute
-							priv_policy_url = self.utilities.get_absolute_url_from_page_link(url,link_url)
-							priv_policy_url_text = link_text
-							break
-
 		# if the final page is https (often after a redirect), mark it appropriately
 		if browser_output['final_url'][:5] == 'https':
 			page_is_ssl = True
@@ -107,8 +72,7 @@ class OutputStore:
 			page_is_ssl = False
 
 		if store_source:
-			# handles issue where postgres will crash on inserting null character
-			source = browser_output['source'].replace('\x00',' ')
+			source = browser_output['source']
 		else:
 			source = None
 
@@ -121,8 +85,6 @@ class OutputStore:
 			browser_output['meta_desc'],
 			url, 
 			browser_output['final_url'],
-			priv_policy_url,
-			priv_policy_url_text,
 			page_is_ssl,
 			source,
 			browser_output['load_time'],
@@ -343,29 +305,7 @@ class OutputStore:
 			else:
 				element_type = None
 
-			# file hashing has non-trivial overhead and off by default
-			#
-			# what this does is uses the same ua/referer as the actual request
-			# 	so we are just replaying the last one to get similar response
-			# 	note that we aren't sending the same cookies so that could be an issue
-			# 	otherwise it is equivalent to a page refresh in theory
-
-			# option to hash only 3p elements observed here
-			if (get_file_hashes and hash_3p_only and is_3p_element) or (get_file_hashes and hash_3p_only == False):
-				replay_element_request = urllib.request.Request(
-					request,
-					headers = {
-						'User-Agent' : browser_output['processed_requests'][request]['user_agent'],
-						'Referer' : referer,
-						'Accept' : '*/*'
-					}
-				)
-				try:
-					file_md5 = hashlib.md5(urllib.request.urlopen(replay_element_request,timeout=10).read()).hexdigest()
-				except:
-					file_md5 = None
-			else:
-				file_md5 = None
+			file_md5 = None
 
 			# final tasks is to truncate the request if it is 
 			#	over 2k characters as it is likely
@@ -393,7 +333,6 @@ class OutputStore:
 				body_size,
 				request_headers,
 				response_headers,
-				file_md5,
 				element_extension,
 				element_type,
 				element_args,

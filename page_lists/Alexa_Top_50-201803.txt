@@ -1,5 +1,7 @@
 # Alexa top 50 list
 # retrieved 20180301
+# porn sites commented out to avoid 
+#	unwelcome surprises in headed mode
 http://google.com
 http://youtube.com
 http://facebook.com
@@ -34,9 +36,9 @@ http://netflix.com
 http://google.it
 http://twitch.tv
 http://google.es
-http://pornhub.com
+# http://pornhub.com
 http://alipay.com
-http://xvideos.com
+# http://xvideos.com
 http://google.com.hk
 http://t.co
 http://google.com.mx

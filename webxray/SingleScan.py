@@ -7,7 +7,6 @@ import json
 from webxray.ParseURL import ParseURL
 
 # browsers
-from webxray.PhantomDriver	import PhantomDriver
 from webxray.ChromeDriver	import ChromeDriver
 
 class SingleScan:
@@ -57,9 +56,7 @@ class SingleScan:
 			return None
 
 		# import and set up specified browser driver
-		if self.browser_type == 'phantomjs':
-			browser_driver 	= PhantomDriver()
-		elif self.browser_type == 'chrome':
+		if self.browser_type == 'chrome':
 			browser_driver 	= ChromeDriver()
 			chrome_ua = browser_driver.get_ua_for_headless()
 			browser_driver 	= ChromeDriver(ua=chrome_ua)

@@ -226,8 +226,6 @@ class SQLiteDriver:
 		browser_type, browser_version, browser_wait,
 		title, meta_desc, 
 		start_url, final_url,
-		priv_policy_url,
-		priv_policy_url_text,
 		is_ssl, source, 
 		load_time, domain_id):
 		"""
@@ -246,8 +244,6 @@ class SQLiteDriver:
 				browser_type, browser_version, browser_wait,
 				start_url_md5, start_url,
 				final_url_md5, final_url,
-				priv_policy_url_md5, priv_policy_url, 
-				priv_policy_url_text,
 				is_ssl, source, 
 				load_time, domain_id,
 				accessed
@@ -257,8 +253,6 @@ class SQLiteDriver:
 		 		?,?,
 		 		?,?,
 		 		?,?,
-		 		?,
-		 		?,?,
 		 		?,?,
 		 		?
 		)""", 
@@ -266,8 +260,6 @@ class SQLiteDriver:
 				browser_type, browser_version, browser_wait,
 				self.md5_text(start_url), start_url, 
 				self.md5_text(final_url), final_url,
-				self.md5_text(priv_policy_url), priv_policy_url,
-				priv_policy_url_text,
 				is_ssl, source, 
 				load_time, domain_id,
 				accessed)
@@ -290,7 +282,7 @@ class SQLiteDriver:
 		status, status_text, 
 		content_type, body_size, 
 		request_headers, response_headers, 
-		file_md5, extension,
+		extension,
 		type, args, 
 		domain_id):
 		"""
@@ -309,7 +301,7 @@ class SQLiteDriver:
 				status, status_text, 
 				content_type, body_size, 
 				request_headers, response_headers, 
-				file_md5, extension,
+				extension,
 				type, args, 
 				domain_id) 
 		VALUES (
@@ -323,7 +315,7 @@ class SQLiteDriver:
 				?, ?,
 				?, ?,
 				?, ?,
-				?, ?,
+				?,
 				?, ?, 
 				?)""", 
 		(		page_id,
@@ -336,7 +328,7 @@ class SQLiteDriver:
 				status, status_text, 
 				content_type, body_size, 
 				request_headers, response_headers, 
-				file_md5, extension,
+				extension,
 				type, args, 
 				domain_id)
 		)
@@ -401,7 +393,7 @@ class SQLiteDriver:
 	def add_domain_owner(self, 
 			id, parent_id, 
 			name, aliases, 
-			homepage_url, privacy_policy_url,
+			homepage_url, 
 			notes, country):
 		"""
 		create entries for the domain owners we are analyzing
@@ -410,10 +402,10 @@ class SQLiteDriver:
 			INSERT OR IGNORE INTO domain_owner (
 				id, parent_id, 
 				name, aliases, 
-				homepage_url, privacy_policy_url,
+				homepage_url, 
 				notes, country
-			) VALUES (?,?,?,?,?,?,?,?)""", 
-			(id, parent_id, name, aliases, homepage_url, privacy_policy_url, notes, country)
+			) VALUES (?,?,?,?,?,?,?)""", 
+			(id, parent_id, name, aliases, homepage_url, notes, country)
 		)
 		self.db_conn.commit()
 	# add_domain_owner
@@ -441,7 +433,7 @@ class SQLiteDriver:
 		self.db.execute("""
 			SELECT 
 				id, parent_id, name,
-				aliases, homepage_url, privacy_policy_url,
+				aliases, homepage_url,
 				notes, country
 			FROM
 				domain_owner
@@ -578,7 +570,7 @@ class SQLiteDriver:
 		return self.db.fetchall()
 	# get_element_sizes
 
-	def get_complex_page_count(self, tld_filter = None, type = None, tracker_domains = None):
+	def get_complex_page_count(self, tld_filter = None, type = None):
 		"""
 		given various types of analyses we may want to count how many pages meet
 			certain criteria, this function handles creating complex sql queries
@@ -589,10 +581,6 @@ class SQLiteDriver:
 		while it is better to have logic in elsewhere, some logic has to be here
 			as building the queries this way is specific to different sql flavors
 		
-		FOR EXPERTS:
-		by defining 'tracker_domains' to be those domains which link X number of 
-			sites, we can change our reports to be bounded by those domains. note the 
-			list of domains comes from 'get_tracker_domains' in Analyzer.py
 		"""
 
 		# holder for filters
@@ -620,24 +608,6 @@ class SQLiteDriver:
 		# addtional filtering
 		if type == 'javascript': filters.append("element.type = 'javascript'")
 		if tld_filter: filters.append("page_domain.tld = '%s'" % tld_filter)
-
-		# special tracker filtering
-		if tracker_domains:
-			# if we set a very high threshold it is possible we have no tracking domains
-			#	in this case our count will be zero, so we do that and return
-			if len(tracker_domains) == 0:
-				return 0
-			# otherwise we build the query with a super long conditional as 
-			#	we have tracker domains
-			tracker_filter = '('
-			for tracker_domain_name in tracker_domains:
-				if type == 'cookies':
-					tracker_filter += "cookie_domain.domain = '%s' OR " % tracker_domain_name
-				else:
-					tracker_filter += "element_domain.domain = '%s' OR " % tracker_domain_name
-			tracker_filter = tracker_filter[:-3]
-			tracker_filter += ')'
-			filters.append(tracker_filter)
 
 		self.db.execute(self.build_filtered_query(query,filters))
 		return self.db.fetchone()[0]

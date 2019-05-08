@@ -13,7 +13,6 @@ from urllib.parse import urlunsplit
 # custom webxray classes
 from webxray.OutputStore	import OutputStore
 from webxray.ChromeDriver 	import ChromeDriver
-from webxray.PhantomDriver 	import PhantomDriver
 
 class Collector:
 	"""
@@ -27,15 +26,13 @@ class Collector:
 		*will* retry pages that may not have loaded
 	"""
 
-	def __init__(self, db_engine, db_name, pages_file_name, browser_types, browser_wait, allow_timeseries=False, interval_minutes=1440):
+	def __init__(self, db_engine, db_name, pages_file_name, browser_types, browser_wait):
 		self.db_engine			= db_engine
 		self.startTime		 	= datetime.now()
 		self.db_name		 	= db_name
 		self.pages_file_name	= pages_file_name
 		self.browser_types		= browser_types
 		self.browser_wait		= browser_wait
-		self.allow_timeseries	= allow_timeseries
-		self.interval_minutes	= interval_minutes # default of 1440 is one day
 
 		# set the correct ua string for chrome, only do once
 		if 'chrome' in browser_types:
@@ -51,20 +48,14 @@ class Collector:
 
 	def process_url(self, url):
 		"""
-		this function takes a specified url, loads it in the browser (currently phantomjs)
+		this function takes a specified url, loads it in the browser
 			and returns json-formatted output with relevant request data, etc.
 
 		the output_store class then puts this data in the db for later analysis
 		"""
 
-		# set up sql connection used to log errors and do timeseries checks
-		if self.db_engine == 'mysql':		
-			from webxray.MySQLDriver import MySQLDriver
-			sql_driver = MySQLDriver(self.db_name)
-		elif self.db_engine == 'postgres':	
-			from webxray.PostgreSQLDriver import PostgreSQLDriver
-			sql_driver = PostgreSQLDriver(self.db_name)
-		elif self.db_engine == 'sqlite':	
+		# set up sql connection used to log errors and do checks
+		if self.db_engine == 'sqlite':	
 			from webxray.SQLiteDriver import SQLiteDriver
 			sql_driver = SQLiteDriver(self.db_name)
 
@@ -77,19 +68,8 @@ class Collector:
 			# import and set up specified browser driver
 			# 	note we need to set up a new browser each time to 
 			#	get a fresh profile
-			if browser_type == 'phantomjs':
-				browser_driver 	= PhantomDriver()
-			elif browser_type == 'chrome':
+			if browser_type == 'chrome':
 				browser_driver 	= ChromeDriver(ua=self.chrome_ua)
-
-			# support for timeseries collections - purposefully undocumented 
-			if self.allow_timeseries:
-				page_last_accessed_browser_type = sql_driver.get_page_last_accessed_by_browser_type(url,browser_type)
-				if page_last_accessed_browser_type:
-					time_diff = datetime.now()-page_last_accessed_browser_type[0]
-					if time_diff < timedelta(minutes=self.interval_minutes) and page_last_accessed_browser_type[1] == browser_type:
-						print("\t\t%-50s Scanned too recently with %s" % (url[:50], browser_type))
-						continue
 
 			# attempt to load the page, fail gracefully
 			try:
@@ -141,13 +121,7 @@ class Collector:
 			exit()
 
 		# set up sql connection used to determine if items are already in the db
-		if self.db_engine == 'mysql':		
-			from webxray.MySQLDriver import MySQLDriver
-			sql_driver = MySQLDriver(self.db_name)
-		elif self.db_engine == 'postgres':	
-			from webxray.PostgreSQLDriver import PostgreSQLDriver
-			sql_driver = PostgreSQLDriver(self.db_name)
-		elif self.db_engine == 'sqlite':	
+		if self.db_engine == 'sqlite':	
 			from webxray.SQLiteDriver import SQLiteDriver
 			sql_driver = SQLiteDriver(self.db_name)
 
@@ -172,7 +146,7 @@ class Collector:
 				print("\t\t%s | %-50s Not a valid address, Skipping." % (count, url[:50]))
 				continue
 
-			# non-ascii domains will crash phantomjs, so we need to convert them to 
+			# non-ascii domains may cause issues, so we need to convert them to 
 			# 	idna/ascii/utf-8
 			# this requires splitting apart the url, converting the domain to idna,
 			#	and pasting it all back together
@@ -186,11 +160,10 @@ class Collector:
 				print("\t\t%s | %-50s Not an HTML document, Skipping." % (count, url[:50]))
 				continue
 
-			# skip if in db already unless we are doing a timeseries
-			if self.allow_timeseries == False:
-				if sql_driver.page_exists(url):
-					print("\t\t%s | %-50s Exists in DB, Skipping." % (count, url[:50]))
-					continue
+			# skip if in db already
+			if sql_driver.page_exists(url):
+				print("\t\t%s | %-50s Exists in DB, Skipping." % (count, url[:50]))
+				continue
 	
 			# only add if not in list already
 			if url not in urls_to_process:

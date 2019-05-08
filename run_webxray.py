@@ -29,8 +29,8 @@ from optparse import OptionParser
 ###################
 
 # BROWSER SELECTION
-# 	browser_type can be chrome or phantomjs
-#	chrome is default
+# 	browser_type can only be chrome
+#	phantomjs has been removed
 browser_type = 'chrome'
 
 # BROWSER WAIT TIME
@@ -56,22 +56,14 @@ browser_wait = 45
 pool_size = 1
 
 # DATABASE ENGINE SELECTION
-# 	db_engine can be 'mysql', 'postgres', or 'sqlite'
-#	sqlite requires no configuation, but mysql and postgres
-#		need user/pw set up in the relevant driver in the 
-#		./webxray directory
+# 	db_engine can only be 'sqlite'
+#	'mysql' and 'postgres' have been removed
 db_engine = 'sqlite'
 
 # set up database connection
-if db_engine == 'mysql':
-	from webxray.MySQLDriver import MySQLDriver
-	sql_driver = MySQLDriver()
-elif db_engine == 'sqlite':
+if db_engine == 'sqlite':
 	from webxray.SQLiteDriver import SQLiteDriver
 	sql_driver = SQLiteDriver()
-elif db_engine == 'postgres':
-	from webxray.PostgreSQLDriver import PostgreSQLDriver
-	sql_driver = PostgreSQLDriver()
 else:
 	print('INVALED DB ENGINE FOR %s, QUITTING!' % db_engine)
 	quit()
@@ -312,7 +304,6 @@ def analyze(db_name):
 	analyzer.generate_db_summary_report()
 	analyzer.generate_stats_report()
 	analyzer.generate_aggregated_tracking_attribution_report()
-	analyzer.generate_use_report()
 	analyzer.generate_3p_domain_report()
 	analyzer.generate_3p_element_report()
 	analyzer.generate_3p_element_report('javascript')
@@ -345,32 +336,18 @@ if __name__ == '__main__':
 	  \_/\_/ \___|_.__/_/\_\_|  \__,_|\__, |
 	                                   __/ |
 	                                  |___/ 
-                            	   	  [v 2.1]
+                            	   	  [v 2.2]
     ''')
+
 
 	# set up cli args
 	parser = OptionParser()
-	parser.add_option('-i', action='store_true', dest='interactive', help='Interactive Mode: Best for Small/Medium Size Datasets')
-	parser.add_option('-a', action='store_true', dest='analyze', help='Analyze Unattended: Best for Large Datasets - Args: [db_name]')
-	parser.add_option('-c', action='store_true', dest='collect', help='Collect Unattended: Best for Large Datasets - Args: [db_name] [page_file_name]')
 	parser.add_option('-s', action='store_true', dest='single', help='Single Site: for One-Off Tests - Args [url to analyze]')
 	(options, args) = parser.parse_args()
 
 	mode_count = 0
 	
 	# set mode, make sure we don't have more than one specified
-	if options.interactive:
-		mode = 'interactive'
-		mode_count += 1 
-
-	if options.analyze:
-		mode = 'analyze'
-		mode_count += 1
-		
-	if options.collect:
-		mode = 'collect'
-		mode_count += 1
-		
 	if options.single:
 		mode = 'single'
 		mode_count += 1
@@ -386,21 +363,6 @@ if __name__ == '__main__':
 	# do what we're supposed to do		
 	if mode == 'interactive':
 		interaction()
-	elif mode == 'analyze':
-		try:
-			db_name = args[0]
-		except:
-			print('Need a db name!')
-			quit()
-		analyze(db_name)
-	elif mode == 'collect':
-		try:
-			db_name = args[0]
-			page_file = args[1]
-		except:
-			print('Need a db name and pages file name!')
-			quit()
-		collect(db_name, page_file)
 	elif mode == 'single':
 		try:
 			url = args[0]
@@ -408,5 +370,9 @@ if __name__ == '__main__':
 			print('URL needs to be supplied as an argument!')
 			quit()
 		single(url)
+	quit()
+
+	# main show
+	interaction()
 	quit()
 # main

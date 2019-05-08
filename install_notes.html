@@ -82,7 +82,7 @@ __      _____| |____  ___ __ __ _ _   _
   \_/\_/ \___|_.__/_/\_\_|  \__,_|\__, |
                                    __/ |
                                   |___/ 
-                           	   [v 2.0]
+                           	   [v 2.2]
 			</pre>
 		</header>
 		<section>
@@ -91,7 +91,7 @@ __      _____| |____  ___ __ __ _ _   _
 
 				<p>webxray uses a custom library of domain ownership to chart the flow of data from a given third-party domain to a corporate owner, and if applicable, to parent companies.  Tracking attribution reports produced by webxray provide robust granularity.  Reports of the average numbers of third-parties and cookies per-site, most commonly occurring third-party domains and elements, volumes of data transferred, use of SSL encryption, and more are provided out-of-the-box.  A flexible data schema allows for the generation of custom reports as well as authoring extensions to add additional data sources.</p>
 
-				<p>By default, webxray uses Chrome to load pages, stores data in a SQLite database, and can be used on a normal desktop computer.  Users with advanced needs may install webxray on a server and leverage MySQL or PostgreSQL for heavy-duty data storage.</p>
+				<p>The public version of webxray uses Chrome to load pages, stores data in a SQLite database, and can be used on a normal desktop computer.</p>
 
 				<p>Below you will find detailed instructions on how to install the software needed to run webxray in the <a href="#dependencies">Dependencies</a> section.  The <a href="#install_webxray">Installation and First Run</a> section provides guidance on getting started.  Additional section provide instructions on <a href="#custom_scans">Using webxray to Analyze Your Own List of Pages</a>, <a href="#reports">Viewing and Understanding Reports</a>, as well as <a href="#advanced_options">Advanced Options</a>, and <a href="#help">Getting Help</a>.
 		</section>
@@ -270,65 +270,26 @@ __      _____| |____  ___ __ __ _ _   _
 		<section>
 			<h2 id="advanced_options">Advanced Options</h2>
 		
-				<p>The default installation instructions above are perfect for analyzing moderate volumes of pages (e.g. fewer than 1,000).  However, the true value of webxray is the ability to scan vast volumes of pages.  The following are details on how to leverage the power of many advanced functions, and unlike the above, these directions assume you are familiar installing dependencies on your own and doing light editing of Python3 code.</p>
+				<p>The following are details on how to leverage the power of many advanced functions, and unlike the above, these directions assume you are capable of doing light editing of Python3 code.</p>
 
 				<h3>Analyze a Single Page</h3>
 					<p>Sometimes you just want to run a single quick scan, to do so, use the command below.  Be sure to replace "http://example.com" with the address of the site you want to scan.</p>
 					<p class="cli">python3 run_webxray.py -s http://example.com</p>
 
 				<h3>Run Many Browsers in Parallell to Increase Speed</h3>
-					<p>By default, webxray will only run a single browser at a time.  Given webxray waits 30 seconds for a page to load, this means it will take over 8 hours to scan 1,000 pages.  However, most systems can handle running many more browsers at a time, resulting in significant speed gains.</p>
+					<p>By default, webxray will only run a single browser at a time.  Given webxray waits 45 seconds for a page to load, this means it will take over 8 hours to scan 1,000 pages.  However, most systems can handle running many more browsers at a time, resulting in significant speed gains.</p>
 
 					<p>To use one browser per available processor core open run_webxray.py and change "pool_size = 1" to "pool_size = None" - this is the most straight-forward way to increase speed.  Since webxray spends most of its time waiting for pages to load you may also experiment with setting pool_size <em>above</em> the number of available cores.</p>
 
 					<p>It is possible to do some performance tuning to determine how many browsers you can run before you get crashes.  If you desire to scan more than 100,000 pages, performance tuning is highly advised.</p>
 
-				<h3>Use a More Powerful Database</h3>
-					<p>If you are scanning more than a few thousand pages, you will need a database engine far more powerful than SQLite.  Both MySQL and PostgreSQL are supported by webxray.  The instructions below will tell you how to set up each database.  Note that most webxray development has been done on MySQL and PostgreSQL has therefore undergone less testing.</p>
-
-					<h4>To use MySQL:</h4>
-
-						<p>First you must install MySQL: <a href="https://www.mysql.com">https://www.mysql.com</a> and the mysql-connector module for Python3: <a href="https://dev.mysql.com/downloads/connector/python/">https://dev.mysql.com/downloads/connector/python/</a>.</p>
-
-						<p>Second, because MySQL's version of unicode is not actual unicode, you must configure your database to use real unicode which MySQL calls 'utf8mb4'.  Follow this guide to get MySQL to work correctly, note you only need to follow Step 5, ignore the rest: <a href="https://mathiasbynens.be/notes/mysql-utf8mb4#character-sets">https://mathiasbynens.be/notes/mysql-utf8mb4#character-sets</a>.</p>
-
-						<p>Third, you must configure webxray to use MySQL, to do so open the file 'run_webxray.py', find the line "db_engine = 'sqlite'" and change it to "db_engine = 'mysql'".</p>
-
-						<p>Fourth, open the file './webxray/MySQLDriver.py' and update your username and password in the '__init__' function.</p>
-
-						<p>You should be all set to use MySQL now, run webxray as you normally would.</p>
-
-					<h4>To use PostgreSQL:</h4>
-
-						<p>First, you must install PostgreSQL: <a href="https://www.postgresql.org">https://www.postgresql.org</a> and the psycopg2 module for Python3: <a href="http://initd.org/psycopg/">http://initd.org/psycopg/</a>.</p>
-
-						<p>Second, you must configure webxray to use PostgreSQL, to do so open the file 'run_webxray.py' find the line "db_engine = 'sqlite'" and change it to "db_engine = 'postgres'".</p>
-
-						<p>Third, open the file './webxray/PostgreSQLDriver.py' and update your username and password in the '__init__' function.</p>
-
-						<p>You should be all set to use PostgreSQL now, run webxray as you normally would.</p>
-
 				<h3>Change How Long the Browser Waits After Loading a Page</h3>
 		
-					<p>In order to get all the third-party elements possible, webxray waits for 30 seconds after loading a page.  You can make this longer or shorter by changing the line "browser_wait = 30" in run_webxray.py.  Note that 30 seconds works very well, and due to specifics of Chrome, setting it to fewer than 30 seonds may result in lost cookies.</p>
+					<p>In order to get all the third-party elements possible, webxray waits for 45 seconds after loading a page.  You can make this longer or shorter by changing the line "browser_wait = 45" in run_webxray.py.  Note that 45 seconds works very well, and due to specifics of Chrome, setting it to fewer than 45 seonds may result in lost cookies.</p>
 
 				<h3>Run Chrome in Windowed Mode</h3>
 		
 					<p>By default, Chrome is run without a window opening on your computer which uses less resources, is less annoying, and is required if your computer doesn't have a monitor.  If you do want to see pages loading you can enable 'windowed' mode by opening the file './webxray/ChromeDriver.py', finding the line "self.headless = True", and changing it to " self.headless = False".</p>
-
-				<h3>Use PhantomJS</h3>
-		
-					<p>The state of the PhantomJS is in dissarray as people are moving to Chrome.  This is sad as the browser is extremely resource-friendly and very useful for scanning large volumes of web pages.  If you still want to use PhantomJS you must first install it on your system, then open the run_webxray.py file and change the line "browser_type = 'chrome'" to "browser_type = 'phantomjs'".</p>
-
-				<h3>Hash Elements</h3>
-	
-					<p>It is possible to have webxray calculate the MD5 hash of all elements being downloaded.  This is useful if you want to check for malware and other tasks.  In the 'store' function of of './webxray/OutputStore.py' you will find the 'get_file_hashes' and 'hash_3p_only' parameters, modify them as desired.  Note that elements must be re-downloaded for hashing so it slows down your network connection considerably and makes heavy CPU demands as you are runnig a ton of hashing operations.  This is why it is off by default.</p>
-
-				<h3>Hidden Options</h3>
-			
-					<p>There are many options hidden throughout the code base, most often you can find hints in function parameters and by running this command:</p>
-
-					<p class="cli">python3 run_webxray.py -h</p>
 		</section>
 		<section>
 			<h2 id="help">Getting Help</h2>

@@ -51,28 +51,4 @@ class Utilities:
 		# this only happens if something breaks
 		return None
 	# get_absolute_url_from_link
-
-	def get_privacy_policy_term_list(self):
-		"""
-		Returns a list of all strings we know to correspond to
-			privacy policy links which are retrieved from
-			our json database.
-		"""
-		privacy_policy_term_list = []
-		for lang_term_set in json.load(open(os.path.dirname(os.path.abspath(__file__))+'/resources/policyxray/policy_terms.json', 'r', encoding='utf-8')):
-			for term in lang_term_set['policy_terms']:
-				privacy_policy_term_list.append(term)
-		return privacy_policy_term_list
-	# get_privacy_policy_term_list
-
-	def get_lang_to_privacy_policy_term_dict(self):
-		"""
-		Returns a dict of privacy policy terms keyed by language code.
-		"""
-		lang_to_terms = {}
-		for lang_term_set in json.load(open(os.path.dirname(os.path.abspath(__file__))+'/resources/policyxray/policy_terms.json', 'r', encoding='utf-8')):
-			lang_to_terms[lang_term_set['lang']] = lang_term_set['policy_terms']
-		return lang_to_terms
-	# get_lang_to_priv_term_dict
-
 # Utilities	
