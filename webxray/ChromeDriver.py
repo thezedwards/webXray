@@ -74,6 +74,11 @@ class ChromeDriver:
 		if self.allow_insecure:
 			chrome_options.add_argument('--allow-running-insecure-content')
 
+		# in chrome 74 mac does not get cookies, this is a workaround per
+		#	https://bugs.chromium.org/p/chromedriver/issues/detail?id=2897
+		chrome_options.add_argument('--enable-features=NetworkService,NetworkServiceInProcess')
+
+			
 		# thank god for this option
 		chrome_options.add_argument('--mute-audio')
 		
