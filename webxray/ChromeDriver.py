@@ -101,7 +101,7 @@ class ChromeDriver:
 		# once 'eager' is implemented in chromedriver that may be preferable
 		# see: https://w3c.github.io/webdriver/#dfn-table-of-page-load-strategies
 		chrome_capabilities = {
-			'loggingPrefs': {'performance': 'ALL'}, 
+			'goog:loggingPrefs': {'performance': 'ALL'}, 
 			'pageLoadStrategy': 'none'
 		}
 
@@ -496,9 +496,9 @@ class ChromeDriver:
 			})
 
 		if self.headless == True:
-			browser_version = driver.capabilities['version'] + ' [headless]'
+			browser_version = driver.capabilities['browserVersion'] + ' [headless]'
 		else:
-			browser_version = driver.capabilities['version']
+			browser_version = driver.capabilities['browserVersion']
 
 		# other parts of webxray expect this data format, common to all browser drivers used
 		return_dict = {
