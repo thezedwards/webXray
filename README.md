@@ -18,8 +18,8 @@ Python 3.4+ is required:
 	
 Google Chrome:
 
-	Chrome 66+				https://www.google.com/chrome/
-	Chrome Driver			https://sites.google.com/a/chromium.org/chromedriver/
+	Chrome 75+				https://www.google.com/chrome/
+	Chrome Driver 75			https://sites.google.com/a/chromium.org/chromedriver/
 	
 Selenium:
 	Selenium				https://pypi.python.org/pypi/selenium
