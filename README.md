@@ -4,7 +4,7 @@ webXray is a tool for analyzing third-party content on webpages and identifying 
 
 webXray uses a custom library of domain ownership to chart the flow of data from a given third-party domain to a corporate owner, and if applicable, to parent companies.  Tracking attribution reports produced by webXray provide robust granularity.  Reports of the average numbers of third-parties and cookies per-site, most commonly occurring third-party domains and elements, volumes of data transferred, use of SSL encryption, and more are provided out-of-the-box.  A flexible data schema allows for the generation of custom reports as well as authoring extensions to add additional data sources.
 
-The public version of webXray uses Chrome to load pages, stores data in a SQLite database, and can be used on a normal desktop computer.
+The public version of webXray uses Chrome to load pages, stores data in a SQLite database, and can be used on a normal desktop computer.  There is also a private version of webXray which has enhanced capabilties for web-scale forensic analysis which is designed for academic research and litigation needs.  If you have academic needs please contact Tim Libert (https://timlibert.me), if you have litigation needs please contact us at the webXray company website (https://webxray.eu).
 
 More information and detailed installation instructions may be found on the [project website](http://webXray.org).
 
