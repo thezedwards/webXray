@@ -119,7 +119,8 @@ class ChromeDriver:
 					desired_capabilities=chrome_capabilities,
 					chrome_options=chrome_options
 				)
-		except:
+		except Exception as e:
+			print('Chrome error is: %s' % e)
 			return None
 
 		# allow one minute before we kill it, seperate from browser_wait
