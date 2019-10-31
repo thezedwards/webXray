@@ -7,7 +7,6 @@ if __name__ == '__main__':
 	infile	= open('domain_owners.json', 'r')
 	data 	= json.load(infile)
 	infile.close()
-	outfile	= open('domain_owners.json', 'w')
 
 	data_sorted = sorted(data, key=lambda data:data['owner_name'].lower())
 	data_reindexed = []
@@ -95,6 +94,7 @@ if __name__ == '__main__':
 		))
 	# end loop
 	out_string = out_string[:-1]+'\n]'
+	outfile	= open('domain_owners.json', 'w')
 	outfile.write(out_string)
 	outfile.close()
 # end main
