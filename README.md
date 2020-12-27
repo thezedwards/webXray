@@ -1,5 +1,7 @@
 # webXray
 
+NOTE: This version is not under active development and no support is offered.  A new, much improved, version will be released in 2021.
+
 webXray is a tool for analyzing third-party content on webpages and identifying the companies which collect user data.  A command line user interface makes webXray easy to use for non-programmers, and those with advanced needs may analyze millions of pages with proper configuration.  webXray is a professional tool designed for academic research, and may be used by privacy compliance officers, regulators, and those who are generally curious about hidden data flows on the web.
 
 webXray uses a custom library of domain ownership to chart the flow of data from a given third-party domain to a corporate owner, and if applicable, to parent companies.  Tracking attribution reports produced by webXray provide robust granularity.  Reports of the average numbers of third-parties and cookies per-site, most commonly occurring third-party domains and elements, volumes of data transferred, use of SSL encryption, and more are provided out-of-the-box.  A flexible data schema allows for the generation of custom reports as well as authoring extensions to add additional data sources.
@@ -72,4 +74,4 @@ This tool is produced by Timothy Libert, if you are using it for academic resear
 
 # License
 
-webXray is FOSS and licensed under GPLv3, see LICENSE.md for details.
+This software is *not* open source, it is *source available* and licensed for non-commercial use only.
