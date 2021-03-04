@@ -1,152 +1,67 @@
 # standard python libraries
 import os
-import re
-import csv
 import json
-import operator
+import datetime
 import statistics
 import collections
-from datetime import datetime
-from operator import itemgetter
+
+# custom libraries
+from webxray.Utilities import Utilities
 
 class Analyzer:
 	"""
-	webXray stores data in a relational db, but that isn't human-readable
-	so what this class does is analyze the data and exports it to csv files that can be
-	opened in other programs (e.g. excel, r, gephi)
-
-	Most of the reports may also be run on the top tlds (off by default), so you will be able to
-	see if there are variations between tlds ('org' and 'com' usually differ quite a bit)
-
-	See the readme for details on all of the available reports.
+	This class performs analysis of our data.
 	"""
 
-	def __init__(self, db_engine, db_name, num_tlds, num_results, flush_owner_db = True):
-		"""
-		This performs a few start-up tasks:
-			- sets up some useful global variables
-			- makes sure we have a directory to store the reports
-			- flushes the existing domain_owner mappings (this can be disabled)
-			- if we want to do per-tld reports, figures out the most common
-		"""
-
-		# set various global vars
-		self.db_engine			= db_engine
-		self.db_name 			= db_name
-		self.num_tlds 			= num_tlds
-		self.top_tlds 			= []
-		self.num_results 		= num_results
-		self.start_time			= datetime.now()
-		
-		# number of decimal places to round to in reports
-		self.num_decimals		= 2
+	def __init__(self,db_name,db_engine):
 
 		# set up global db connection
-		if self.db_engine == 'sqlite':
+		if db_engine == 'sqlite':
 			from webxray.SQLiteDriver import SQLiteDriver
-			self.sql_driver = SQLiteDriver(self.db_name)
+			self.sql_driver = SQLiteDriver(db_name)
+		elif db_engine == 'postgres':
+			from webxray.PostgreSQLDriver import PostgreSQLDriver
+			self.sql_driver = PostgreSQLDriver(db_name)
 		else:
 			print('INVALID DB ENGINE FOR %s, QUITTING!' % db_engine)
-			exit()
-		
-		# this is reused often, do it once to save time
-		self.get_pages_ok_count		= self.sql_driver.get_pages_ok_count()
+			quit()
 
-		print('\t=============================')
-		print('\t Checking Output Directories ')
-		print('\t=============================')				
-		
-		self.setup_report_dir()
+		# these gets reused frequently, minimize db calls by doing it up here
+		self.total_pages 	= self.sql_driver.get_complex_page_count()
+		self.total_crawls 	= self.sql_driver.get_crawl_count()
 
-		print('\t============================')
-		print('\t Patching Domain Owner Data ')
-		print('\t============================')
+		# pass utilities the database info
+		self.utilities = Utilities(db_name,db_engine)
 
-		if flush_owner_db:
-			# update the domains to their owners in the db, can be overridden
-			#	by changing flush_owner_db to false
-			self.patch_domain_owners()
-		else:
-			print('\t\t\tSkipping')
+		# initialize the domain owner dict
+		self.domain_owners = self.utilities.get_domain_owner_dict()
 
-		# this is used in various places to get owner information
-		self.domain_owners = self.get_domain_owner_dict()
-
-		# if we want to get sub-reports for the most frequent tlds we find
-		#	them here
-		if self.num_tlds:
-			print('\t=====================')
-			print('\t Getting top %s tlds' % self.num_tlds)
-			print('\t=====================')
-			print('\t\tProcessing...', end='', flush=True)
-			self.top_tlds = self.get_top_tlds(self.num_tlds)
-			print('done!')
-			print('\t\tThe top tlds are:')
-			for (tld, pages) in self.top_tlds:
-				if tld: print('\t\t |- %s (%s)' % (tld,pages))
-		else:
-			# othewise we push in a single empty entry
-			self.top_tlds.append((None,self.get_pages_ok_count))
+		# load to memory for faster processing, make sure you
+		#	have enough RAM!
+		self.get_crawl_id_to_3p_domain_info()
 	# __init__
 
-	#################
-	#	UTILITIES	#
-	#################
+	def get_crawl_id_to_3p_domain_info(self):
+		"""
+		Many operations needed to access a mapping of crawl_ids to the
+			domain name and domain_owner_ids of all types of data
+			(requests, responses, cookies, and websockets).  To save
+			db calls we set up a massive dictionary once to be reused
+			later.
+		"""
 
-	def setup_report_dir(self):
-		"""
-		create directory for where the reports go if it does not exist
-		"""
-		if os.path.exists('./reports') == False:
-			print('\t\tMaking global reports directory at ./reports.')
-			os.makedirs('./reports')
-		
-		# set global report_path
-		self.report_path = './reports/'+self.db_name
-	
-		# set up subdir for this analysis
-		if os.path.exists(self.report_path) == False:
-			print('\t\tMaking subdirectory for reports at %s' % self.report_path)
-			os.makedirs(self.report_path)
+		print('\tFetching crawl 3p domain lookup info...', end='', flush=True)
 
-		print('\t\tStoring output in %s' % self.report_path)
-	# setup_report_dir
+		# this is a class global
+		self.crawl_id_to_3p_domain_info = {}
+		for crawl_id,domain,domain_owner_id in self.sql_driver.get_crawl_id_3p_domain_info():
+			if crawl_id not in self.crawl_id_to_3p_domain_info:
+				self.crawl_id_to_3p_domain_info[crawl_id] = [{'domain':domain,'owner_id':domain_owner_id}]
+			else:
+				self.crawl_id_to_3p_domain_info[crawl_id] = self.crawl_id_to_3p_domain_info[crawl_id] + [{'domain':domain,'owner_id':domain_owner_id}]
 
-	def write_csv(self, file_name, csv_rows):
-		"""
-		basic utility function to write list of csv rows to a file
-		"""
-		full_file_path = self.report_path+'/'+file_name
-		with open(full_file_path, 'w', newline='', encoding='utf-8') as csvfile:
-			csv_writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
-			for row in csv_rows:
-				csv_writer.writerow(row)
-		print('\t\tOutput written to %s' % full_file_path)
-	# write_csv
-
-	def get_most_common_sorted(self,list_in):
-		"""
-		takes a list, finds the most common items
-		and then resorts alpha (b/c python's Counter will arbitrarily 
-		order items with same count), then sorts again for most-common
-
-		assumes list_in contains alphanumeric tuples
-		"""
-		most_common_sorted = collections.Counter(list_in).most_common()
-		most_common_sorted.sort()
-		most_common_sorted.sort(reverse=True, key=lambda item:item[1])
-		return most_common_sorted
-	# get_most_common_sorted
-
-	def print_runtime(self):
-		"""
-		just for CLI info
-		"""
-		print('~='*40)
-		print('Finished!')
-		print('Time to process: %s' % str(datetime.now()-self.start_time))
-		print('-'*80)
-	# print_runtime
+		print('done!')
+	# get_crawl_id_to_3p_domain_info
 
 	def patch_domain_owners(self):
 		"""
@@ -154,122 +69,47 @@ class Analyzer:
 		  the database with domain ownership records we have stored previously
 		"""
 
+		# temporary
+		return
+
 		# we first clear out what is the db in case the new data has changed, 
 		# 	on big dbs takes a while
-		print('\t\tFlushing extant domain owner data...', end='', flush=True)
+		print('\tFlushing extant domain owner data...', end='', flush=True)
 		self.sql_driver.reset_domain_owners()
 		print('done!')
 
 		# next we pull the owner/domain pairings from the json file in 
 		# 	the resources dir and add to the db
-		print('\t\tPatching with new domain owner data...', end='', flush=True)
+		print('\tPatching with new domain owner data...', end='', flush=True)
 		domain_owner_data = json.load(open(os.path.dirname(os.path.abspath(__file__))+'/resources/domain_owners/domain_owners.json', 'r', encoding='utf-8'))
 		for item in domain_owner_data:
-			aliases = ''
-			for alias in item['aliases']:
-				aliases += '<<' + alias + '>>'
+			# skipping for now, but perhaps find a way to enter this in db?
+			if 'revision_date' in item: continue
+
 			self.sql_driver.add_domain_owner(
 				item['id'], 
 				item['parent_id'],
-				item['owner_name'], 
-				aliases,
+				item['name'],
+				json.dumps(item['aliases']),
 				item['homepage_url'],
+				json.dumps(item['site_privacy_policy_urls']),
+				json.dumps(item['service_privacy_policy_urls']),
+				json.dumps(item['gdpr_statement_urls']),
+				json.dumps(item['terms_of_use_urls']),
+				json.dumps(item['platforms']),
+				json.dumps(item['uses']),
 				item['notes'], 
 				item['country']
 			)
+
 			for domain in item['domains']:
 				self.sql_driver.update_domain_owner(item['id'], domain)
+
+		# update the domain owner dict
+		self.domain_owners = self.utilities.get_domain_owner_dict()
+
 		print('done!')
 	# patch_domain_owners
-
-	def get_domain_owner_dict(self):
-		"""
-		read out everything in the domain_owner table into a dictionary
-			so we can easily use it as a global lookup table
-		
-		this is purposefully independent of self.patch_domain_owners
-			and does not assume the above has been run, however will return
-			and empty dictionary if the db has not been patched yet
-
-		reasons for above is that if user does not wish to update with the 
-			current json file historical data will remain consistent
-		"""
-		domain_owners = {}
-		domain_owner_raw_data = self.sql_driver.get_all_domain_owner_data()
-		if domain_owner_raw_data:
-			for item in domain_owner_raw_data:
-				# aliases are stored in the db as a string that needs to be turned into a list
-				aliases = []
-				for alias in re.split('<<(.+?)>>',item[3]):
-					if alias != '': aliases.append(alias)
-				# add everything to the dict
-				domain_owners[item[0]] = {
-					'parent_id' :			item[1],
-					'owner_name' :			item[2],
-					'aliases' :				aliases,
-					'homepage_url' :		item[4],
-					'notes' :				item[5],
-					'country' :				item[6],
-				}
-		return domain_owners
-	# get_domain_owner_dict
-
-	def get_domain_owner_lineage_ids(self, id):
-		"""
-		for a given domain owner id, return the list which corresponds to its ownership lineage
-		"""
-		if self.domain_owners[id]['parent_id'] == None:
-			return [id]
-		else:
-			return [id] + self.get_domain_owner_lineage_ids(self.domain_owners[id]['parent_id'])
-	# get_domain_owner_lineage_ids
-
-	def get_domain_owner_lineage_strings(self,owner_id,get_aliases=False):
-		"""
-		given an owner_id this function returns a list
-			which is the full lineage of ownership
-
-		optionally will also return aliases (e.g. 'Doubleclick' and 'Double Click')
-		"""
-		lineage_strings = []
-		for owner_id in self.get_domain_owner_lineage_ids(owner_id):
-			lineage_strings.append((owner_id,self.domain_owners[owner_id]['owner_name']))
-			if get_aliases:
-				for alias in self.domain_owners[owner_id]['aliases']:
-					lineage_strings.append((owner_id,alias))
-		return lineage_strings
-	# get_domain_owner_lineage_strings
-
-	def get_domain_owner_lineage_combined_string(self,owner_id):
-		"""
-		given an owner_id this function returns a single string
-			which is the full lineage of ownership
-		"""
-		lineage_string = ''
-		for item in self.get_domain_owner_lineage_strings(owner_id):
-			lineage_string += item[1] + ' > '
-		return lineage_string[:-2]
-	# get_domain_owner_lineage_combined_string
-
-	def get_domain_owner_child_ids(self,id):
-		"""
-		for a given owner id, get all of its children/subsidiaries
-		"""
-		
-		# first get all the children ids if they exist
-		child_ids = []
-		for item in self.domain_owners:
-			if self.domain_owners[item]['parent_id'] == id:
-				child_ids.append(item)
-
-		# if we have children, call recursively
-		if len(child_ids) > 0:
-			for child_id in child_ids:
-				child_ids.extend(self.get_domain_owner_child_ids(child_id))
-
-		# return an empty list if no children
-		return child_ids
-	# get_domain_owner_child_ids
 
 	def get_top_tlds(self, limit):
 		"""
@@ -279,108 +119,170 @@ class Analyzer:
 		returns list of tlds
 		"""
 
+		# first we put all the tlds for each page into a list
 		tlds = []
-
 		for row in self.sql_driver.get_all_tlds():
 			tlds.append(row[0])
 
-		top_tlds = collections.Counter(tlds).most_common()
-	
-		# cut the list to the limit
-		top_tlds = top_tlds[0:limit]
+		# use this to hold the top tlds
+		# it starts with "None" as that means we process all the pages
+		top_tlds = [None]
 
-		# push in entry for all tlds
-		top_tlds.insert(0, (None,self.get_pages_ok_count))
+		# set up a global var which has the counts for each tld
+		self.page_counts_by_tld = {}
+		
+		# cut the list to the limit to return only top tlds
+		for tld,count in collections.Counter(tlds).most_common()[0:limit]:
+			top_tlds.append(tld)
+			self.page_counts_by_tld[tld] = count
 		
 		return top_tlds
 	# get_top_tlds
 
-	#####################
-	# 	REPORT HELPERS	#
-	#####################
-
-	def get_3p_domain_stats(self, num_pages, tld_filter = None):
+	def get_per_crawl_3p_domain_counts(self, tld_filter = None):
 		"""
-		determines basic stats for the number of 3p domains contacted per-page
+		determines basic stats for the number of 3p domains contacted per-crawl
 		
 		note this is distinct domain+pubsuffix, not fqdns (e.g. 'sub.example.com' 
 			and sub2.example.com' only count as 'example.com')
 		"""
 
-		# each page id corresponds to a list of domains belonging to page elements
-		page_id_to_domains_dict = {}
-
-		# run query to get all page id, page domain, and element domain entries
-		# there is no third-party filter so each page will have at least one entry for first-party domain
-		for row in self.sql_driver.get_page_id_3p_element_domain_pairs(tld_filter):
-			page_id 		= row[0]
-			element_domain 	= row[1]
-
-			# if the page id is not yet seen enter the current element as a fresh list
-			#	otherwise, we add to the existing list
-			if page_id not in page_id_to_domains_dict:
-				page_id_to_domains_dict[page_id] = [element_domain]
-			else:
-				page_id_to_domains_dict[page_id] = page_id_to_domains_dict[page_id] + [element_domain]
-
 		# now we determine the number of domains each page is connected to by looking at len of list of 3p domains
-		per_page_3p_element_counts = []
-		for page_id in page_id_to_domains_dict:
-			per_page_3p_element_counts.append(len(page_id_to_domains_dict[page_id]))
+		per_crawl_3p_request_counts = []
+		for crawl_id,count in self.sql_driver.get_crawl_3p_domain_counts():
+			per_crawl_3p_request_counts.append(count)
 
-		# pages that have no 3p elements are not yet in our counts
+		# crawls that have no 3p requests are not yet in our counts
 		# 	so for all uncounted pages we add in zeros
-		uncounted_pages = num_pages - len(per_page_3p_element_counts)
-		while uncounted_pages > 0:
-			uncounted_pages -= 1
-			per_page_3p_element_counts.append(0)
+		uncounted_crawls = self.total_crawls - len(per_crawl_3p_request_counts)
+		for i in range(0,uncounted_crawls):
+			per_crawl_3p_request_counts.append(0)
+
+		return per_crawl_3p_request_counts
+	# get_per_crawl_3p_domain_counts
+
+	def get_3p_domain_distribution(self, tld_filter=None):
+		"""
+		Determines the number of pages which have a given number of 3p domains.
+		"""
+		per_crawl_3p_request_counts = self.get_per_crawl_3p_domain_counts()
+		domain_count_to_page_count = collections.Counter(per_crawl_3p_request_counts)
+		domain_count_to_page_distribution = {}
+		max_value = 0
+		for domain_count in domain_count_to_page_count:
+			domain_count_to_page_distribution[domain_count] = domain_count_to_page_count[domain_count]
+			if domain_count > max_value:
+				max_value = domain_count
+		
+		full_dist = []
+		for domain_count in range(max_value+1):
+			if domain_count in domain_count_to_page_distribution:
+				full_dist.append({
+					'domain_count': domain_count,
+					'page_count':	domain_count_to_page_distribution[domain_count]
+				})
+			else:
+				full_dist.append({
+					'domain_count': domain_count,
+					'page_count':	0
+				})
+
+		return full_dist
+	# get_3p_domain_distribution
+
+	def get_3p_cookie_distribution(self, tld_filter=None):
+		"""
+		Determines the number of pages which have a given number of cookies.
+		"""
+		per_page_3p_cookie_counts = self.get_per_crawl_3p_cookie_counts(tld_filter)
+		cookie_count_to_page_count = collections.Counter(per_page_3p_cookie_counts)
+		cookie_count_to_page_distribution = {}
+		max_value = 0
+		for cookie_count in cookie_count_to_page_count:
+			cookie_count_to_page_distribution[cookie_count] = cookie_count_to_page_count[cookie_count]
+			if cookie_count > max_value:
+				max_value = cookie_count
+		
+		full_dist = []
+		for cookie_count in range(max_value+1):
+			if cookie_count in cookie_count_to_page_distribution:
+				full_dist.append({
+					'cookie_count': cookie_count,
+					'page_count':	cookie_count_to_page_distribution[cookie_count]
+				})
+			else:
+				full_dist.append({
+					'cookie_count': cookie_count,
+					'page_count':	0
+				})
+
+		return full_dist
+	# get_3p_cookie_distribution
+
+	def get_3p_domain_stats(self, tld_filter=None):
+		"""
+		Returns high-level 3p domain stats.
+		"""
+
+		# this is the data we will be getting stats for
+		per_crawl_3p_request_counts = self.get_per_crawl_3p_domain_counts(tld_filter)
 
 		# mean and median should always be ok
-		mean 	= statistics.mean(per_page_3p_element_counts)
-		median 	= statistics.median(per_page_3p_element_counts)
+		mean 	= statistics.mean(per_crawl_3p_request_counts)
+		median 	= statistics.median(per_crawl_3p_request_counts)
 
 		# but mode can throw an error, so catch here
 		try:
-			mode = statistics.mode(per_page_3p_element_counts)
+			mode = statistics.mode(per_crawl_3p_request_counts)
 		except:
 			mode = None
 
-		return(mean, median, mode)
+		return({
+			'mean': 	mean, 
+			'median':	median, 
+			'mode':		mode
+		})
 	# get_3p_domain_stats
 
-	def get_3p_cookie_stats(self, num_pages, tld_filter = None):
+	def get_per_crawl_3p_cookie_counts(self, tld_filter = None):
 		"""
-		determines basic stats for the number of 3p cookies contacted per-page
+		determines basic stats for the number of 3p cookies contacted per-crawl
 			note that a single 3p many set more than one cookie
 		"""
-
 		# each page id corresponds to a list of cookie ids
-		page_id_to_cookie_id_dict = {}
+		crawl_id_to_unique_cookies = {}
 
 		# run query to get all page id, 3p cookie id, 3p cookie domain entries
-		for row in self.sql_driver.get_page_id_3p_cookie_id_3p_cookie_domain(tld_filter):
-			page_id 		= row[0]
-			cookie_id		= row[1]
-			cookie_domain 	= row[2]
-
+		for crawl_id,cookie_name,cookie_domain in self.sql_driver.get_crawl_id_3p_cookie_id_3p_cookie_domain(tld_filter):
 			# if the page id is not yet seen enter the current cookie id as a fresh list
 			#	otherwise, we add to the existing list
-			if page_id not in page_id_to_cookie_id_dict:
-				page_id_to_cookie_id_dict[page_id] = [cookie_id]
+			if crawl_id not in crawl_id_to_unique_cookies:
+				crawl_id_to_unique_cookies[crawl_id] = [(cookie_name,cookie_domain)]
 			else:
-				page_id_to_cookie_id_dict[page_id] = page_id_to_cookie_id_dict[page_id] + [cookie_id]
+				if (cookie_name,cookie_domain) not in crawl_id_to_unique_cookies[crawl_id]:
+					crawl_id_to_unique_cookies[crawl_id] = crawl_id_to_unique_cookies[crawl_id] + [(cookie_name,cookie_domain)]
 
-		# determine the number of 3p cookies each page has by looking at len of list of cookie ids
-		per_page_3p_cookie_counts = []
-		for page_id in page_id_to_cookie_id_dict:
-			per_page_3p_cookie_counts.append(len(page_id_to_cookie_id_dict[page_id]))
+		# determine the number of 3p cookies each crawl has by looking at len of list of cookies
+		per_crawl_3p_cookie_counts = []
+		for crawl_id in crawl_id_to_unique_cookies:
+			per_crawl_3p_cookie_counts.append(len(crawl_id_to_unique_cookies[crawl_id]))
 
-		# pages that have no 3p cookies are not yet in our counts
-		# so for all uncounted pages we add in zeros
-		uncounted_pages = num_pages - len(per_page_3p_cookie_counts)
-		while uncounted_pages > 0:
-			uncounted_pages -= 1
-			per_page_3p_cookie_counts.append(0)
+		# crawls that have no 3p cookies are not yet in our counts
+		# 	so for all uncounted crawls we add in zeros
+		uncounted_crawls = self.total_crawls - len(per_crawl_3p_cookie_counts)
+		for i in range(0,uncounted_crawls):
+			per_crawl_3p_cookie_counts.append(0)
+
+		return per_crawl_3p_cookie_counts
+	# get_per_crawl_3p_cookie_counts
+
+	def get_3p_cookie_stats(self,tld_filter=None):
+		"""
+		Returns high-level cookie stats.
+		"""
+
+		# this is the data we will be getting stats for
+		per_page_3p_cookie_counts = self.get_per_crawl_3p_cookie_counts(tld_filter)
 
 		# mean and median should always be ok
 		mean 	= statistics.mean(per_page_3p_cookie_counts)
@@ -392,603 +294,913 @@ class Analyzer:
 		except:
 			mode = None
 
-		return(mean, median, mode)
+		return({
+			'mean': 	mean, 
+			'median':	median, 
+			'mode':		mode
+		})
 	# get_3p_cookie_stats
 
-	#####################
-	# REPORT GENERATORS #
-	#####################
+	def get_db_summary(self):
+		"""
+		Get basic data about what is in our database.
+		"""
 
-	def generate_db_summary_report(self):
-		"""
-		outputs and stores report of basic data about how many records in db, etc.
-		"""
-		print('\t================')
-		print('\t General Summary')
-		print('\t================')
+		# some of these take longer than others
+		total_tasks_fail 			= self.sql_driver.get_pending_task_count()
+		total_tasks_attempted 		= self.total_crawls + total_tasks_fail
+		percent_tasks_ok 			= (self.total_crawls/total_tasks_attempted)*100
+		total_errors 				= self.sql_driver.get_total_errors_count()
+		total_cookies 				= self.sql_driver.get_total_cookie_count()
+		total_3p_cookies 			= self.sql_driver.get_total_cookie_count(is_3p = True)
+		total_dom_storage			= self.sql_driver.get_dom_storage_count()
+		total_websockets			= self.sql_driver.get_websocket_count()
+		total_websocket_events		= self.sql_driver.get_websocket_event_count()
+		total_requests				= self.sql_driver.get_total_request_count()
+		total_responses 			= self.sql_driver.get_total_response_count()
+		total_requests_received 	= self.sql_driver.get_total_request_count(received = True)
+		percent_requests_received 	= (total_requests_received/total_requests)*100
+		total_3p_requests			= self.sql_driver.get_total_request_count(party='third')
+		total_3p_responses			= self.sql_driver.get_total_response_count(is_3p = True)
 		
-		csv_rows = []
-
-		total_pages_ok = self.sql_driver.get_pages_ok_count()
-
-		print("\t\tTotal Pages OK:\t\t\t%s" % total_pages_ok)
-	
-		csv_rows.append(('Total Pages OK',total_pages_ok))
-	
-		total_pages_noload = self.sql_driver.get_pages_noload_count()
-		total_pages_attempted = total_pages_ok + total_pages_noload
-	
-		print("\t\tTotal Pages FAIL:\t\t%s" % total_pages_noload)
-		csv_rows.append(('Total Pages FAIL', total_pages_noload))
-	
-		print("\t\tTotal Pages Attempted:\t\t%s" % total_pages_attempted)
-		csv_rows.append(('Total Pages Attempted',total_pages_attempted))
-	
-		percent_pages_OK = (total_pages_ok/total_pages_attempted)*100
-		print("\t\t%% Pages OK:\t\t\t%.2f%%" % round(percent_pages_OK,self.num_decimals))
-		csv_rows.append(('% Pages OK', round(percent_pages_OK,self.num_decimals)))
-
-		print('\t\t---')
-	
-		total_errors = self.sql_driver.get_total_errors_count()
-		print("\t\tTotal Errors:\t\t\t%s" % total_errors)
-		csv_rows.append(('Total Errors', total_errors))
-	
-		print('\t\t---')
-	
-		total_3p_cookies = self.sql_driver.get_total_cookie_count(is_3p = True)
-		print("\t\tTotal 3P Cookies:\t\t%s" % total_3p_cookies)
-		csv_rows.append(('Total Cookies', total_3p_cookies))
-
-		print('\t\t---')
-	
-		# see if we have both 1p/3p requests, if so show stats for all
-		total_1p_elements = self.sql_driver.get_total_request_count(party='first')
-		if total_1p_elements > 0:
-			total_elements = self.sql_driver.get_total_request_count()
-			print("\t\tTotal Elements Requested:\t%s" % total_elements)
-			csv_rows.append(('Total Elements Requested', total_elements))
-
-			total_elements_received = self.sql_driver.get_total_request_count(received = True)
-			print("\t\tTotal Elements Received:\t%s" % total_elements_received)
-			csv_rows.append(('Total Elements Received', total_elements_received))
-
-			percent_element_received = (total_elements_received/total_elements)*100
-			print('\t\tTotal %% Elements Received:\t%.2f%%' % percent_element_received)
-			csv_rows.append(('Total % Elements Received', round(percent_element_received,self.num_decimals)))
+		# avoid divide-by-zero
+		if total_3p_requests > 0:
+			total_3p_requests_received 	= self.sql_driver.get_total_request_count(received = True, party='third')
+			percent_3p_requests_received = (total_3p_requests_received/total_3p_requests)*100
+		else:
+			percent_3p_requests_received = 0
 		
-			print('\t\t---')
+		# ship it back
+		return({
+			'total_crawls_ok'				: self.total_crawls,
+			'total_pages_ok'				: self.total_pages,
+			'total_tasks_fail'				: total_tasks_fail,
+			'total_tasks_attempted'			: total_tasks_attempted,
+			'percent_tasks_ok'				: percent_tasks_ok,
+			'total_errors'					: total_errors,
+			'total_cookies'					: total_cookies,
+			'total_3p_cookies'				: total_3p_cookies,
+			'total_dom_storage'				: total_dom_storage,
+			'total_websockets'				: total_websockets,
+			'total_websocket_events'		: total_websocket_events,
+			'total_requests'				: total_requests,
+			'total_responses'				: total_responses,
+			'percent_requests_received'		: percent_requests_received,
+			'total_3p_requests'				: total_3p_requests,
+			'total_3p_responses'			: total_3p_responses,
+			'percent_3p_requests_received'	: percent_3p_requests_received,
+		})
+	# get_db_summary
 
-		# only 3p request/receive info - we always do this
-		total_3p_elements = self.sql_driver.get_total_request_count(party='third')
-		print("\t\t3P Elements Requested:\t\t%s" % total_3p_elements)
-		csv_rows.append(('3P Elements Requested', total_3p_elements))
-
-		# avoid divide-by-zero if no 3p elements
-		if total_3p_elements > 0:
-			total_3p_elements_received = self.sql_driver.get_total_request_count(received = True, party='third')
-			print("\t\t3P Elements Received:\t\t%s" % total_3p_elements_received)
-			csv_rows.append(('3P Elements Received', total_3p_elements_received))
-
-			percent_3p_element_received = (total_3p_elements_received/total_3p_elements)*100
-			print('\t\t3P %% Elements Received:\t\t%.2f%%' % percent_3p_element_received)
-			csv_rows.append(('3P % Elements Received', round(percent_3p_element_received,self.num_decimals)))
-
-		print('\t\t'+'-'*40)
-		self.write_csv('db_summary.csv', csv_rows)
-	# generate_db_summary_report
-
-	def generate_stats_report(self):
+	def get_high_level_stats(self, tld_filter=None):
 		"""
-		High level stats
+		Get high level stats about what we found.
 		"""
-		print('\t=============================')
-		print('\t Processing High-Level Stats ')
-		print('\t=============================')
 
-		for tld in self.top_tlds:
-			csv_rows = []
-	
-			if tld[0]:
-				tld_filter = tld[0]
-				file_name = tld[0]+'-stats.csv'
-			else:
-				tld_filter = None
-				file_name = 'stats.csv'
+		crawls_w_3p_req 		= self.sql_driver.get_crawl_w_3p_req_count()
+		percent_w_3p_request 	= (crawls_w_3p_req/self.total_crawls)*100
+		total_crawls_cookies 	= self.sql_driver.get_crawl_w_3p_cookie_count()
+		percent_w_3p_cookie 	= (total_crawls_cookies/self.total_crawls)*100
+		crawls_w_3p_script 		= self.sql_driver.get_crawl_w_3p_script_count()
+		percent_w_3p_script		= (crawls_w_3p_script/self.total_crawls)*100
+		total_pages_ssl 		= self.sql_driver.get_ssl_page_count()
+		percent_pages_ssl		= (total_pages_ssl/self.total_pages)*100
 
-			# page info
-			total_pages 			= self.sql_driver.get_complex_page_count(tld_filter)
-			total_pages_percent 	= (total_pages/self.get_pages_ok_count)*100
-			total_pages_elements 	= self.sql_driver.get_complex_page_count(tld_filter, 'elements')
-			percent_with_elements 	= (total_pages_elements/total_pages)*100
-			total_pages_cookies 	= self.sql_driver.get_complex_page_count(tld_filter, 'cookies')
-			percent_with_cookies 	= (total_pages_cookies/total_pages)*100
-			total_pages_js 			= self.sql_driver.get_complex_page_count(tld_filter, 'javascript')
-			percent_with_js 		= (total_pages_js/total_pages)*100
-			total_pages_ssl 		= self.sql_driver.get_pages_ok_count(is_ssl = True)
-			percent_pages_ssl		= (total_pages_ssl/total_pages)*100
+		# request info
+		total_requests_received 		= self.sql_driver.get_total_request_count(received = True)
+		total_requests_received_ssl		= self.sql_driver.get_total_request_count(received = True, is_ssl = True)
 
-			# elements info
-			total_elements_received 		= self.sql_driver.get_total_request_count(received = True)
-			total_elements_received_ssl		= self.sql_driver.get_total_request_count(received = True, is_ssl = True)
+		total_requests_received_1p 		= self.sql_driver.get_total_request_count(received = True, party='first')
+		total_requests_received_1p_ssl	= self.sql_driver.get_total_request_count(received = True, party='first', is_ssl = True)
 
-			total_elements_received_1p 		= self.sql_driver.get_total_request_count(received = True, party='first')
-			total_elements_received_1p_ssl	= self.sql_driver.get_total_request_count(received = True, party='first', is_ssl = True)
+		total_requests_received_3p 		= self.sql_driver.get_total_request_count(received = True, party='third')
+		total_requests_received_3p_ssl	= self.sql_driver.get_total_request_count(received = True, party='third', is_ssl = True)
 
-			total_elements_received_3p 		= self.sql_driver.get_total_request_count(received = True, party='third')
-			total_elements_received_3p_ssl	= self.sql_driver.get_total_request_count(received = True, party='third', is_ssl = True)
+		# ssl
+		if total_requests_received > 0:
+			percent_requests_ssl 	= (total_requests_received_ssl/total_requests_received)*100
+			percent_1p_requests_ssl	= (total_requests_received_1p_ssl/total_requests_received_1p)*100
+		else:
+			percent_requests_ssl 	= 0
+			percent_1p_requests_ssl	= 0
 
-			all_load_times = self.sql_driver.get_pages_load_times()
-			all_load_times_sum = 0
-			for load_time in all_load_times:
-				all_load_times_sum += load_time
+		if total_requests_received_3p:
+			percent_3p_requests_ssl	= (total_requests_received_3p_ssl/total_requests_received_3p)*100
+		else:
+			percent_3p_requests_ssl	= 0
 
-			average_page_load_time =  all_load_times_sum/len(all_load_times)
+		# load time is seconds
+		average_page_load_time = self.sql_driver.get_page_ave_load_time()
 
-			domain_stats	= self.get_3p_domain_stats(total_pages, tld_filter)
-			domain_mean 	= domain_stats[0]
-			domain_median	= domain_stats[1]
-			domain_mode		= domain_stats[2]
+		# domains and cookies
+		domain_stats	= self.get_3p_domain_stats(tld_filter)
+		cookie_stats 	= self.get_3p_cookie_stats(tld_filter)
 
-			cookie_stats 	= self.get_3p_cookie_stats(total_pages, tld_filter)
-			cookie_mean 	= cookie_stats[0]
-			cookie_median	= cookie_stats[1]
-			cookie_mode		= cookie_stats[2]
+		return ({
+			'total_crawls'					: self.total_crawls,
+			'total_pages'					: self.total_pages,
+			'percent_pages_ssl'				: percent_pages_ssl,
+			'total_requests_received'		: total_requests_received,
+			'percent_requests_ssl'			: percent_requests_ssl,
+			'total_requests_received_1p'	: total_requests_received_1p,
+			'percent_1p_requests_ssl'		: percent_1p_requests_ssl,
+			'total_requests_received_3p'	: total_requests_received_3p,
+			'percent_3p_requests_ssl'		: percent_3p_requests_ssl,
+			'average_page_load_time'		: average_page_load_time,
+			'percent_w_3p_request'			: percent_w_3p_request,
+			'percent_w_3p_cookie'			: percent_w_3p_cookie,
+			'percent_w_3p_script'			: percent_w_3p_script,
+			'3p_domains_mean'				: domain_stats['mean'],
+			'3p_domains_median'				: domain_stats['median'],
+			'3p_domains_mode'				: domain_stats['mode'],
+			'3p_cookies_mean'				: cookie_stats['mean'],
+			'3p_cookies_median'				: cookie_stats['median'],
+			'3p_cookies_mode'				: cookie_stats['mode'],
+		})
+	# get_high_level_stats
 
-			csv_rows.append(('N Pages Loaded', total_pages))
-			csv_rows.append(('% of all Pages',total_pages_percent))
-			csv_rows.append(('% Pages SSL', round(percent_pages_ssl, self.num_decimals)))
-
-			csv_rows.append(('N Elements Received', total_elements_received))
-			csv_rows.append(('% Elements Received SSL', round((total_elements_received_ssl/total_elements_received)*100,self.num_decimals)))
-			csv_rows.append(('N 1P Elements Received', total_elements_received_1p))
-			csv_rows.append(('% 1P Elements Received SSL', round((total_elements_received_1p_ssl/total_elements_received_1p)*100,self.num_decimals)))
-			csv_rows.append(('N 3P Elements Received', total_elements_received_3p))
-			csv_rows.append(('% 3P Elements Received SSL', round((total_elements_received_3p_ssl/total_elements_received_3p)*100,self.num_decimals)))
-
-			csv_rows.append(('Average Page Load Time (ms)', round(average_page_load_time,self.num_decimals)))
-
-			csv_rows.append(('% w/3p Element',round(percent_with_elements,self.num_decimals)))
-			csv_rows.append(('% w/3p Cookie',round(percent_with_cookies,self.num_decimals)))
-			csv_rows.append(('% w/3p Javascript',round(percent_with_js,self.num_decimals)))
-
-			csv_rows.append(('Mean 3p Domains',round(domain_mean,self.num_decimals)))
-			csv_rows.append(('Median 3p Domains',domain_median))
-			csv_rows.append(('Mode 3p Domains',domain_mode))
-
-			csv_rows.append(('Mean 3p Cookies',round(cookie_mean,self.num_decimals)))
-			csv_rows.append(('Median 3p Cookies',cookie_median))
-			csv_rows.append(('Mode 3p Cookies',cookie_mode))
-
-			self.write_csv(file_name,csv_rows)
-	# generate_stats_report
-
-	def generate_aggregated_tracking_attribution_report(self):
+	def get_aggregated_tracking_attribution(self, tld_filter=None):
 		"""
 		generates ranked list of which entities collect data 
-			from the greatest number of pages ('data_flow_ownership.csv')
+			from the greatest number of crawls
 
 		- entities which have subsidiaries are ranked according 
-			to the pages their subsidiaries get data from as well
+			to the crawls their subsidiaries get data from as well
 		- however, parent entities only get one hit on 
-			a page which has multiple subsidiaries present
-		- for example, if a page has 'google analytics' and 'doubleclick' 
+			a crawl which has multiple subsidiaries present
+		- for example, if a crawl has 'google analytics' and 'doubleclick' 
 			that is only one hit for 'google'
 
-		also able to filter by tld
-		"""
-		print('\t======================================')
-		print('\t Processing Aggregated Tracking Report ')
-		print('\t======================================')
-
-		for tld in self.top_tlds:
-			csv_rows = []
-			csv_rows.append(('Percentage Pages Tracked','Owner','Owner Country','Owner Lineage'))
-
-			# will need this value to determine percentages later on
-			total_pages = self.sql_driver.get_complex_page_count(tld_filter=tld[0])
-
-			# list will have entry for each hit on a given entity
-			all_owner_occurances = []
-
-			# each page id is a key which corresponds to a list of 
-			#	ids for entities which own the 3p element domains
-			page_to_element_owners = {}
-
-			# this query may produce a large volume of results!
-			results = self.sql_driver.get_all_page_id_3p_domain_owner_ids(tld_filter=tld[0])
-
-			# for each result we either create a new list, or extend the existing one
-			#	with the ids of the owners of the 3p elements
-			for item in results:
-				page_id = item[0]
-				element_owner_id = item[1]
-
-				if page_id not in page_to_element_owners:
-					page_to_element_owners[page_id] = [element_owner_id]
-				else:
-					page_to_element_owners[page_id] = page_to_element_owners[page_id] + [element_owner_id]
-
-			# now that we have ids for each page, we can look up the lineage
-			#	to create the aggregate measure of how often entities appear
-			for item in page_to_element_owners:
-
-				# this is a set so items which appear more than once only get counted once
-				# reset this for each page
-				page_domain_owners = set()
-
-				# we are operating on a list of ids which correspond to the owners of domains which get the data
-				for page_3p_owner_id in page_to_element_owners[item]:
-					# for each domain owner we also count all of its parents by getting the lineage
-					for lineage_id in self.get_domain_owner_lineage_ids(page_3p_owner_id):
-						page_domain_owners.add((lineage_id, self.domain_owners[lineage_id]['owner_name']))
-
-				# we have finished processing for this page so we add the owner ids to the full list
-				for owner_id in page_domain_owners:
-					all_owner_occurances.append(owner_id)
-
-			# write out data to csv
-			for item in self.get_most_common_sorted(all_owner_occurances):
-				# we want to specify the parent name for each item, or if there is no parent, identify as such
-				parent_id = self.domain_owners[item[0][0]]['parent_id']
-				if parent_id:
-					parent_name = self.domain_owners[parent_id]['owner_name']
-				else:
-					parent_name = ''
-				csv_rows.append((
-					round((item[1]/total_pages)*100,2),
-					item[0][1],
-					self.domain_owners[item[0][0]]['country'],
-					self.get_domain_owner_lineage_combined_string(item[0][0])
-					)
-				)
-			
-			# set file name prefix when doing tld-bounded report
-			if tld[0]:
-				file_name = tld[0]+'-aggregated_tracking_attribution.csv'
-			else:
-				file_name = 'aggregated_tracking_attribution.csv'
-
-			# done!
-			self.write_csv(file_name,csv_rows)
-	# generate_aggregated_tracking_attribution_report
-
-	def generate_aggregated_3p_ssl_use_report(self):
-		"""
-		this report tells us the percentage of requests made to a given
-			third-party are encrypted
 		"""
 
-		print('\t=========================================')
-		print('\t Processing Aggregated 3P SSL Use Report ')
-		print('\t=========================================')
+		# list will have entries for each hit on a given entity
+		all_owner_occurances = []
 
-		csv_rows = []
+		# each crawl_id is a key which corresponds to a list of 
+		#	ids for entities which own the 3p domains
+		crawl_to_3p_owners = {}
 
-		domain_owners_ssl_use_dict = {}
+		# iterate through the entire set of 3p domains for each
+		#	crawl
+		for crawl_id in self.crawl_id_to_3p_domain_info:
 
-		for item in self.sql_driver.get_3p_element_domain_owner_id_ssl_use():
-			child_domain_owner_id = item[0]
-			is_ssl = item[1]
+			# this is a set so items which appear more than once only get counted once
+			# reset this for each crawl
+			crawl_domain_owners = set()
 
-			for domain_owner_id in self.get_domain_owner_lineage_ids(child_domain_owner_id):
-				if domain_owner_id not in domain_owners_ssl_use_dict:
-					domain_owners_ssl_use_dict[domain_owner_id] = [is_ssl]
-				else:
-					domain_owners_ssl_use_dict[domain_owner_id] = domain_owners_ssl_use_dict[domain_owner_id] + [is_ssl]
+			for item in self.crawl_id_to_3p_domain_info[crawl_id]:
+				if item['owner_id']:
+					for lineage_id in self.utilities.get_domain_owner_lineage_ids(item['owner_id']):
+						crawl_domain_owners.add(lineage_id)
 
-		for domain_owner_id in domain_owners_ssl_use_dict:
-			csv_rows.append((
-				round(100*(sum(domain_owners_ssl_use_dict[domain_owner_id])/len(domain_owners_ssl_use_dict[domain_owner_id])),self.num_decimals),
-				self.domain_owners[domain_owner_id]['owner_name'], 
-				self.domain_owners[domain_owner_id]['country'],
-				self.get_domain_owner_lineage_combined_string(domain_owner_id)
-			))
+			# we have finished processing for this crawl so we add the owner ids to the full list
+			for owner_id in crawl_domain_owners:
+				all_owner_occurances.append(owner_id)
 
-		# sort results by owner, note is upper then lower case
-		#	would cause code bloat to do otherwise, but worth considering
-		csv_rows.sort(key=itemgetter(1))
+		# return a list of dicts
+		ranked_aggregated_tracking_attribution = []
+		for owner_id, total_crawl_occurances in collections.Counter(all_owner_occurances).most_common():
+			ranked_aggregated_tracking_attribution.append({
+				'owner_id':			owner_id,
+				'owner_name':		self.domain_owners[owner_id]['owner_name'],
+				'owner_country':	self.domain_owners[owner_id]['country'],
+				'percent_crawls':	(total_crawl_occurances/self.total_crawls)*100,
+			})
 
-		# now sort by percentage of encrypted requests descending
-		csv_rows.sort(key=itemgetter(0),reverse=True)
+		return ranked_aggregated_tracking_attribution
 
-		# insert header row after sort
-		csv_rows[0] = ('Percent Requests Encrypted','Owner','Owner Country','Owner Lineage')
-
-		# done!
-		self.write_csv('3p_ssl_use.csv',csv_rows)
-	# generate_aggregated_3p_ssl_use_report
-
-	def generate_per_page_data_flow_report(self):
-		"""
-		generates a csv which has information on data flows for each page
-
-		note this file may be very large and is disabled by default
-		"""
-		print('\t======================================')
-		print('\t Processing Per-Page Data Flow Report ')
-		print('\t======================================')
+		# # get the crawl count for each domain + its children
+		# domain_owner_to_crawl_count = {}
+		# for domain_owner_id in self.domain_owners:
+		# 	# this it the owner + children
+		# 	domain_owner_id_list = [domain_owner_id]+self.utilities.get_domain_owner_child_ids(domain_owner_id)
+		# 	domain_owner_to_crawl_count[domain_owner_id] = self.sql_driver.get_crawl_count_by_domain_owners(domain_owner_id_list)
 		
-		file_name = 'per_page_data_flow.csv'
-		csv_rows = []
-		csv_rows.append(('Final URL','3P Domain','Owner','Owner Country','Owner Lineage'))
+		# # now figure out the ranking		
+		# domain_owners_ranked_high_low = []
+		# for domain_owner_id, count in sorted(domain_owner_to_crawl_count.items(), key=lambda item: item[1],reverse=True):
+		# 	domain_owners_ranked_high_low.append(domain_owner_id)
 
-		for item in self.sql_driver.get_all_pages_3p_domains_and_owners():
-			# this condition has to specify != None, b/c otherwise it will skip values of 0
-			if item[3] != None:
-				csv_rows.append((
-					item[1],
-					item[2],
-					self.domain_owners[item[3]]['owner_name'],
-					self.domain_owners[item[3]]['country'],
-					self.get_domain_owner_lineage_combined_string(item[3])
-				))
-			else:
-				csv_rows.append((item[1],item[2],'Unknown','',''))
-		self.write_csv(file_name,csv_rows)
-	# generate_per_page_data_flow_report
+		# # return a list of dicts
+		# ranked_aggregated_tracking_attribution = []
+		# for domain_owner_id in domain_owners_ranked_high_low:
+		# 	ranked_aggregated_tracking_attribution.append({
+		# 		'owner_id':			domain_owner_id,
+		# 		'owner_name':		self.domain_owners[domain_owner_id]['owner_name'],
+		# 		'owner_country':	self.domain_owners[domain_owner_id]['country'],
+		# 		'percent_crawls':	(domain_owner_to_crawl_count[domain_owner_id]/self.total_crawls)*100,
+		# 	})
 
-	def generate_3p_domain_report(self):
+		# return ranked_aggregated_tracking_attribution
+	# get_aggregated_tracking_attribution
+
+	def get_aggregated_3p_ssl_use(self, tld_filter=None):
 		"""
-		this queries the db to get all elements, domains, and domain owners
-		next they are counted to find the most common
-		and formatted to csv rows and returned
+		For each request where we know the owner we determine if it is SSL,
+			then we figure out the aggregated (owner+children) SSL
+			usage percentage
 		"""
-		print('\t==============================')
-		print('\t Processing 3P Domains Report ')
-		print('\t==============================')
 
-		for tld in self.top_tlds:
-			csv_rows = []
-			csv_rows.append(('Percent Total','Domain','Owner','Owner Country', 'Owner Lineage'))
+		# do processing here
+		owner_id_ssl_use = {}
 
-			if tld[0]:
-				tld_filter = tld[0]
-				file_name = tld[0]+'-3p_domains.csv'
-			else:
-				tld_filter = None
-				file_name = '3p_domains.csv'
-
-			total_pages = tld[1]
-
-			all_3p_domains = []
-			for item in self.sql_driver.get_3p_domain_owners(tld_filter):
-				all_3p_domains.append((item[1],item[2]))
-
-			# if num_results is None we get everything, otherwise stops at limit
-			for item in self.get_most_common_sorted(all_3p_domains)[:self.num_results]:
-				# this condition has to specify != None, b/c otherwise it will skip values of 0
-				if item[0][1] != None:
-					owner_name = self.domain_owners[item[0][1]]['owner_name']
-					owner_country = self.domain_owners[item[0][1]]['country']
-					owner_lineage = self.get_domain_owner_lineage_combined_string(item[0][1])
+		# we iterate over every received request
+		# this is a potentially large query b/c we must look at each request on the page
+		# since a single domain owner may have more than one requests and these may or may not be with ssl
+		for domain,domain_owner_id,is_ssl in self.sql_driver.get_3p_request_domain_owner_id_ssl_use(tld_filter):
+			for domain_owner_id in self.utilities.get_domain_owner_lineage_ids(domain_owner_id):
+				if domain_owner_id not in owner_id_ssl_use:
+					owner_id_ssl_use[domain_owner_id] = [is_ssl]
 				else:
-					owner_name = 'Unknown'
-					owner_country = ''
-					owner_lineage = ''
+					owner_id_ssl_use[domain_owner_id] = owner_id_ssl_use[domain_owner_id] + [is_ssl]
 
-				csv_rows.append((
-					round((item[1]/total_pages)*100,self.num_decimals),
-					item[0][0],
-					owner_name,
-					owner_country,
-					owner_lineage
-				))
-			self.write_csv(file_name,csv_rows)
-	# generate_3p_domain_report
+		# output list of dicts
+		aggregated_3p_ssl_use = []
+		for owner_id in owner_id_ssl_use:
+			aggregated_3p_ssl_use.append({
+				'owner_id'			: owner_id,
+				'owner_name'		: self.domain_owners[owner_id]['owner_name'],
+				'owner_country'		: self.domain_owners[owner_id]['country'],
+				'ssl_use'			: 100*(sum(owner_id_ssl_use[owner_id])/len(owner_id_ssl_use[owner_id]))
+		})
 
-	def generate_3p_element_report(self,element_type=None):
+		return aggregated_3p_ssl_use
+	# get_aggregated_3p_ssl_use
+
+	def get_site_to_3p_network(self, domain_owner_is_known=False):
 		"""
-		this queries the db to get all elements, domains, or domain owners
-		next they are counted to find the most common
-		and formatted to csv rows and returned
+			sql_driver.get_network_ties returns a set of tuples in the format
+			(page domain, request domain, request domain owner id)
+			we just go through this data to produce the report
 		"""
-		if element_type == 'javascript':
-			print('\t=================================')
-			print('\t Processing 3P Javascript Report ')
-			print('\t=================================')
-		elif element_type == 'image':
-			print('\t=============================')
-			print('\t Processing 3P Images Report ')
-			print('\t=============================')
+		network = []
+
+		for page_domain,request_domain,request_owner_id in self.sql_driver.get_3p_network_ties():
+			# if we know the owner get name and country, otherwise None
+			if request_owner_id != None:
+				request_owner_name 		= self.domain_owners[request_owner_id]['owner_name']
+				request_owner_country	= self.domain_owners[request_owner_id]['country']
+			else:
+				request_owner_name 		= None
+				request_owner_country	= None
+
+			network.append({
+				'page_domain'			: page_domain,
+				'request_domain'		: request_domain,
+				'request_owner_id'		: request_owner_id,
+				'request_owner_name'	: request_owner_name,
+				'request_owner_country'	: request_owner_country
+			})
+		return network
+	# get_3p_network
+
+	def get_page_to_3p_network(self):
+		"""
+		Returns the network of all pages between third-party domains.
+
+		Additionally returns information on page redirects and owners.
+		"""
+		network = []
+
+		for page_start_url,page_final_url,page_accessed,request_domain,request_owner_id in self.sql_driver.get_all_pages_3p_domains_and_owners():
+			# if we know the owner get name and country, otherwise None
+			if request_owner_id != None:
+				request_owner_name 		= self.domain_owners[request_owner_id]['owner_name']
+				request_owner_country	= self.domain_owners[request_owner_id]['country']
+			else:
+				request_owner_name 		= None
+				request_owner_country	= None
+
+			network.append({
+				'page_start_url'		: page_start_url,
+				'page_final_url'		: page_final_url,
+				'page_accessed'			: page_accessed,
+				'request_domain'		: request_domain,
+				'request_owner_id'		: request_owner_id,
+				'request_owner_name'	: request_owner_name,
+				'request_owner_country'	: request_owner_country
+			})
+		return network
+	# get_page_to_3p_network
+
+	def get_3p_domain_percentages(self,tld_filter=None):
+		"""
+		Determines what percentage of crawls a given third-party domain is found on and
+			owner information.
+		"""
+
+		# total crawls for this tld, used to calculate percentages
+		if tld_filter:
+			total_crawls = self.crawl_counts_by_tld[tld_filter]
 		else:
-			print('\t==============================')
-			print('\t Processing 3P Element Report ')
-			print('\t==============================')
-		
-		for tld in self.top_tlds:
-			total_pages = tld[1]
+			total_crawls = self.total_crawls
 
-			csv_rows = []
-			csv_rows.append(('Percent Total','Element','Extension','Type','Domain','Owner','Owner Country','Owner Lineage'))
+		all_3p_domains = []
+		for crawl_id in self.crawl_id_to_3p_domain_info:
+			for item in self.crawl_id_to_3p_domain_info[crawl_id]:
+				all_3p_domains.append((item['domain'],item['owner_id']))
 
-			if tld[0]:
-				tld_filter = tld[0]
-				if element_type:
-					file_name = tld[0]+'-3p_'+element_type+'.csv'
-				else:
-					file_name = tld[0]+'-3p_element.csv'
+		domain_percentages = []
+		for item, domain_crawl_count in self.utilities.get_most_common_sorted(all_3p_domains):
+			domain 		= item[0]
+			owner_id 	= item[1]
+
+			# if we know the owner get name and country, otherwise None
+			if owner_id != None:
+				owner_name 		= self.domain_owners[owner_id]['owner_name']
+				owner_country 	= self.domain_owners[owner_id]['country']
 			else:
-				tld_filter = None
-				if element_type:
-					file_name = '3p_'+element_type+'.csv'
-				else:
-					file_name = '3p_element.csv'
+				owner_name 		= None
+				owner_country 	= None
 
-			all_3p_elements = []
-			for item in self.sql_driver.get_3p_elements(tld_filter, element_type):
-				# we need to drop off the first element returned here
-				# perhaps tho it should happen insql?
+			domain_percentages.append({
+				'percent_crawls': 100*(domain_crawl_count/total_crawls),
+				'domain'		: domain,
+				'owner_id'		: owner_id,
+				'owner_name'	: owner_name,
+				'owner_country'	: owner_country
+			})
+		return domain_percentages
+	# get_3p_domain_percentages
 
-				all_3p_elements.append((item[1],item[2],item[3],item[4],item[5]))
-
-			# if num_results is None we get everything, otherwise stops at limit
-			for item in self.get_most_common_sorted(all_3p_elements)[:self.num_results]:
-				# this condition has to specify != None, b/c otherwise it will skip values of 0
-				if item[0][4] != None:
-					owner_name = self.domain_owners[item[0][4]]['owner_name']
-					owner_country = self.domain_owners[item[0][4]]['country']
-					owner_lineage = self.get_domain_owner_lineage_combined_string(item[0][4])
-				else:
-					owner_name = 'Unknown'
-					owner_country = ''
-					owner_lineage = ''
-
-				csv_rows.append((
-					round((item[1]/total_pages)*100,self.num_decimals),
-					item[0][0],
-					item[0][1],
-					item[0][2],
-					item[0][3],
-					owner_name,
-					owner_country,
-					owner_lineage
-				))
-			self.write_csv(file_name,csv_rows)
-	# generate_3p_element_report
-
-	def generate_data_transfer_report(self):
+	def get_3p_request_percentages(self,tld_filter=None,request_type=None):
 		"""
-		these reports tell us how much data was transferred across several dimensions
-		"""
+		Determine what percentage of pages a given request is found on.  
 		
-		print('\t==================================')
-		print('\t Processing Data Transfer Reports ')
-		print('\t==================================')
-	
+		This is based on the "request_url" which is the url for a given request
+			stripped of arguments.
+			ex: "https://example.com/track.js?abc=123" would become "https://example.com/track.js"
 
-		for tld in self.top_tlds:
-			# set up filter and file names
-			if tld[0]:
-				tld_filter = tld[0]
-				summary_file_name 		= tld[0]+'-data_xfer_summary.csv'
-				domain_file_name		= tld[0]+'-data_xfer_by_domain.csv'
-				aggregated_file_name	= tld[0]+'-data_xfer_aggregated.csv'
+		Additionally returns relevant owner information.
+		"""
+
+		all_3p_requests = []
+		
+		# total crawls for this tld, used to calculate percentages
+		if tld_filter:
+			total_crawls = self.crawl_counts_by_tld[tld_filter]
+		else:
+			total_crawls = self.total_crawls
+
+		for page_id,request_url,request_type,request_domain,request_domain_owner in self.sql_driver.get_3p_requests(tld_filter, request_type):
+			all_3p_requests.append((request_url,request_type,request_domain,request_domain_owner))
+
+		request_percentages =[]
+		
+		for item, request_crawl_count in self.utilities.get_most_common_sorted(all_3p_requests):
+			# if we know the owner get name and country, otherwise None
+			request_owner_id = item[3]
+			if request_owner_id != None:
+				request_owner_name 		= self.domain_owners[request_owner_id]['owner_name']
+				request_owner_country 	= self.domain_owners[request_owner_id]['country']
 			else:
-				tld_filter = None
-				summary_file_name 		= 'data_xfer_summary.csv'
-				domain_file_name		= 'data_xfer_by_domain.csv'
-				aggregated_file_name	= 'data_xfer_aggregated.csv'
+				request_owner_name 		= None
+				request_owner_country 	= None
 
-			# get the data from db, tuple of (element_domain, size, is_3p (boolean), domain_owner_id)
-			element_sizes = self.sql_driver.get_element_sizes(tld_filter=tld_filter)
+			request_percentages.append({
+				'percent_crawls'		: 100*(request_crawl_count/total_crawls),
+				'request_url'			: item[0],
+				'request_type'			: item[1],
+				'request_domain'		: item[2],
+				'request_owner_id'		: request_owner_id,
+				'request_owner_name'	: request_owner_name,
+				'request_owner_country'	: request_owner_country
+			})
+		return request_percentages
+	# get_3p_domain_percentages
 
-			# initialize vars
-			first_party_data = 0
-			third_party_data = 0
-			total_data 		 = 0
-			
-			# need Counter object, allows sorting later
-			domain_data	= collections.Counter()
-			owner_data 	= collections.Counter()
-			
-			# process each row
-			for item in element_sizes:
+	def get_3p_use_data(self,tld_filter=None):
+		""""
+		For some domains we know what they are used for on a first-party basis (eg marketing).
+			This function examines the data we have collected in order to determine what percentage
+			of crawls include a request to a third-party domain with a given use, how many
+			such requests are made on a per-use basis per-crawl, and finally, what percentage
+			of requests per-crawl set a third-party cookie.
 
-				element_domain	= item[0]
-				element_size 	= item[1]
-				element_is_3p 	= item[2]
-				domain_owner_id = item[3]
+		Data is returned as a dict, the first field of which is a set of all the
+			uses we know of.
+		"""
 
-				# this is the measure of all data downloaded
-				total_data += element_size
+		# we first need to create a dict whereby each domain 
+		#	corresponds to a list of known uses
+		# domains with no known uses are not in the list
+		#
+		# IMPORTANT NOTE:
+		#	some domains may have several uses!
+		domain_to_use_map = {}
 
-				# measures for third and first party data
-				if element_is_3p:
-					third_party_data += element_size
-				else:
-					first_party_data += element_size
+		# a list of all known uses
+		all_uses = set()
 
-				# data by domain, increment if already in there, otherwise new entry
-				if element_domain in domain_data:
-					domain_data[element_domain] += element_size
-				else:
-					domain_data[element_domain] = element_size
+		for domain,owner_id in self.sql_driver.get_domain_owner_ids():
+			if len(self.domain_owners[owner_id]['uses']) > 0:
+				domain_to_use_map[domain] = self.domain_owners[owner_id]['uses']
+				for use in self.domain_owners[owner_id]['uses']:
+					all_uses.add(use)
 
-				# only if we know the owner, increment
-				if domain_owner_id:
-					for lineage_id in self.get_domain_owner_lineage_ids(domain_owner_id):
-						if lineage_id in owner_data:
-							owner_data[lineage_id] += element_size
+		# for each crawl, create a list of the set of domains 
+		#	which set a cookie
+		#
+		# note that due to currently unresolved chrome issues we sometimes 
+		# 	can get cookies which don't have a corresponding 3p request
+		# 	this approach handles that gracefully
+		crawl_cookie_domains = {}
+		for crawl_id, cookie_domain in self.sql_driver.get_crawl_id_3p_cookie_domain_pairs():
+			if crawl_id not in crawl_cookie_domains:
+				crawl_cookie_domains[crawl_id] = [cookie_domain]
+			else:
+				crawl_cookie_domains[crawl_id] = crawl_cookie_domains[crawl_id] + [cookie_domain]
+
+		# next, for each crawl we want a list of uses for domains and if
+		#	that domain corresponds to a cookie being set
+		# NOTE: the same use may occur many times, this is desired
+		# 	as it gives us our counts later on
+		crawl_3p_uses = {}
+
+		# for crawl_id, request_domain in self.sql_driver.get_crawl_id_3p_request_domain_pairs(tld_filter):
+		for crawl_id in self.crawl_id_to_3p_domain_info:
+			for item in self.crawl_id_to_3p_domain_info[crawl_id]:
+				domain = item['domain']
+
+				# if this 3p domain has a known use we add it to a list of uses keyed to crawl id
+				if domain in domain_to_use_map:
+					# check if the domain of this request has a cookie for this crawl
+					if crawl_id in crawl_cookie_domains and domain in crawl_cookie_domains[crawl_id]: 
+						sets_cookie = True
+					else:
+						sets_cookie = False
+
+					# add in a tuple of (use,sets_cookie) to a list for this crawl_id
+					for use in domain_to_use_map[domain]:
+						if crawl_id not in crawl_3p_uses:
+							crawl_3p_uses[crawl_id] = [(use,sets_cookie)]
 						else:
-							owner_data[lineage_id] = element_size
+							crawl_3p_uses[crawl_id] = crawl_3p_uses[crawl_id] + [(use,sets_cookie)]
 
-			# output data to csv
-			summary_data_csv = []
-			summary_data_csv.append(('Party','Percent Total','Data Transfered (bytes)'))
-			summary_data_csv.append(('All','100',total_data))
-			summary_data_csv.append((
-				'First', 
-				round((first_party_data/total_data)*100, self.num_decimals),
-				first_party_data))
-			summary_data_csv.append((
-				'Third', 
-				round((third_party_data/total_data)*100, self.num_decimals),
-				third_party_data))
+		# determine how often requests for a give use are encrypted with ssl
+		# 	- note that on the same crawl multiple requests for a single use may be made
+		# 		and each request may or may not be ssl
+		use_ssl 	= {}
+		use_total 	= {}
+		total_classified = 0
+		for domain,domain_owner_id,is_ssl in self.sql_driver.get_3p_request_domain_owner_id_ssl_use(tld_filter):
+			# only analyze domains we know the use for
+			if domain in domain_to_use_map:
+				total_classified += 1
+				# each domain may have several uses, add for all
+				for use in domain_to_use_map[domain]:
+					# increment count of ssl usage
+					if is_ssl:
+						if use not in use_ssl:
+							use_ssl[use] = 1
+						else:
+							use_ssl[use] = use_ssl[use] + 1
+					
+					# keep track of total occurances of this use
+					if use not in use_total:
+						use_total[use] = 1
+					else:
+						use_total[use] = use_total[use] + 1
 
-			self.write_csv(summary_file_name, summary_data_csv)
+		# for each use we will produce summary counts, we 
+		#	initialize everyting to zero here
+		total_crawls_w_use 				= {}
+		total_use_occurances 			= {}
+		total_use_occurances_w_cookie 	= {}
+
+		for use in all_uses:
+			total_crawls_w_use[use] 				= 0
+			total_use_occurances[use] 			= 0
+			total_use_occurances_w_cookie[use] 	= 0
+
+		# process each crawl and update the relevant counts
+		for crawl_id in crawl_3p_uses:
+			# we only want to count use once per-crawl, so
+			#	create a set and add to it as we go along
+			this_crawl_use_set = set()
+
+			# upate the use occurance counters
+			for use, has_cookie in crawl_3p_uses[crawl_id]:
+				this_crawl_use_set.add(use)
+				total_use_occurances[use] = total_use_occurances[use] + 1
+				if has_cookie == True:
+					total_use_occurances_w_cookie[use] = total_use_occurances_w_cookie[use] + 1
 			
-			# sort and output ranked data
-			domain_data = domain_data.most_common()
-			domain_data.sort()
-			domain_data.sort(reverse=True, key=lambda item:item[1])
+			# each use in the set adds one to the total crawl count
+			for use in this_crawl_use_set:
+				total_crawls_w_use[use] = total_crawls_w_use[use] + 1
 
-			# for csv data
-			domain_data_csv = []
-			domain_data_csv.append(('Percent Total','Domain','Data Transfered (bytes)'))
+		# the last step is to calculate the relevant percentages and averages
 
-			# if num_results is None we get everything, otherwise stops at limit
-			for item in domain_data[:self.num_results]:
-				domain_data_csv.append((
-					round((item[1]/total_data)*100,self.num_decimals),
-					item[0],
-					item[1]))
-			self.write_csv(domain_file_name, domain_data_csv)
+		# used to get percentage by use
+		if tld_filter:
+			total_crawls = self.crawl_counts_by_tld[tld_filter]
+		else:
+			total_crawls = self.total_crawls
 
-			owner_data 	= self.get_most_common_sorted(owner_data)
-			owner_data_csv = []
-			owner_data_csv.append(('Percent Total','Owner','Owner Country','Owner Lineage','Data Transfered (bytes)'))
-			# get results for all known owners
-			for item in owner_data:
-				owner_data_csv.append((
-					round((item[1]/total_data)*100,self.num_decimals),
-					self.domain_owners[item[0]]['owner_name'],
-					self.domain_owners[item[0]]['country'],
-					self.get_domain_owner_lineage_combined_string(item[0]),
-					item[1]
-				))
-			self.write_csv(aggregated_file_name, owner_data_csv)
-	# generate_data_transfer_report
+		percentage_by_use 				= {}
+		average_use_occurance_per_crawl 	= {}
+		percentage_use_w_cookie 		= {}
+		percentage_use_ssl 				= {}
+		
+		for use in all_uses:
+			percentage_by_use[use] 				= 0
+			average_use_occurance_per_crawl[use] = 0
+			percentage_use_w_cookie[use] 		= 0
 
-	def generate_network_report(self):
+		for use in total_crawls_w_use:
+			if total_crawls_w_use[use] > 0:
+				percentage_by_use[use] 				= 100*(total_crawls_w_use[use]/total_crawls)
+				average_use_occurance_per_crawl[use] = total_use_occurances[use]/total_crawls_w_use[use]
+				percentage_use_w_cookie[use]		= 100*(total_use_occurances_w_cookie[use]/total_use_occurances[use])
+			else:
+				percentage_by_use[use] 				= None
+				average_use_occurance_per_crawl[use] = None
+				percentage_use_w_cookie[use]		= None
+
+			# conditional to account for cases where no instance of a given use is ssl
+			if use in use_ssl:
+				percentage_use_ssl[use] 			= 100*(use_ssl[use]/use_total[use])
+			else:
+				percentage_use_ssl[use] 			= 0
+
+		# send back everyting as a keyed dict
+		return({
+			'all_uses'							: all_uses,
+			'percentage_by_use'					: percentage_by_use,
+			'average_use_occurance_per_crawl'	: average_use_occurance_per_crawl,
+			'percentage_use_w_cookie' 			: percentage_use_w_cookie,
+			'percentage_use_ssl'				: percentage_use_ssl
+			})
+	# get_3p_use_data
+
+	def get_all_pages_requests(self):
 		"""
-		this report generates data necessary for graph/network analysis by
-			outputting a list of page domains and the elements/owners they connect to
+		For all pages get all of the requests associated with each page 
+			load.  Default is only_3p, but this can be overridden to get
+			1p as well.
+		"""
+		records = []
+		for result in self.sql_driver.get_all_pages_requests():
+			try:
+				domain_owner = self.utilities.get_domain_owner_lineage_combined_string(result[4])
+			except:
+				domain_owner = None
+
+			records.append({
+				'accessed'				: result[0].isoformat(),
+				'start_url'				: result[1],
+				'final_url'				: result[2],
+				'request_domain'		: result[3],
+				'request_domain_owner'	: domain_owner,
+				'request_url'			: result[5],
+			})
+		return records
+	# get_all_pages_requests
+
+	def get_all_pages_cookies(self):
+		"""
+		For all pages get all of the cookies associated with each page 
+			load.  Default is 1p and 3p, but this can be overridden to get
+			3p only.
+		"""
+		records = []
+		for result in self.sql_driver.get_all_pages_cookies():
+			try:
+				cookie_owner = self.utilities.get_domain_owner_lineage_combined_string(result[4])
+			except:
+				cookie_owner = None
+
+			records.append({
+				'accessed'		: result[0].isoformat(),
+				'start_url'		: result[1],
+				'final_url'		: result[2],
+				'cookie_domain'	: result[3],
+				'cookie_owner'	: cookie_owner,
+				'cookie_name'	: result[5],
+				'cookie_value'	: result[6],
+			})
+		return records
+	# get_all_pages_cookies
+
+	def get_single_page_request_dump(self,page_start_url):
+		"""
+		For a given page (defined as unique start_url) get all of the requests associated
+			with every page load.  Default is only_3p, but this can be overridden to get
+			1p as well.
+		"""
+		records = []
+		for result in self.sql_driver.get_single_page_requests(page_start_url):
+			try:
+				domain_owner = self.utilities.get_domain_owner_lineage_combined_string(result[6])
+			except:
+				domain_owner = None
+
+			records.append({
+				'page_accessed'			: result[0].isoformat(),
+				'start_url'				: result[1],
+				'final_url'				: result[2],
+				'request_url'			: result[4],
+				'request_domain'		: result[5],
+				'request_domain_owner'	: domain_owner
+			})
+		return records
+	# get_single_page_request_dump
+
+	def get_single_page_cookie_dump(self,page_start_url):
+		"""
+		For a given page (defined as unique start_url) get all of the cookies associated
+			with every page load.  Default is only_3p, but this can be overridden to get
+			1p as well.
+		"""
+		records = []
+		for result in self.sql_driver.get_single_page_cookies(page_start_url):
+			try:
+				domain_owner = self.utilities.get_domain_owner_lineage_combined_string(result[6])
+			except:
+				domain_owner = None
+
+			records.append({
+				#'page_accessed'			: result[0].isoformat(),
+				'page_accessed'			: 'blah',
+				'start_url'				: result[1],
+				'final_url'				: result[2],
+				'is_ssl'				: result[3],
+				'cookie_domain'			: result[4],
+				'cookie_name'			: result[5],
+				'cookie_value'			: result[6],
+				'cookie_domain_owner'	: domain_owner
+			})
+		return records
+	# get_single_page_cookie_dump
+
+	def update_site_hosts(self):
+		"""
+		For each FDQN corresponding to a page we find the
+			owner of the associated ip_addr.
+
 		"""
 
-		print('\t=========================')
-		print('\t Processing Network Ties ')
-		print('\t=========================')
+		# required, non-standard
+		try:
+			from ipwhois import IPWhois
+		except:
+			print('!!! UNABLE TO UPDATE SITE HOSTS, IPWHOIS NOT INSTALLED !!!')
+		
+		page_ips_w_no_owner = self.sql_driver.get_page_ips_w_no_owner()
+		total_to_update = len(page_ips_w_no_owner)
 
-		# put output here
-		csv_rows = []
+		progress = 0
+		for ip, in page_ips_w_no_owner:
+			progress += 1
+			print('\t\t %s of %s done' % (progress,total_to_update))
+
+			try:
+				obj = IPWhois(ip)
+				result = obj.lookup_whois()
+				owner = result['nets'][0]['description']
+			except:
+				print('fail on %s' % ip)
+				pass
+
+			# fall back
+			if owner == None:
+				owner = result['asn_description']
+
+			if owner:
+				# combine amazon
+				# if 'Amazon' in owner:
+				# 	owner = 'amazon'
+				# fix strings
+				owner = owner.replace('.','')
+				owner = owner.replace('"','')
+				owner = owner.replace("'","")
+				owner = owner.replace('\n', ' ')
+				owner = owner.replace('\r', ' ')
+				owner = owner.replace(' ','_')
+				owner = owner.replace(',','_')
+				owner = owner.lower()
+				self.sql_driver.update_ip_owner(ip,owner)
+
+	# update_site_hosts
+
+	def get_site_host_network(self):
+		"""
+		Return all records where we known the owner of the ip_addr
+			corresponding to a given page's fqdn.
+		"""
+		records = []
+		for site_domain,host_name in self.sql_driver.get_site_hosts():
+			records.append({
+				'site_domain'	: site_domain,
+				'host_name'		: host_name
+			})
+
+		return records
+	#get_site_hosts
+
+	##############
+	# POLICYXRAY #
+	##############
+
+	def get_policy_count(self,policy_type=None):
+		"""
+		For a given type of policy tells us how many we have, if
+			policy_type is None we get total count.
+		"""
+		return self.sql_driver.get_total_policy_count(policy_type)
+	# get_policy_count
+
+	def get_average_policy_word_count(self, policy_type=None):
+		"""
+		Returns average policy word count, filtered by policy_type.
+		"""
+		return self.sql_driver.get_average_policy_word_count(policy_type=policy_type)
+	# get_average_policy_word_count
+
+	def update_readability_scores(self):
+		"""
+		This function performs two English-language readability tests: Flesch-Kinkaid
+			grade-level and Flesch Reading Ease for any policies we haven't already 
+			done.  The python textstat module handle the actual calculations.
+
+		Note these scores are meaningless for non-English language policies.
+		"""
+
+		# non-standard lib which must be installed
+		from textstat.textstat import textstat
+
+		for policy_id, text in self.sql_driver.get_id_and_policy_text(readability_null = True):
+			fre_score = textstat.flesch_reading_ease(text)
+			fk_score = textstat.flesch_kincaid_grade(text)
+			self.sql_driver.update_readability_scores(policy_id, fre_score, fk_score)
+	# update_readability_scores
+
+	def get_readability_scores(self, policy_type=None):
+		"""
+		Returns average policy word count, filtered by policy_type.
+		"""
+		ave_fre = self.sql_driver.get_ave_fre(policy_type=policy_type)
+		ave_fkg = self.sql_driver.get_ave_fkg(policy_type=policy_type)
+		return({
+			'ave_fre': ave_fre,
+			'ave_fkg': ave_fkg
+		})
+	# get_readability_scores
+
+	def update_crawl_disclosure(self):
+		"""
+		REDOING THIS FOR CRAWLS
+		"""
+		# set up dictionaries so we can pull in the policy_id and policy_text for each page
+		crawl_id_to_policy_id_text = {}
+		for crawl_id, policy_id, policy_text in self.sql_driver.get_crawl_id_policy_id_policy_text():
+			crawl_id_to_policy_id_text[crawl_id] = (policy_id, policy_text)
+
+		# pull in all sets of page_id/request_owner_id we haven't analyzed yet
+		for crawl_id, domain_owner_id in self.sql_driver.get_all_crawl_id_3p_request_owner_ids():
+			# only process in cases we have an associated policy
+			if crawl_id in crawl_id_to_policy_id_text:
+				policy_id   = crawl_id_to_policy_id_text[crawl_id][0]
+				policy_text = crawl_id_to_policy_id_text[crawl_id][1]
+				# default values
+				disclosed = False
+				disclosed_owner_id = None
+				# each owner may have several parent owners and aliases, we check for all of these in the policy
+				for this_owner_id, this_owner_name in self.utilities.get_domain_owner_lineage_strings(domain_owner_id,get_aliases=True):
+					if this_owner_name in policy_text:
+						disclosed = True
+						disclosed_owner_id = this_owner_id
+
+				# done for this record, update disclosure table
+				self.sql_driver.update_crawl_3p_domain_disclosure(crawl_id, domain_owner_id)
+		return
+	# update_crawl_disclosure
+
+	def update_request_disclosure(self):
+		"""
+		For any page where we have a policy we extract all third-party request domains
+			where we have determined the owner.  Next, we check if the name of the owner,
+			any of it's parent companies, is in a given policy.  Note we also check based
+			on "aliases" which are spelling variations on a given owner name (eg 'doubleclick'
+			and 'double click').  Once we've done the checks we update the policy_request_disclosure
+			table.
+		"""
+
+		# set up dictionaries so we can pull in the policy_id and policy_text for each page
+		page_id_to_policy_id_text = {}
+		for page_id, policy_id, policy_text in self.sql_driver.get_page_id_policy_id_policy_text():
+			page_id_to_policy_id_text[page_id] = (policy_id, policy_text)
+
+		# pull in all sets of page_id/request_owner_id we haven't analyzed yet
+		for page_id, request_owner_id in self.sql_driver.get_all_page_id_3p_request_owner_ids(not_in_disclosure_table=True):
+			# only process in cases we have an associated policy
+			if page_id in page_id_to_policy_id_text:
+				policy_id   = page_id_to_policy_id_text[page_id][0]
+				policy_text = page_id_to_policy_id_text[page_id][1]
+				# default values
+				disclosed = False
+				disclosed_owner_id = None
+				# each owner may have several parent owners and aliases, we check for all of these in the policy
+				for this_owner_id, this_owner_name in self.utilities.get_domain_owner_lineage_strings(request_owner_id,get_aliases=True):
+					if this_owner_name in policy_text:
+						disclosed = True
+						disclosed_owner_id = this_owner_id
+
+				# done for this record, update disclosure table
+				self.sql_driver.update_request_disclosure(
+						page_id, policy_id,
+						request_owner_id, disclosed, 
+						disclosed_owner_id
+				)
+		return
+	# update_request_disclosure
+
+	def get_percent_crawl_3p_domains_disclosed(self, policy_type=None):
+		"""
+		Determine the global percentage of 3p requests which are disclosed
+			in policies.
+		"""
+		total_identified = self.sql_driver.get_total_crawl_3p_count()
+		total_disclosed  = self.sql_driver.get_total_crawl_3p_disclosure_count()
+		if total_identified == 0:
+			return 0
+		else:
+			return(100*(total_disclosed/total_identified))
+	# get_percent_3p_requests_disclosed
+
+	def get_percent_3p_requests_disclosed(self, policy_type=None):
+		"""
+		Determine the global percentage of 3p requests which are disclosed
+			in privacy policies.
+
+		NOTE A PAGE CAN HAVE SEVERAL POLICIES WITH DISCLOSURE OCCURING IN SOME 
+		BUT NOT ALL, WE SHOULD ACCOUNT FOR THIS!
+		"""
+		total_identified = self.sql_driver.get_total_request_disclosure_count(policy_type=policy_type)
+		total_disclosed  = self.sql_driver.get_total_request_disclosure_count(policy_type=policy_type,disclosed=True)
+		if total_identified == 0:
+			return 0
+		else:
+			return(100*(total_disclosed/total_identified))
+	# get_percent_3p_requests_disclosed
+
+	def get_disclosure_by_request_owner(self):
+		"""
+		For each domain owner we query the policy_disclosure_table to find
+			out if it or its subsidiaries have been disclosed.  This gives a very
+			granular view on disclosure on a per-service basis in some cases.
+
+		Note that this is distinct on the page id to avoid over-counting for
+			subsidiaries.
 		
-		# header row for csv		
-		csv_rows.append(('Page Domain','3P Element Domain','3P Domain Owner','3P Domain Owner Country'))
+		Returns a dict which is keyed to the owner name.
+		"""
+		results = {}
+		for owner_id in self.domain_owners:
+			child_owner_ids = self.utilities.get_domain_owner_child_ids(owner_id)
+			if len(child_owner_ids) > 0:
+				total 				= self.sql_driver.get_domain_owner_disclosure_count(owner_id, child_owner_ids=child_owner_ids)
+				total_disclosed 	= self.sql_driver.get_domain_owner_disclosure_count(owner_id, child_owner_ids=child_owner_ids, disclosed=True)
+			else:
+				total 				= self.sql_driver.get_domain_owner_disclosure_count(owner_id)
+				total_disclosed 	= self.sql_driver.get_domain_owner_disclosure_count(owner_id, disclosed=True)
+			
+			if total != 0:
+				results[self.domain_owners[owner_id]['owner_name']] = (total,total_disclosed,(total_disclosed/total)*100)	
+
+		# return the dict which can be processed to a csv in the calling class
+		return results
+	# get_disclosure_by_request_owner
+
+	def get_terms_percentage(self,substrings,policy_type=None,policy_type_count=None):
+		total_count = self.sql_driver.get_total_policy_count(policy_type=None)
+		if policy_type:
+			matches_count = self.sql_driver.get_policy_substrings_count(substrings,policy_type=policy_type)
+		else:
+			matches_count = self.sql_driver.get_policy_substrings_count(substrings)
 		
-		# sql_driver.get_network_ties returns a set of tuples in the format
-		#	(page domain, element domain, element domain owner id)
-		#	we just go through this data to produce the report
-		
-		for item in self.sql_driver.get_3p_network_ties():
-			# if a page has no elements, edge[1] will be 'None' so we skip it
-			#	an alternate approach would be to include as orphan nodes
-			if item[1]:
-				# this condition has to specify != None, b/c otherwise it will skip values of 0
-				if item[2] != None:
-					csv_rows.append((item[0],item[1],self.domain_owners[item[2]]['owner_name'],self.domain_owners[item[2]]['country']))
-				else:
-					csv_rows.append((item[0],item[1],'Unknown',''))
-		self.write_csv('network.csv', csv_rows)
-	# generate_network_report
+		return (matches_count/policy_type_count)*100
+	# get_terms_percentage
+
+	def stream_rate(self):
+		wait_time = 10
+		elapsed = 0
+		query = 'SELECT COUNT(*) FROM task_queue'
+		old_count = sql_driver.fetch_query(query)[0][0]
+		all_rates = []
+		while True:
+			time.sleep(wait_time)
+			elapsed += wait_time
+			new_count = sql_driver.fetch_query(query)[0][0]
+			all_rates.append((old_count-new_count)*60)
+			old_count = new_count
+			json_data = json.dumps({
+				'time': elapsed/60,
+				'rate': statistics.mean(all_rates)
+				# 'rate': new_count
+			})
+			yield f"data:{json_data}\n\n"
+	# stream_rate
+
 # Analyzer

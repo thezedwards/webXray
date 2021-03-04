@@ -1,116 +1,80 @@
 """
-	Welcome to webxray!
-
-	This file may be all you are ever be exposed to.  It has an interactive mode
-		'-i' or no flag, which is what most people will need for small to moderate sets of pages (eg < 10k).
-	
-	If you are doing big sets you may want to use the unattended options 
-		to collect ('-c') and analyze ('-a').
-	
-	Run with '-h' for details.
+	Welcome to webxray!  This file both launches an interactive mode and is 
+		pre-configured to store data in sqlite, which is sufficient for many
+		users.  For advanced users, the software supports also a massively
+		distributed scan infrastrcture, backend storage in postgres,
+		and has been used to build multi-billion record datasets.  Many of
+		these options are available via command-line flags.
 """
 
-# test we are on right version of python
-import sys
-if sys.version_info[0] < 3 or sys.version_info[1] < 4:
-	print('******************************************************************************')
-	print(' Python 3.4 or above is required for webXray; please check your installation. ')
-	print('******************************************************************************')
-	quit()
-
-# import standard python packages
+# standard python packages
+import datetime
+import multiprocessing
+import optparse
 import os
 import re
+import socket
+import sys
 import time
-from optparse import OptionParser
-
-###################
-# GLOBAL SETTINGS #
-###################
-
-# BROWSER SELECTION
-# 	browser_type can only be chrome
-#	phantomjs has been removed
-browser_type = 'chrome'
-
-# BROWSER WAIT TIME
-#	in order to give time for all elements to load the browser will wait for a set ammount of time
-#	 DECREASING means faster collection, but you may miss slow-loading elements
-#	 INCREASING means slower collection, but higher likelihood of getting slow-loading elements
-#
-#	extensive testing has determined 45 seconds performs well, and you are advised to keep it there,
-#		but you may adjust to taste and network conditions
-#		for example, on a very slow connection you may want to use 60 seconds
-#
-#	when using chrome a wait time below 30 seconds often results in lost cookies and is NOT RECCOMENDED!
-browser_wait = 45
-
-# PERFORMANCE: RUNNING PARALLEL BROWSING ENGINES
-#	'pool_size' sets how many browser processes get run in parallel, 
-#	by default it is set to 1 so no parallel processes are run
-#	setting this to 'None' will use all available cores and is reccomended 
-#		if doing over 1k pages
-#
-#	note that with manual tweaking the pool can be larger than the number
-#		of available cores, but proceed with caution
-pool_size = 1
-
-# DATABASE ENGINE SELECTION
-# 	db_engine can only be 'sqlite'
-#	'mysql' and 'postgres' have been removed
-db_engine = 'sqlite'
+import urllib.parse
+import urllib.request
 
 # set up database connection
+db_engine = 'sqlite'
 if db_engine == 'sqlite':
 	from webxray.SQLiteDriver import SQLiteDriver
 	sql_driver = SQLiteDriver()
+elif db_engine == 'postgres':
+	from webxray.PostgreSQLDriver import PostgreSQLDriver
+	sql_driver = PostgreSQLDriver()
 else:
-	print('INVALED DB ENGINE FOR %s, QUITTING!' % db_engine)
+	print('INVALID DB ENGINE FOR %s, QUITTING!' % db_engine)
 	quit()
+
+# import our custom utilities
+from webxray.Utilities import Utilities
+utilities = Utilities(db_engine=db_engine)
+
+# check for various dependencies, python version, etc.
+utilities.check_dependencies()
+
+# SET CONFIG
+#
+# There are a large number of setting for webXray, which are
+#	set in a 'config' variable.  Two default configurations are 
+#	'haystack' which collects data needed for examining data transfers
+#	and 'forensic' which collects everything, including images,
+#	page text, and the content of files.  It is A VERY BAD IDEA
+#	to conduct forensic scans on lists of random webpages
+#	as you may be downloading and storing files you do not want.
+#
+# Only use forensic when you are TOTALLY SURE you want to retain
+#	all site content on your machine.  Advanced users can either
+#	edit config details directly in the database or create their
+#	own custom config in Utilities.py.
+config = utilities.get_default_config('haystack')
+
+# SET NUMBER OF PARALLEL BROWSING ENGINES
+#
+# 'pool_size' sets how many browser processes get run in parallel, 
+#	by default it is set to 1 so no parallel processes are run.
+#	Setting this to 'None' will use all available cores on your
+#	machine.
+pool_size = None
+
+
+# Set the client_id based on the hostname, you can put in 
+#	 a custom value of your choosing as well.
+client_id = socket.gethostname()
 
 ####################
 # HELPER FUNCTIONS #
 ####################
 
-def select_wbxr_db():
-	"""
-	databases are stored with a prefix (default 'wbxr_'), this function helps select a database in interactive mode
-	"""
-
-	# you can optionally specify a different prefix here by setting "db_prefix = '[PREFIX]'"
-	wbxr_dbs = sql_driver.get_wbxr_dbs_list()
-	wbxr_dbs.sort()
-
-	if len(wbxr_dbs) == 0:
-		print('''\t\tThere are no databases to analyze, please try [C]ollecting data or 
-				import an existing wbxr-formatted database manually.''')
-		interaction()
-		return
-
-	for index,db_name in enumerate(wbxr_dbs):
-		print('\t\t[%s] %s' % (index, db_name))
-
-	max_index = len(wbxr_dbs)-1
-	
-	# interaction step: loop until we get acceptable input
-	while True:
-		selected_db_index = input("\n\tPlease select database by number: ")
-		if selected_db_index.isdigit():
-			selected_db_index = int(selected_db_index)
-			if selected_db_index >= 0 and selected_db_index <= max_index:
-				break
-			else:
-				print('\t\t You entered an invalid string, please select a number in the range 0-%s.' % max_index)
-				continue
-		else:
-			print('\t\t You entered an invalid string, please select a number in the range 0-%s.' % max_index)
-			continue
-
-	db_name = wbxr_dbs[selected_db_index]
-	return db_name
-# select_wbxr_db
-
 def quit():
+	"""
+	Make sure we close the db connection before we exit.
+	"""
 	print('------------------')
 	print('Quitting, bye bye!')
 	print('------------------')
@@ -120,26 +84,30 @@ def quit():
 
 def interaction():
 	"""
-	primary interaction function, most people should only be exposed to this
+	Handles user interaction, alternative to command line flags, good
+		for most people.
 	"""
 
 	print('\tWould you like to:')
 	print('\t\t[C] Collect Data')
 	print('\t\t[A] Analyze Data')
+	print('\t\t[V] Visualize Data')
+	print('\t\t[PC] Policy Collect')
+	print('\t\t[PA] Policy Analyze')
 	print('\t\t[Q] Quit')
 
-	# interaction: loop until we get acceptable input
+	# loop until we get acceptable input
 	while True:
 		selection = input("\tSelection: ").lower()
+
+		acceptable_input = ['c','a','v','pc','pa','q']
 		
-		if selection 	== 'c':
-			break
-		elif selection 	== 'a':
-			break
-		elif selection 	== 'q':
+		if selection 	== 'q':
 			quit()
+		elif selection in acceptable_input:
+			break
 		else:
-			print('\t\tValid selections are C, A, and Q.  Please try again.')
+			print('\t\tInvalid select, please try again.')
 			continue
 
 	# we are collecting new data
@@ -178,12 +146,13 @@ def interaction():
 				db_name = input('\tEnter new database name: ').lower()
 
 				if len(db_name) <= 40 and re.search('^[a-zA-Z0-9_]*$', db_name):
-					print('\tNew db name is "%s"' % db_name)
+					print(f'\tCreating new db with name {db_name}')
 					break
 				else:
 					print('\tName was invalid, try again.')
 					continue
 			sql_driver.create_wbxr_db(db_name)
+			sql_driver.set_config(config)
 
 		elif selection == 'a':	
 			# collect - add to db
@@ -192,7 +161,7 @@ def interaction():
 			print('\t---------------------------')
 			print('\tThe following webXray databases are available:')
 			
-			db_name = select_wbxr_db()
+			db_name = utilities.select_wbxr_db()
 			print('\tUsing database: %s' % db_name)
 		
 		# we have selected the db to use, now move on to collection	
@@ -206,7 +175,7 @@ def interaction():
 		#	the name of the selected list.
 		files = os.listdir(path='./page_lists')
 		
-		if len(files) is 0:
+		if len(files) == 0:
 			print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			print('ERROR: No page lists found, check page_lists directory.')
 			print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
@@ -257,31 +226,170 @@ def interaction():
 		print('\tAnalyzing Data')
 		print('\t==============')
 
-		print('\t-----------------------------------------------------------')
-		print('\tThe following webXray databases are available for anlaysis:')
-		print('\t-----------------------------------------------------------')
+		print('\t----------------------------------------------')
+		print('\tThe following webXray databases are available:')
+		print('\t----------------------------------------------')
 		
-		db_name = select_wbxr_db()
+		db_name = utilities.select_wbxr_db()
 
 		print('\tUsing database: %s' % db_name)
 
-		# go do the report now
+		# go do the analysis
 		analyze(db_name)
+		
+		# restart interaction
+		interaction()
+	elif selection == 'pc':	
+		# analyze
+		print('\t=====================')
+		print('\t Collecting Policies ')
+		print('\t=====================')
+
+		print('\t----------------------------------------------')
+		print('\tThe following webXray databases are available:')
+		print('\t----------------------------------------------')
+		
+		db_name = utilities.select_wbxr_db()
+
+		print('\tUsing database: %s' % db_name)
+
+		# go get the policies
+		collect(db_name,task='get_policy')
+		
+		# restart interaction
+		interaction()
+	elif selection == 'pa':
+		# analyze
+		print('\t====================')
+		print('\t Analyzing Policies ')
+		print('\t====================')
+
+		print('\t----------------------------------------------')
+		print('\tThe following webXray databases are available:')
+		print('\t----------------------------------------------')
+		
+		db_name = utilities.select_wbxr_db()
+
+		print('\tUsing database: %s' % db_name)
+
+		# go get the policies
+		policy_report(db_name)
 		
 		# restart interaction
 		interaction()
 # interaction
 
-def collect(db_name, pages_file_name):
+def collect(db_name, pages_file_name=None, task='get_scan'):
 	"""
 	manage the loading of pages, extracting relevant data, and storing to db
 	may also be called in stand-alone with 'run_webxray.py -c [DB_NAME] [PAGE_FILE_NAME]'
 	"""
 
 	from webxray.Collector import Collector
-	collector = Collector(db_engine, db_name, pages_file_name, [browser_type], browser_wait)
-	collector.run(pool_size)
+
+	# if db doesn't exist, create it
+	if sql_driver.db_exists(db_name) == 0:
+		print('\t------------------------------')
+		print('\tCreating DB: %s' % db_name)
+		print('\t------------------------------')
+		sql_driver.create_wbxr_db(db_name)
+		sql_driver.set_config(config)
+
+	# needed to display runtime info
+	start_time = datetime.datetime.now()
+
+	# the main event
+	collector = Collector(db_name,db_engine,client_id)
+	if task == 'get_scan':
+		build_task_queue(db_name, 'get_scan', pages_file_name=pages_file_name)
+	elif task=='get_policy':
+		build_task_queue(db_name, 'get_policy')
+	elif task=='get_random_crawl':
+		build_task_queue(db_name, 'get_random_crawl', pages_file_name=pages_file_name)
+
+	collector.run(task='process_tasks_from_queue', pool_size=pool_size)
+
+	# fyi
+	utilities.print_runtime('Data collection', start_time)
 # collect
+
+def build_task_queue(db_name, task, pages_file_name=None, crawl_file_name=None):
+	"""
+	builds the queue of pages to be scanned, does no scanning itself, can 
+		only be called by CLI
+	"""
+
+	from webxray.Collector import Collector
+
+	# if db doesn't exist, create it
+	if sql_driver.db_exists(db_name) == 0:
+		print('\t------------------------------')
+		print('\tCreating DB: %s' % db_name)
+		print('\t------------------------------')
+		sql_driver.create_wbxr_db(db_name)
+		sql_driver.set_config(config)
+
+	# needed to display runtime info
+	start_time = datetime.datetime.now()
+
+	# the main event
+	collector = Collector(db_name,db_engine,client_id)
+	if task == 'get_scan':
+		print('\t---------------------------------')
+		print('\t Adding page scans to task queue ')
+		print('\t---------------------------------')
+
+		collector.build_scan_task_queue(params = {
+			'pages_file_name'		: pages_file_name, 
+			'flush_scan_task_queue'	: True,
+			'task'					: 'get_scan'
+		})
+	elif task == 'get_random_crawl':
+		print('\t-----------------------------------------')
+		print('\t Adding random crawl scans to task queue ')
+		print('\t-----------------------------------------')
+
+		collector.build_scan_task_queue(params = {
+			'pages_file_name'		: pages_file_name, 
+			'flush_scan_task_queue'	: True,
+			'task'					: 'get_random_crawl'
+		})
+	elif task == 'get_crawl':
+		print('\t-----------------------------')
+		print('\t Adding crawls to task queue ')
+		print('\t-----------------------------')
+		collector.build_crawl_task_queue(params = {
+			'crawl_file_name'			: crawl_file_name,
+			'flush_crawl_task_queue'	: True
+		})
+	elif task == 'get_policy':
+		print('\t-----------------------------------')
+		print('\t Adding policy scans to task queue ')
+		print('\t-----------------------------------')
+		collector.build_policy_task_queue(flush_policy_task_queue=True)
+
+	# fyi
+	utilities.print_runtime('Build task queue', start_time)
+# build_task_queue
+
+def worker_collect(db_name):
+	"""
+	manage the loading of pages, extracting relevant data, and storing to db
+	may also be called in stand-alone with 'run_webxray.py --worker [DB_NAME]'
+	"""
+
+	from webxray.Collector import Collector
+
+	# needed to display runtime info
+	start_time = datetime.datetime.now()
+
+	# the main event
+	collector = Collector(db_name,db_engine,client_id)
+	collector.run(task='process_tasks_from_queue', pool_size=pool_size)
+
+	# fyi
+	utilities.print_runtime('Data collection', start_time)
+# worker_collect
 
 def analyze(db_name):
 	"""
@@ -289,7 +397,59 @@ def analyze(db_name):
 	may also be called in stand-alone with 'run_webxray.py -a [DB_NAME]'
 	"""
 
-	from webxray.Analyzer import Analyzer
+	from webxray.Reporter import Reporter
+
+	# needed to display runtime info
+	start_time = datetime.datetime.now()
+	
+	# set how many tlds you want to produce sub-reports for
+	num_tlds	= None
+
+	# set reports to only get the top X results, set to None to get everything
+	num_results	= 500
+
+	# set up a new reporter
+	reporter = Reporter(db_name, db_engine, num_tlds, num_results, flush_domain_owners=True)
+
+	# this is the main suite of reports, comment out those you don't need
+	reporter.generate_db_summary_report()
+	reporter.generate_stats_report()
+	reporter.generate_aggregated_tracking_attribution_report()
+	reporter.generate_3p_domain_report()
+	reporter.generate_3p_request_report()
+	reporter.generate_3p_request_report('script')
+	reporter.generate_use_report()
+
+	# the following reports may produce very large files and are off by default
+	reporter.generate_per_site_network_report()
+	# reporter.generate_per_page_network_report()
+	# reporter.generate_all_pages_request_dump()
+	# reporter.generate_all_pages_cookie_dump()
+
+	# fyi
+	utilities.print_runtime('Report generation', start_time)
+# analyze
+
+def single(url):
+	"""
+	For one-off analyses printed to CLI, avoids db calls entirely
+	"""
+
+	from webxray.SingleScan import SingleScan
+	single_scan = SingleScan()
+	single_scan.execute(url, haystack_config)
+# single
+
+def policy_report(db_name):
+	"""
+	perform of policies, generate reports and store them in ./reports
+	may also be called in stand-alone with 'run_webxray.py -p [DB_NAME]'
+	"""
+
+	from webxray.Reporter import Reporter
+
+	# needed to display runtime info
+	start_time = datetime.datetime.now()
 	
 	# set how many tlds you want to produce sub-reports for
 	num_tlds	= None
@@ -297,72 +457,201 @@ def analyze(db_name):
 	# set reports to only get the top X results, set to None to get everything
 	num_results	= 100
 
-	# set up a new analyzer
-	analyzer = Analyzer(db_engine, db_name, num_tlds, num_results)
+	# set up a new reporter
+	reporter = Reporter(db_name, db_engine, num_tlds, num_results, flush_domain_owners=True)
 
-	# this is the full suite of reports, comment out those you don't need
-	analyzer.generate_db_summary_report()
-	analyzer.generate_stats_report()
-	analyzer.generate_aggregated_tracking_attribution_report()
-	analyzer.generate_3p_domain_report()
-	analyzer.generate_3p_element_report()
-	analyzer.generate_3p_element_report('javascript')
-	analyzer.generate_3p_element_report('image')
-	analyzer.generate_data_transfer_report()
-	analyzer.generate_aggregated_3p_ssl_use_report()
+	# do relevant policy reports
+	reporter.initialize_policy_reports()
+	reporter.generate_policy_summary_report()
+	reporter.generate_policy_owner_disclosure_reports()
+	reporter.generate_policy_gdpr_report()
+	reporter.generate_policy_pacification_report()
+	reporter.generate_policy_pii_report()
+
+	# fyi
+	utilities.print_runtime('Report generation', start_time)
+# policy_report
+
+def rate_estimate(db_name, client_id):
+	"""
+	Tells us how much longer to go...
+	"""
+	print('Showing scan rate for database %s' % db_name)
+	if client_id:
+		print('\tclient_id is %s' % client_id)
+	else:
+		client_id = None
+
+	print()
+	print()
+
+	print('elapsed_minutes\tcurrent_rate\taverage_rate\tremaining_tasks\tremaining_hours')
+	print('---------------\t------------\t------------\t---------------\t---------------')
+	utilities = Utilities(db_name=db_name,db_engine=db_engine)
+	for result in utilities.stream_rate():
+		print('%s\t\t%s\t\t%s\t\t%s\t\t%s' % (
+				result[client_id]['elapsed_minutes'],
+				result[client_id]['current_rate'],
+				result[client_id]['average_rate'],
+				result[client_id]['remaining_tasks'],
+				result[client_id]['remaining_hours']
+			)
+		)
+
+# rate_estimate
+
+def store_results_from_queue():
+	"""
+	If we have results in our result_queue we will
+		process/store them.  Can be run in parallell
+		with server if set to queue results.
+	"""
+	from webxray.Collector import Collector
+	collector = Collector(db_engine=db_engine)
+	collector.run(task='store_results_from_queue', pool_size=pool_size)
+# store_results_from_queue
+
+def run_client():
+	"""
+	Start the remote client, note this only performs scans
+		and uploads to the server and runs until stopped.
 	
-	# the following reports may produce very large files, you have been warned
-	# analyzer.generate_per_page_data_flow_report()
-	analyzer.generate_network_report()
-	analyzer.print_runtime()
-# report
+	However, since Chrome can crash it is a good idea
+		to have this restarted periodically by a 
+		cron job.
 
-def single(url):
 	"""
-	for one-off analyses printed to CLI, avoids db calls entirely
-	"""
-
-	from webxray.SingleScan import SingleScan
-	single_scan = SingleScan(browser_type)
-	single_scan.execute(url, browser_wait)
-# single
+	from webxray.Client import Client
+	client = Client('https://wbxrcac.andrew.cmu.edu', pool_size=pool_size)
+	client.run_client()
+# run_client
 
 if __name__ == '__main__':
 	print('''   
-	             | |                        
-	__      _____| |____  ___ __ __ _ _   _ 
-	\ \ /\ / / _ \ '_ \ \/ / '__/ _` | | | |
-	 \ V  V /  __/ |_) >  <| | | (_| | |_| |
-	  \_/\_/ \___|_.__/_/\_\_|  \__,_|\__, |
-	                                   __/ |
-	                                  |___/ 
-		[v 2.2 - UNSUPPORTED LEGACY CODE]
+               _   __  __                
+ __      _____| |__\ \/ /_ __ __ _ _   _ 
+ \ \ /\ / / _ \ '_ \\\\  /| '__/ _` | | | |
+  \ V  V /  __/ |_) /  \| | | (_| | |_| |
+   \_/\_/ \___|_.__/_/\_\_|  \__,_|\__, |
+                                   |___/
+		[Forensic Edition v1.0]
     ''')
 
-
 	# set up cli args
-	parser = OptionParser()
-	parser.add_option('-s', action='store_true', dest='single', help='Single Site: for One-Off Tests - Args [url to analyze]')
+	parser = optparse.OptionParser()
+	parser.add_option(
+		'--scan_pages',	
+		action='store_true',
+		dest='scan_pages',
+		help='Scan Pages: Only scan URL specified - Args: [db_name] [page_file_name]'
+	)
+	parser.add_option(
+		'--crawl_sites',	
+		action='store_true',
+		dest='crawl_sites',
+		help='Crawl Sites: Scan URL specified and 3 random internal pages - Args: [db_name] [page_file_name]'
+	)
+	parser.add_option(
+		'--build_queue',
+		action='store_true',
+		dest='build_queue',
+		help='Build page queue: Should be run on db server, leave scanning to workers - Args: [db_name] [page_file_name or crawl_file_name]'
+	)
+	parser.add_option(
+		'--worker',
+		action='store_true',
+		dest='worker',
+		help='Collect Unattended as Worker: Simpler Alternative to Distributed Client - Args: [db_name]'
+	)
+	parser.add_option(
+		'-s',
+		action='store_true',
+		dest='single',
+		help='Single Site: for One-Off Tests - Args [url to analyze]'
+	)
+	parser.add_option(
+		'-a',
+		action='store_true',
+		dest='analyze',
+		help='Analyze Unattended: Best for Large Datasets - Args: [db_name]'
+	)
+	parser.add_option(
+		'--policy_collect',
+		action='store_true',
+		dest='policy_collect',
+		help='Policy Collect Unattended: Best for Large Datasets - Args: [db_name]'
+	)
+	parser.add_option(
+		'--policy_analyze',
+		action='store_true',
+		dest='policy_report',
+		help='Policy Report Unattended: Best for Large Datasets - Args: [db_name]'
+	)
+	parser.add_option(
+		'--rate',
+		action='store_true',
+		dest='rate_estimate',
+		help='Estimates time remaining on scan - Args: [db_name]'
+	)
+	parser.add_option(
+		'--store_queue',
+		action='store_true',
+		dest='store_results_from_queue',
+		help='Stores any results in the queue - Args: [db_name]'
+	)
+	parser.add_option(
+		'--run_client',
+		action='store_true',
+		dest='run_client',
+		help='Runs the distributed client'
+	)
 	(options, args) = parser.parse_args()
 
-	mode_count = 0
-	
-	# set mode, make sure we don't have more than one specified
-	if options.single:
+	# set mode
+	if options.scan_pages:
+		mode = 'scan_pages'
+	elif options.crawl_sites:
+		mode = 'crawl_sites'
+	elif options.build_queue:
+		mode = 'build_queue'
+	elif options.store_results_from_queue:
+		mode = 'store_results_from_queue'
+	elif options.worker:
+		mode = 'worker'
+	elif options.single:
 		mode = 'single'
-		mode_count += 1
-		
-	# if nothing is specified we do interactive
-	if mode_count == 0:
+	elif options.analyze:
+		mode = 'analyze'
+	elif options.policy_collect:
+		mode = 'policy_collect'
+	elif options.policy_report:
+		mode = 'policy_report'
+	elif options.rate_estimate:
+		mode = 'rate_estimate'
+	elif options.run_client:
+		mode = 'run_client'
+	else:
 		mode = 'interactive'
-	elif mode_count > 1:
-		print('Error: Too many modes specified, only one allowed!')
-		parser.print_help()
-		quit()
 
 	# do what we're supposed to do		
 	if mode == 'interactive':
 		interaction()
+	elif mode == 'scan_pages':
+		try:
+			db_name 		= args[0]
+			pages_file_name = args[1]
+		except:
+			print('Need a db name and pages file name!')
+			quit()
+		collect(db_name, pages_file_name=pages_file_name, task='get_scan')
+	elif mode == 'crawl_sites':
+		try:
+			db_name 		= args[0]
+			pages_file_name = args[1]
+		except:
+			print('Need a db name and pages file name!')
+			quit()
+		collect(db_name, pages_file_name=pages_file_name, task='get_random_crawl')
 	elif mode == 'single':
 		try:
 			url = args[0]
@@ -370,9 +659,81 @@ if __name__ == '__main__':
 			print('URL needs to be supplied as an argument!')
 			quit()
 		single(url)
-	quit()
+	elif mode == 'analyze':
+		try:
+			db_name = args[0]
+		except:
+			print('Need a db name!')
+			quit()
+		analyze(db_name)
+	
+	elif mode == 'policy_collect':
+		try:
+			db_name = args[0]
+		except:
+			print('Need a db name!')
+			quit()
+		collect(db_name,task='get_policy')
+	
+	elif mode == 'policy_report':
+		try:
+			db_name = args[0]
+		except:
+			print('Need a db name!')
+			quit()
+		policy_report(db_name)
+	
+	elif mode == 'worker':
+		try:
+			db_name = args[0]
+		except:
+			print('Need a db name!')
+			quit()
+		worker_collect(db_name)
 
-	# main show
-	interaction()
+	elif mode == 'build_queue':
+		try:
+			db_name = args[0]
+			task = args[1]
+		except:
+			print('Need a db name and task name')
+			quit()
+
+		# if we are doing get_scan we also need a page file name
+		if task == 'get_scan' or task == 'get_random_crawl':
+			try:
+				page_file = args[2]
+			except:
+				print('Need a page file name for get_scan')
+				quit()
+			build_task_queue(db_name, task, pages_file_name=page_file)
+		elif task == 'get_crawl':
+			try:
+				page_file = args[2]
+			except:
+				print('Need a crawl file name for get_crawl')
+				quit()
+			build_task_queue(db_name, task, crawl_file_name=page_file)
+		else:
+			# get_policy
+			build_task_queue(db_name, task)
+
+	elif mode == 'store_results_from_queue':
+		store_results_from_queue()
+
+	elif mode == 'rate_estimate':
+		try:
+			db_name = args[0]
+		except:
+			print('Need a db name!')
+			quit()
+		try:
+			client_id = args[1]
+		except:
+			client_id = None
+		rate_estimate(db_name,client_id)
+
+	elif mode == 'run_client':
+		run_client()
 	quit()
 # main

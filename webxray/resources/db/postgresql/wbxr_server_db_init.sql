@@ -1,0 +1,29 @@
+-- this file is read line-by-line by python to init the database
+-- for the sake of readability, db schemas are in laid out in comments
+-- but for python sake they are read as very long single lines
+----------------------------
+--- CLIENT_CONFIG ---
+----------------------------
+-- CREATE TABLE IF NOT EXISTS server_client_config(
+-- 	client_ip TEXT,
+-- 	client_id TEXT UNIQUE,
+-- 	mapped_db TEXT,
+-- 	live BOOLEAN
+-- );
+CREATE TABLE IF NOT EXISTS client_config(client_ip TEXT,client_id TEXT UNIQUE,mapped_db TEXT,live BOOLEAN);
+--------------------
+--- RESULT_QUEUE ---
+--------------------
+-- CREATE TABLE IF NOT EXISTS result_queue(
+-- 	id BIGSERIAL PRIMARY KEY,
+-- 	locked BOOLEAN DEFAULT FALSE,
+-- 	client_id TEXT,
+-- 	client_ip TEXT,
+-- 	mapped_db TEXT,
+-- 	target TEXT,
+-- 	task TEXT,
+-- 	task_result TEXT,
+-- 	added TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+-- 	modified TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+-- );
+CREATE TABLE IF NOT EXISTS result_queue(id BIGSERIAL PRIMARY KEY,locked BOOLEAN DEFAULT FALSE,client_id TEXT,client_ip TEXT,mapped_db TEXT,target TEXT,task TEXT,task_result TEXT,added TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,modified TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP);

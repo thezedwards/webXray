@@ -6,25 +6,23 @@ import json
 # custom webxray classes
 from webxray.ParseURL import ParseURL
 
-# browsers
-from webxray.ChromeDriver	import ChromeDriver
-
 class SingleScan:
 	"""
 	Loads and analyzes a single page, print outputs to cli
 	Very simple and does not require a db being configured
 	"""
 
-	def __init__(self, browser_type):
+	def __init__(self):
 		self.url_parser		= ParseURL()
-		self.browser_type 	= browser_type
 		self.domain_owners 	= {}
 		self.id_to_owner	= {}
 		self.id_to_parent	= {}
 
 		# set up the domain ownership dictionary
 		for item in json.load(open(os.path.dirname(os.path.abspath(__file__))+'/resources/domain_owners/domain_owners.json', 'r', encoding='utf-8')):
-			self.id_to_owner[item['id']] 	= item['owner_name']
+			if item['id'] == '-': continue
+
+			self.id_to_owner[item['id']] 	= item['name']
 			self.id_to_parent[item['id']] 	= item['parent_id']
 			for domain in item['domains']:
 				self.domain_owners[domain] = item['id']
@@ -40,29 +38,34 @@ class SingleScan:
 			return [id] + self.get_lineage(self.id_to_parent[id])
 	# end get_lineage
 
-	def execute(self, url, browser_wait):
+	def execute(self, url, config):
 		"""
 		Main function, loads page and analyzes results.
 		"""
 
-		print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-		print('Single Site Test On: %s' % url)
-		print('\tBrowser type is %s' % self.browser_type)
-		print('\tBrowser wait time is %s seconds' % browser_wait)
+		print('\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+		print('\tSingle Site Test On: %s' % url)
+		print('\t - Browser type is %s' % config['client_browser_type'])
+		print('\t - Browser max wait time is %s seconds' % config['client_max_wait'])
 
 		# make sure it is an http(s) address
-		if not re.match('^https?://', url): 
-			print('\tNot a valid url, aborting')
-			return None
+		# if not re.match('^https?://', url): 
+		# 	print('\tNot a valid url, aborting')
+		# 	return None
 
 		# import and set up specified browser driver
-		if self.browser_type == 'chrome':
-			browser_driver 	= ChromeDriver()
-			chrome_ua = browser_driver.get_ua_for_headless()
-			browser_driver 	= ChromeDriver(ua=chrome_ua)
+		if config['client_browser_type'] == 'chrome':
+			from webxray.ChromeDriver	import ChromeDriver
+			browser_driver 	= ChromeDriver(config)
+		# elif config['client_browser_type'] == 'basic':
+		# 	from webxray.BasicDriver	import BasicDriver
+		# 	browser_driver = BasicDriver(config)
+		else:
+			print('INVALID BROWSER TYPE FOR %s, QUITTING!' % config['client_browser_type'])
+			exit()
 
 		# attempt to get the page
-		browser_output = browser_driver.get_webxray_scan_data(url, browser_wait)
+		browser_output = browser_driver.get_scan(url)
 
 		# if there was a problem we print the error
 		if browser_output['success'] == False:
@@ -87,70 +90,50 @@ class SingleScan:
 		origin_tld 			= origin_ip_fqdn_domain_pubsuffix_tld[4]
 
 		print('\n\t------------------{ URL }------------------')
-		print('\t'+url)
+		print('\t %s' % url)
 		print('\n\t------------------{ Final URL }------------------')
-		print('\t'+browser_output['final_url'])
+		print('\t %s' % browser_output['final_url'])
+		print('\n\t------------------{ Title }------------------')
+		print('\t %s' % browser_output['title'])
+		print('\n\t------------------{ Description }------------------')
+		print('\t %s' % browser_output['meta_desc'])
 		print('\n\t------------------{ Domain }------------------')
-		print('\t'+origin_domain)
+		print('\t %s' % origin_domain)
 		print('\n\t------------------{ Seconds to Complete Download }------------------')
-		print('\t%s' % (browser_output['load_time']/1000))
-		print('\n\t------------------{ 3rd Party Cookies }------------------')
+		print('\t%s' % (browser_output['load_time']))
+		print('\n\t------------------{ Cookies }------------------')
+		# put relevant fields from cookies into list we can sort
 		cookie_list = []
 		for cookie in browser_output['cookies']:
-			# get domain, pubsuffix, and tld from cookie
-			# we have to append http b/c the parser will fail, this is a lame hack, should fix
-			cookie_ip_fqdn_domain_pubsuffix_tld	= self.url_parser.get_ip_fqdn_domain_pubsuffix_tld('http://'+cookie['domain'])
-
-			# something went wrong, but we continue to go process the elements
-			if cookie_ip_fqdn_domain_pubsuffix_tld is None:
-				print('could not parse cookie')
-				continue
-
-			# otherwise, everything went fine
-			cookie_ip 			= cookie_ip_fqdn_domain_pubsuffix_tld[0]
-			cookie_fqdn 		= cookie_ip_fqdn_domain_pubsuffix_tld[1]
-			cookie_domain 		= cookie_ip_fqdn_domain_pubsuffix_tld[2]
-			cookie_pubsuffix 	= cookie_ip_fqdn_domain_pubsuffix_tld[3]
-			cookie_tld 			= cookie_ip_fqdn_domain_pubsuffix_tld[4]
-
-			# print external cookies
-			if origin_domain not in cookie_domain:
-				cookie_list.append(re.sub('^\.', '', cookie['domain'])+' -> '+cookie['name'])
+			cookie_list.append(cookie['domain']+' -> '+cookie['name']+' -> '+cookie['value'])
 
 		cookie_list.sort()
-		count = 0
-		for cookie in cookie_list:
-			count += 1
-			print('\t%s) %s' % (count,cookie))
+		for count,cookie in enumerate(cookie_list):
+			print(f'\t[{count}] {cookie}')
+			
+		print('\n\t------------------{ Local Storage }------------------')
+		for item in browser_output['dom_storage']:
+			print('\t%s (is local: %s): %s' % (item['security_origin'],item['is_local_storage'],item['key']))
 
-		print('\n\t------------------{ 3p Domains Requested }------------------')
-		element_domains = []
+		print('\n\t------------------{ Domains Requested }------------------')
+		request_domains = set()
 
-		for request in browser_output['processed_requests']:
+		for request in browser_output['requests']:
 			# if the request starts with 'data'/etc we can't parse tld anyway, so skip
-			if re.match('^(data|about|chrome).+', request):
+			if re.match('^(data|about|chrome).+', request['url']):
 				continue
 
-			element_ip_fqdn_domain_pubsuffix_tld	= self.url_parser.get_ip_fqdn_domain_pubsuffix_tld(request)
-
-			# problem with this request, bail on it and do the next
-			if element_ip_fqdn_domain_pubsuffix_tld is None:
+			# parse domain from the security_origin
+			domain_info = self.url_parser.get_parsed_domain_info(request['url'])
+			if domain_info['success'] == False:
+				print('\tUnable to parse domain info for %s with error %s' % (request['url'], domain_info['result']))
 				continue
 
-			element_ip 			= element_ip_fqdn_domain_pubsuffix_tld[0]
-			element_fqdn 		= element_ip_fqdn_domain_pubsuffix_tld[1]
-			element_domain 		= element_ip_fqdn_domain_pubsuffix_tld[2]
-			element_pubsuffix 	= element_ip_fqdn_domain_pubsuffix_tld[3]
-			element_tld 		= element_ip_fqdn_domain_pubsuffix_tld[4]
-				
-			if origin_domain not in element_domain:
-				if element_domain not in element_domains:
-					element_domains.append(element_domain)
+			# if origin_domain != domain_info['result']['domain']:
+			request_domains.add(domain_info['result']['domain'])
 		
-		element_domains.sort()
-
 		count = 0
-		for domain in element_domains:
+		for domain in sorted(request_domains):
 			count += 1
 			if domain in self.domain_owners:
 				lineage = ''

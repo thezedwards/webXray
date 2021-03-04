@@ -1,98 +1,109 @@
 import json
 
+def list_to_json_string(list):
+	json_string = ''
+	if len(list) > 0:
+		for item in sorted(list):
+			json_string += '\n\t\t\t\t"'+item+'",'
+		return json_string[:-1]
+	else:
+		return json_string
+# list_to_json_string
+
+def url_list_to_json_string(list):
+	json_string = ''
+	if len(list) > 0:
+		for lang,url in sorted(list):
+			json_string += '\n\t\t\t\t["%s","%s"],' % (lang,url)
+		return json_string[:-1]
+	else:
+		return json_string
+# url_list_to_json_string
+
+def null_json_string(string):
+	if string:
+		return '"%s"' % string
+	else:
+		return 'null'
+# null_json_string
+
 if __name__ == '__main__':
-	"""
-	reindexes the domain_owners file
-	"""
 	infile	= open('domain_owners.json', 'r')
 	data 	= json.load(infile)
 	infile.close()
+	
+	# alpha sort list on id string
+	data_sorted = sorted(data, key=lambda data:data['id'])
 
-	data_sorted = sorted(data, key=lambda data:data['owner_name'].lower())
-	data_reindexed = []
-	old_id_to_new_id = {}
-
-	new_id = 0
-
-	for item in data_sorted:
-		old_id_to_new_id[item['id']] = new_id
-		
-		if item['parent_id']:
-			old_parent_id = item['parent_id']
-		else:
-			old_parent_id = None
-
-		data_reindexed.append({
-			"id"					: new_id,
-			"old_parent_id"			: old_parent_id,
-			"owner_name"			: item['owner_name'],
-			"aliases"				: item['aliases'],
-			"homepage_url"			: item['homepage_url'],
-			"notes"					: item['notes'],
-			"country"				: item['country'],
-			"domains"				: item['domains']
-		})
-
-		new_id +=1
-
+	# stuff everything into one giant string
 	out_string = '['
-	for item in data_reindexed:
-		if item['old_parent_id'] != None:
-			parent_id = old_id_to_new_id[item['old_parent_id']]
-		else:
-			parent_id = "null"
 
-		if len(item['aliases']) != 0:
-			aliases_string = ''
-			for alias in sorted(item['aliases']):
-				aliases_string += '"'+alias+'",'
-			aliases_string = aliases_string[:-1]
-		else:
-			aliases_string = ''
-
-		if len(item['domains']) != 0:
-			domains_string = ''
-			for domain in sorted(item['domains']):
-				domains_string += '\n\t\t\t"'+domain+'",'
-			domains_string = domains_string[:-1]
-		else:
-			domains_string = ''
-
-		if item['homepage_url'] is None:
-			homepage_url = 'null'
-		else:
-			homepage_url = '"'+item['homepage_url']+'"'
-
-		if item['notes'] is None:
-			notes = 'null'
-		else:
-			notes = '"'+item['notes']+'"'
-
-		if item['country'] is None:
-			country = 'null'
-		else:
-			country = '"'+item['country']+'"'
-
+	# make sure the revision date is first
+	for item in data_sorted:
 		out_string += ("""\n\t{
-		"id"				 : %s,
-		"parent_id"			 : %s,
-		"owner_name"		 : "%s",
-		"aliases"		 	 : [%s],
-		"homepage_url"		 : %s,
-		"notes"				 : %s,
-		"country"			 : %s,
-		"domains"			 : [%s
-		]
+			"id"							: "%s",
+			"parent_id"						: %s,
+			"name"							: %s,
+			"aliases"						: [%s
+			],
+			"homepage_url"					: %s,
+			"homepage_meta_desc"			: %s,
+			"site_privacy_policy_urls"		: [%s
+			],
+			"service_privacy_policy_urls"	: [%s
+			],
+			"gdpr_statement_urls"			: [%s
+			],
+			"terms_of_use_urls"				: [%s
+			],
+			"cookie_policy_urls"			: [%s
+			],
+			"adchoices_urls"				: [%s
+			],
+			"ccpa_urls"						: [%s
+			],
+			"health_segment_urls"			: [%s
+			],
+			"opt_out_urls"					: [%s
+			],
+			"platforms"						: [%s
+			],
+			"uses"							: [%s
+			],
+			"notes"							: %s,
+			"country"						: %s,
+			"crunchbase_id"					: %s,
+			"trade_groups"					: [%s
+			],
+			"domains"						: [%s
+			]
 	},""" % (
-			item['id'],
-			parent_id,item['owner_name'],
-			aliases_string,
-			homepage_url,
-			notes,
-			country,
-			domains_string
+				item['id'],
+				null_json_string(item['parent_id']),
+				null_json_string(item['name']),
+				list_to_json_string(item['aliases']),
+				null_json_string(item['homepage_url']),
+				null_json_string(item['homepage_meta_desc']),
+				url_list_to_json_string(item['site_privacy_policy_urls']),
+				url_list_to_json_string(item['service_privacy_policy_urls']),
+				url_list_to_json_string(item['gdpr_statement_urls']),
+				url_list_to_json_string(item['terms_of_use_urls']),
+				url_list_to_json_string(item['cookie_policy_urls']),
+				url_list_to_json_string(item['adchoices_urls']),
+				url_list_to_json_string(item['ccpa_urls']),
+				url_list_to_json_string(item['health_segment_urls']),
+				url_list_to_json_string(item['opt_out_urls']),
+				list_to_json_string(item['platforms']),
+				list_to_json_string(item['uses']),
+				null_json_string(item['notes']), 
+				null_json_string(item['country']),
+				null_json_string(item['crunchbase_id']),
+				list_to_json_string(item['trade_groups']),
+				list_to_json_string(item['domains'])
 		))
 	# end loop
+
+	# all done.
 	out_string = out_string[:-1]+'\n]'
 	outfile	= open('domain_owners.json', 'w')
 	outfile.write(out_string)

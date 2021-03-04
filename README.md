@@ -1,46 +1,51 @@
 # webXray
 
-NOTE: This version is not under active development and no support is offered.  A new, much improved, version will be released in 2021.
+webXray is a tool for analyzing webpage traffic and content, extracting legal policies, and identifying the companies which collect user data.  A command line user interface makes webXray easy for non-programmers to use, and those with advanced needs may analyze billions of requests by fully leveraging webXray's distributed architecture.  webXray has been used to run hundreds of concurrent browser sessions distributed across multiple continents.
 
-webXray is a tool for analyzing third-party content on webpages and identifying the companies which collect user data.  A command line user interface makes webXray easy to use for non-programmers, and those with advanced needs may analyze millions of pages with proper configuration.  webXray is a professional tool designed for academic research, and may be used by privacy compliance officers, regulators, and those who are generally curious about hidden data flows on the web.
+webXray performs scans of single pages, random crawls within websites, and supports following pre-scripted sequences of page loads.  Unlike tools which rely on browsers with negligible user bases, webXray uses the consumer version of Chrome, the most popular browser in the world.  This means webXray is the best tool for producing scans which accurately reflect the experiences of most desktop web users.
 
-webXray uses a custom library of domain ownership to chart the flow of data from a given third-party domain to a corporate owner, and if applicable, to parent companies.  Tracking attribution reports produced by webXray provide robust granularity.  Reports of the average numbers of third-parties and cookies per-site, most commonly occurring third-party domains and elements, volumes of data transferred, use of SSL encryption, and more are provided out-of-the-box.  A flexible data schema allows for the generation of custom reports as well as authoring extensions to add additional data sources.
+webXray performs both "haystack" scans which give insights into large volumes of network traffic, cookies, local storage, and websockets, as well as "forensic" scans which preserve all file contents for use in reverse-engineering scripts, extracting advertising content, and verifying page execution in a forensically sound way.  An additional module of webXray, policyXray, finds and extracts the text of privacy policies, terms of service, and other related documents in several languages.  
 
-The public version of webXray uses Chrome to load pages, stores data in a SQLite database, and can be used on a normal desktop computer.  There is also a propriety forensic version of webXray designed to meet the demands of academic research and litigation.  If you have academic needs please contact Tim Libert (https://timlibert.me), if you have litigation needs please contact us at the webXray company website (https://webxray.eu).
+Small sets of pages may be stored in self-contained SQLite databases and large datasets can be stored in Postgres databases which come pre-configured for optimum indexing and data retrieval.  In both cases, webXray produces several preconfigured reports which are rendered as CSV files for easy importing into programs such as Excel, R, and Gephi.  Users proficient in SQL may use advanced queries to perform their own analyses with ease.
+
+webXray uses a custom library of domain ownership to chart the flow of data from a given third-party domain to a corporate owner, and if applicable, to parent companies.  Domain ownership is further enhanced with classifications of what domains are used for (e.g. 'marketing', 'fonts', 'hosting'), links to several types of policies in numerous languages, as well as links to homepages, and lists of medical terms used by specific advertisers.
+
+webXray and policyXray are professional tools designed for academic research, and may be used by anybody operating in the non-profit and public-interest space.  Commercial use of webXray is prohibited, as is redistributing the code.
 
 More information and detailed installation instructions may be found on the [project website](http://webXray.org).
 
-# Dependencies
-
-webXray depends on several pieces of software being installed on your computer in advance.  The webXray website has detailed instructions for setting up the software on [Ubuntu](http://webXray.org/#ubuntu) and [macOS](http://webXray.org/#macos).  If you are familiar with installing dependencies on your own, the following are needed:
-
-Python 3.4+ is required:
-
-	Python 3.4+ 			https://www.python.org
-	
-Google Chrome:
-
-	Chrome 75+				https://www.google.com/chrome/
-	Chrome Driver 75			https://sites.google.com/a/chromium.org/chromedriver/
-	
-Selenium:
-	Selenium				https://pypi.python.org/pypi/selenium
-
 # Installation
 
-If the dependencies above are met all you can clone this repository and get started:
+webXray requires Python 3.4+ and Google Chrome to function, pip3 for dependency installation, and Readability.js for text extraction.  These may be installed in the following steps:
 
-	git clone https://github.com/timlib/webXray.git
+1) Install the latest version of Python3 along with pip3, there are various guides online to doing this for your OS of choice.
 
-Again, see the webXray website for installation guides for [Ubuntu](http://webXray.org/#ubuntu) and [macOS](http://webXray.org/#macos).
+2) Install Google Chrome.  For desktop systems (e.g. Mac, Windows, Linux) you can get Chrome from Google's website.  When running in headless linux environments, installing from the official .deb file is recommended.
+
+3)  Clone this repository from GitHub:
+
+        git clone https://github.com/timlib/webXray.git
+
+4) To install Python dependencies (websocket-client, textstat, lxml, and psycopg2), run the following command:
+
+        pip3 install -r requirements.txt
+
+5) If you want to extract page text (eg policies), you must download the file Readability.js from [this address](https://raw.githubusercontent.com/mozilla/readability/master/Readability.js) and copy it into the directory "webxray/resources/policyxray/".  You can also do this via the  command line as follows:
+    
+        cd webxray/resources/policyxray/
+        wget https://raw.githubusercontent.com/mozilla/readability/master/Readability.js
 
 # Using webXray
 
 To start webXray in interactive mode type:
 
-	python3 run_webXray.py
+    python3 run_webXray.py
 
-The prompts will guide you to scanning a sample list of websites using the default settings of Chrome in windowed mode and a SQLite database.  If you wish to run several browsers in paralell to increase speed, leverage a more powerful database engine, or perform other advanced tasks, please see the [project website](http://webXray.org/#advanced_options) for details.
+The prompts will guide you to scanning a sample list of websites using the default settings of Chrome in windowed mode and a SQLite database.  If you wish to run several browsers in parallel to increase speed, leverage a more powerful database engine, or perform other advanced tasks, please see the [project website](http://webXray.org/#advanced_options) for details.
+
+To see how to control webXray via command-line flags, type the following:
+
+    python3 run_webXray.py -h
 
 # Using webXray to Analyze Your Own List of Pages
 
@@ -54,19 +59,18 @@ Use the interactive mode to guide you to generating an analysis once you have co
 * __stats.csv__: provides top-level stats on how many domains are contacted, cookies, javascript, etc.
 * __aggregated\_tracking\_attribution.csv__: details on percentages of sites tracked by different companies and their subsidiaries
 * __3p\_domain.csv__: most frequently occurring third-party domains
-* __3p\_element.csv__: most frequently occurring third-party elements of all types
-* __3p\_image.csv__: most frequently occurring third-party images
+* __3p\_request.csv__: most frequently occurring third-party requests
 * __3p\_javascript.csv__: most frequently occurring third-party javascript
-* __3p\_ssl\_use.csv__: rates at which detected third-parties encrypt requests
-* __data\_xfer\_summary.csv__: volume and percentage of data received from first- and third-party domains
-* __data\_xfer\_aggregated.csv__: volume and percentage of data received from various companies
-* __data\_xfer\_by\_domain.csv__: volume and percentage of data received from specific third-party domains
-* __network__: pairings between page domains and third-party domains, you can import this info to network visualization software
-* __per\_page\_data\_flow.csv__: one giant file that lists the requests made for each page, off by default
-
+* __3p\_uses.csv__: percentages of pages with third-parties performing specified functions
+* __per_site_network_report__: pairings between page domains and third-party domains, you can import this info to network visualization software
+ 
 # Important Note on Speed and Parallelization
 
-webXray can load many pages in parallell and may be used for analyzing millions of pages fairly quickly.  However, out-of-the-box, webXray is configured to only scan one page at a time.  If you think your system can handle more (and chances are it can!), open the 'run\_webXray.py' file and search for the first occurance of the 'pool\_size' variable.  When you find that there are instructions on how to increase the numbers of pages you can do concurrently.  Please find additional information on the [project website](http://webXray.org/#advanced_options).
+webXray can load many pages in parallell and is capable of scanning over one million pages a day when leveraging a cluster of machines.  However, out-of-the-box, webXray is configured to only scan one page at a time on a normal laptop.  If you think your system can handle more concurrent browsers (and chances are it can!), open the 'run\_webXray.py' file and search for the first occurrence of the 'pool\_size' variable.  When you find that there are instructions on how to increase the numbers of pages you can do concurrently.  
+
+# Leveraging Distributed Architecture for Massive Scans
+
+Future documentation updates will detail how to deploy webXray on a cluster of machines, which may be geographically distributed.
 
 # Academic Citation
 
@@ -74,4 +78,4 @@ This tool is produced by Timothy Libert, if you are using it for academic resear
 
 # License
 
-This software is *not* open source, it is *source available* and licensed for non-commercial use only.
+This software is *not* open source, it is *source available* and licensed for non-commercial use only.  You may not distribute webXray in whole or in part or sell data generated by webXray without prior written permission.

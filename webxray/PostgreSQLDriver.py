@@ -1,61 +1,90 @@
-# standard python packages
-import time 
-import random
+# standard python libs
 import os
-import hashlib
-import sqlite3
-import datetime
 import json
+import datetime
 
-class SQLiteDriver:
+# check if non-standard packages are installed
+try:
+	import psycopg2
+	# required to create new dbs
+	from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+except:
+	print('**************************************************************')
+	print(' The psycopg2 library is needed to use Postgres with webXray. ')
+	print(' Please try running "pip3 install psycopg2-binary"  ')
+	print('**************************************************************')
+	quit()
+
+class PostgreSQLDriver:
 	"""
-	this class handles all of the database work, no sql is to be found 
-		elsewhere in the code base aside from other db drivers
+	Handles database work and nothing else
 	"""
 
-	def __init__(self, db_name = '', db_prefix = 'wbxr_'):
+	def __init__(self, db_name = '', db_prefix='wbxr_'):
 		"""
-		set the root path for the db directory since sqlite dbs are not contained in a server
-		if db_name is specified, set up global connection
+		set up connection to db server
 		"""
-		self.db_root_path = os.path.dirname(os.path.abspath(__file__))+'/resources/db/sqlite/'
+
+		# modify this per your install
+		self.db_user = 'wbxr'
+		self.db_pass = 'password'
+		self.db_host = 'localhost'
+		self.db_port = '5432'
 
 		# the db_prefix can be overridden if you like
 		self.db_prefix = db_prefix
-		
-		if db_name != '':
-			self.db_name = self.db_prefix+db_name+'.db'
-			self.db_conn = sqlite3.connect(self.db_root_path+self.db_name,detect_types=sqlite3.PARSE_DECLTYPES)
-			self.db = self.db_conn.cursor()
+
+		# default db is postgres, in order to do anything in postgres
+		#	you must connect to an existing db
+		self.default_db_name = 'postgres'
+
+		if db_name == '':
+			self.db_name = self.default_db_name
+		else:
+			self.db_name = self.db_prefix+db_name
+
+		self.db_conn = psycopg2.connect(
+			database=self.db_name,
+			user=self.db_user,
+			password=self.db_pass,
+			host=self.db_host,
+			port=self.db_port,
+			connect_timeout=0
+		)
+
+		# allows us to create new dbs in postgres
+		self.db_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+		self.db = self.db_conn.cursor()
 	# __init__
 
 	#-----------------#
 	# GENERAL PURPOSE #
 	#-----------------#
 
-	def md5_text(self,text):
-		"""
-		this class is unique to the sqlite driver as md5 is not built in
-		"""
-		try:
-			return hashlib.md5(text.encode('utf-8')).hexdigest()
-		except:
-			return None
-	# md5_text
-
 	def db_switch(self, db_name):
 		"""
-		connect to a new db, in sqlite this requires loading the db from disk
+		connect to a new db, in postgres this requires a new db connection
 		"""
 
 		# close existing connection
 		self.close()
 
+		# if there is a supplied db_name we also reset the global db_name
+		# otherwise we should connect to the current global
+		if db_name:
+			self.db_name = self.db_prefix+db_name
+		
 		# open the new connection
-		self.db_name = self.db_prefix+db_name
-		self.db_conn = sqlite3.connect(self.db_root_path+self.db_name+'.db',detect_types=sqlite3.PARSE_DECLTYPES)
+		self.db_conn = psycopg2.connect(
+			database=self.db_name,
+			user=self.db_user,
+			password=self.db_pass,
+			host=self.db_host,
+			port=self.db_port
+		)
+		
+		self.db_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 		self.db = self.db_conn.cursor()
-		return True
 	# db_switch
 
 	def fetch_query(self, query):
@@ -72,18 +101,119 @@ class SQLiteDriver:
 		"""
 		self.db.execute(query)
 		self.db_conn.commit()
-		return True
 	# commit_query
 
-	def db_exists(self, db_name):
+	def check_db_exist(self, db_name):
 		"""
 		before creating a new db make sure it doesn't already exist, uses specified prefix
 		"""
-		dbs = os.listdir(self.db_root_path)
-		if self.db_prefix+db_name+'.db' in dbs:
-			return True
+		self.db.execute('SELECT datname FROM pg_database WHERE datname = %s', (self.db_prefix+db_name,))
+		if len(self.db.fetchall()) == 1:
+			return True;
 		else:
-			return False
+			return False;
+	# check_db_exist
+
+	def build_filtered_query(self,query,filters):
+		"""
+		takes a base query + filters and returns
+		a query with appropraite 'where'/'and' placements
+		only needed in cases where query conditionals get particularly ugly
+		"""
+		if filters:
+			for index,filter in enumerate(filters):
+				if index == 0:
+					query += ' WHERE '+filter
+				else:
+					query += ' AND '+filter
+		return query
+	# build_filtered_query
+
+	def get_wbxr_dbs_list(self):
+		"""
+		return database names with the class-specified prefix, stripped of prefix, default is 'wbxr_'
+		"""
+		self.db.execute('SELECT datname FROM pg_database;')
+		wbxr_dbs = []
+
+		for result in self.db.fetchall():
+			if result[0][0:len(self.db_prefix)] == self.db_prefix:
+				# [self.db_prefix:] strips the prefix
+				wbxr_dbs.append(result[0][len(self.db_prefix):])
+
+		# return wbxr_dbs
+		return wbxr_dbs
+	# get_wbxr_dbs_list
+
+	def close(self):
+		"""
+		very important, frees up connections to db
+		"""
+		self.db.close()
+		self.db_conn.close()
+	# close
+
+	###############
+	# DB Creation #
+	###############
+
+	def create_wbxr_db(self, db_name):
+		"""
+		create empty db using the sql init file in /webxray/resources/db/postgresql
+		and update the current db
+		"""
+
+		# update global db_name
+		self.db_name = self.db_prefix+db_name
+
+		# create the new db
+		try:
+			self.db.execute('CREATE DATABASE %s' % self.db_name)
+			self.db_conn.commit()
+		except Exception as e:
+			print('****************************************************************')
+			print(' ERROR: Could not create database: %s' % str(e).strip())
+			print('****************************************************************')
+			exit()
+
+		# we already updated the global db_name so we pass None here
+		self.db_switch(None)
+
+		# initialize webxray formatted database
+		db_init_file = open(os.path.dirname(os.path.abspath(__file__))+'/resources/db/postgresql/wbxr_db_init.sql', 'r', encoding='utf-8')
+		for query in db_init_file:
+			# skip lines that are comments
+			if "-" in query[0]: continue
+			# lose whitespace
+			query = query.strip()
+			# push to db
+			self.db.execute(query)
+			self.db_conn.commit()
+
+		# insert domain owners
+		domain_owner_data = json.load(open(os.path.dirname(os.path.abspath(__file__))+'/resources/domain_owners/domain_owners.json', 'r', encoding='utf-8'))
+		for domain_owner in domain_owner_data:
+			# arrays get stored as json strings
+			domain_owner['aliases'] 					= json.dumps(domain_owner['aliases'])
+			domain_owner['site_privacy_policy_urls'] 	= json.dumps(domain_owner['site_privacy_policy_urls'])
+			domain_owner['service_privacy_policy_urls'] = json.dumps(domain_owner['service_privacy_policy_urls'])
+			domain_owner['gdpr_statement_urls'] 		= json.dumps(domain_owner['gdpr_statement_urls'])
+			domain_owner['terms_of_use_urls'] 			= json.dumps(domain_owner['terms_of_use_urls'])
+			domain_owner['platforms'] 					= json.dumps(domain_owner['platforms'])
+			domain_owner['uses'] 						= json.dumps(domain_owner['uses'])
+
+			self.add_domain_owner(domain_owner)
+
+	# create_wbxr_db
+
+	def db_exists(self, db_name):
+		"""
+		Gets a count of dbs with a given name, as count 
+			is either 0 or 1 this is in effect a boolean.
+		"""
+
+		self.db.execute('SELECT count(*) FROM pg_catalog.pg_database WHERE datname = %s', (self.db_prefix+db_name,))
+		return self.db.fetchone()[0]
 	# db_exists
 
 	def set_config(self, config):
@@ -130,39 +260,39 @@ class SQLiteDriver:
 				timeseries_enabled,
 				timeseries_interval
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)
 		""", (
 			config['client_browser_type'],
@@ -291,98 +421,137 @@ class SQLiteDriver:
 		}
 	# get_config
 
-	def build_filtered_query(self,query,filters):
-		"""
-		takes a base query + filters and returns
-		a query with appropraite 'where'/'and' placements
-		only needed in cases where query conditionals get particularly ugly
-		"""
-		if filters:
-			for index,filter in enumerate(filters):
-				if index == 0:
-					query += ' WHERE '+filter
-				else:
-					query += ' AND '+filter
-		return query
-	# build_filtered_query
+	#################
+	# SERVER CONFIG #
+	#################
 
-	def get_wbxr_dbs_list(self):
+	def create_server_config_db(self):
 		"""
-		return database names with the class-specified prefix, stripped of prefix, default is 'wbxr_'
-		"""
-		wbxr_dbs = []
-		for item in os.listdir(self.db_root_path):
-			if item[0:len(self.db_prefix)] == self.db_prefix:
-				wbxr_dbs.append(item[len(self.db_prefix):-3])
-		return wbxr_dbs
-	# get_wbxr_dbs_list
-
-	def close(self):
-		"""
-		very important, frees up connections to db
-		"""
-
-		# it is possible a database is not open, in which case we silently fail
-		try:
-			self.db.close()
-			self.db_conn.close()
-		except:
-			pass
-	# close
-
-	#-------------#
-	# DB Creation #
-	#-------------#
-
-	def create_wbxr_db(self, db_name):
-		"""
-		create empty db using the sql init file in /webxray/resources/db/sqlite
+		create empty db using the sql init file in /webxray/resources/db/postgresql
 		and update the current db
 		"""
 
 		# update global db_name
-		self.db_name = self.db_prefix+db_name
+		self.db_name = self.db_prefix + 'server_config'
 
-		# make sure we don't overwrite existing db
-		if os.path.isfile(self.db_root_path+self.db_name+'.db'):
-			print('****************************************************************************')
-			print('ERROR: Database exists, SQLite will overwrite existing databases, aborting! ')
-			print('****************************************************************************')
+		# create the new db
+		try:
+			self.db.execute('CREATE DATABASE %s' % self.db_name)
+			self.db_conn.commit()
+		except Exception as e:
+			print('****************************************************************')
+			print(' ERROR: Could not create database: %s' % str(e).strip())
+			print('****************************************************************')
 			exit()
-		else:
-			# create new db here, if it does not exist yet it gets created on the connect
-			self.db_conn = sqlite3.connect(self.db_root_path+self.db_name+'.db',detect_types=sqlite3.PARSE_DECLTYPES)
-			self.db = self.db_conn.cursor()
 
-			# initialize webxray formatted database
-			db_init_file = open(self.db_root_path+'sqlite_db_init.schema', 'r', encoding='utf-8')
-			for query in db_init_file:
-				# skip lines that are comments
-				if "-" in query[0]: continue
-				# lose whitespace
-				query = query.strip()
-				# push to db
-				self.db.execute(query)
-				self.db_conn.commit()
+		# we already updated the global db_name so we pass None here
+		self.db_switch(None)
 
-		# insert domain owners
-		domain_owner_data = json.load(open(os.path.dirname(os.path.abspath(__file__))+'/resources/domain_owners/domain_owners.json', 'r', encoding='utf-8'))
-		for domain_owner in domain_owner_data:
-			# arrays get stored as json strings
-			domain_owner['aliases'] 					= json.dumps(domain_owner['aliases'])
-			domain_owner['site_privacy_policy_urls'] 	= json.dumps(domain_owner['site_privacy_policy_urls'])
-			domain_owner['service_privacy_policy_urls'] = json.dumps(domain_owner['service_privacy_policy_urls'])
-			domain_owner['gdpr_statement_urls'] 		= json.dumps(domain_owner['gdpr_statement_urls'])
-			domain_owner['terms_of_use_urls'] 			= json.dumps(domain_owner['terms_of_use_urls'])
-			domain_owner['platforms'] 					= json.dumps(domain_owner['platforms'])
-			domain_owner['uses'] 						= json.dumps(domain_owner['uses'])
+		# initialize webxray formatted database
+		db_init_file = open(os.path.dirname(os.path.abspath(__file__))+'/resources/db/postgresql/wbxr_server_db_init.sql', 'r', encoding='utf-8')
+		for query in db_init_file:
+			# skip lines that are comments
+			if "-" in query[0]: continue
+			# lose whitespace
+			query = query.strip()
+			# push to db
+			self.db.execute(query)
+			self.db_conn.commit()
+	# create_server_config_db
 
-			self.add_domain_owner(domain_owner)
-	# create_wbxr_db
+	def update_client_config(self,client_config):
+		"""
+		Update information for a given client so we can check if the ip
+			is whitelisted and the client is live and then map it to the correct db.
+		"""
 
-	#-----------------------#
+		self.db.execute("""
+			INSERT INTO client_config (
+				ip,
+				client_id,
+				mapped_db,
+				live
+			) VALUES (
+				%s,
+				%s,
+				%s,
+				%s
+			) 
+			ON CONFLICT (client_id)
+			DO UPDATE SET
+				ip = %s,
+				mapped_db = %s,
+				live = %s
+		""", (
+			client_config['ip'],
+			client_config['client_id'],
+			client_config['mapped_db'],
+			client_config['live'],
+			client_config['ip'],
+			client_config['mapped_db'],
+			client_config['live']
+			)
+		)
+		self.db_conn.commit()
+	# update_client_config
+
+	def get_client_configs(self):
+		"""
+		Return the current configuration, where current is the most
+			recently modified entry.
+		"""
+
+		self.db.execute("""
+			SELECT
+				client_ip,
+				client_id,
+				mapped_db,
+				live
+			FROM 
+				client_config
+		""")
+
+		# get query result and then do dict formatting to 
+		#	be nicer to calling function
+		client_configs = []
+
+		for result in self.db.fetchall():
+			client_configs.append({
+				'client_ip'	: result[0],
+				'client_id'	: result[1],
+				'mapped_db'	: result[2],
+				'live'		: result[3] 
+			})
+
+		return client_configs
+	# get_client_configs
+
+	def is_task_in_queue(self,task):
+		"""
+		Check if we have this task queued, if not we
+			ignore it.
+		"""
+		self.db.execute("""
+			SELECT EXISTS(
+				SELECT 
+					*
+				FROM 
+					task_queue 
+				WHERE
+					target_md5 = MD5(%s)
+				AND
+					task = %s
+			)
+		""", (
+			task['target'],
+			task['task']
+		))
+		return self.db.fetchone()[0]
+	# is_task_in_queue
+
+	#########################
 	# INGESTION AND STORING #
-	#-----------------------#	
+	#########################
 
 	def flush_task_queue(self, task=None):
 		"""
@@ -391,98 +560,53 @@ class SQLiteDriver:
 			doesn't get triggered.
 		"""
 		if task:
-			self.db.execute('DELETE FROM task_queue WHERE task = ?', (task,))
+			self.db.execute('DELETE FROM task_queue WHERE task = %s', (task,))
 		else:
 			self.db.execute('DELETE FROM task_queue')
 		self.db_conn.commit()
 	# flush_task_queue
 
-	def get_page_last_accessed_by_browser_type(self,url,browser_type=None):
-		"""
-		see when the page was last accessed, if the page is not in the db yet, this will return none
-		additionaly you can specifify which browser to check for
-		if no browser is specified just return the last time it was accessed
-		"""
-		if browser_type == None:
-			self.db.execute('SELECT accessed,browser_type FROM page WHERE start_url_md5 = ? ORDER BY accessed DESC LIMIT 1', (self.md5_text(url),))
-		else:
-			self.db.execute('SELECT accessed,browser_type FROM page WHERE start_url_md5 = ? AND browser_type = ? ORDER BY accessed DESC LIMIT 1', (self.md5_text(url),browser_type))
+	def get_task_queue_length(self, task=None, unlocked_only=None, max_attempts = 0):
+			"""
+			How many pages in the queue.
+			"""
+			if task and unlocked_only:
+					self.db.execute("""
+						SELECT COUNT(*) FROM task_queue 
+						WHERE locked = FALSE 
+						AND attempts < %s 
+						AND task = %s
+						AND failed IS FALSE
+					""", (max_attempts,task))
+			elif unlocked_only:
+					self.db.execute("""
+						SELECT COUNT(*) FROM task_queue 
+						WHERE locked = FALSE 
+						AND attempts < %s
+						AND failed IS FALSE
+					""", (max_attempts,))
+			elif task:
+					self.db.execute("""
+						SELECT COUNT(*) FROM task_queue 
+						WHERE task = %s
+						AND failed IS FALSE
+					""", (task,))
+			else:
+					self.db.execute("""
+						SELECT COUNT(*) FROM task_queue WHERE failed IS FALSE
+					""", (max_attempts,))
+			
+			return self.db.fetchone()[0]
+	# get_task_queue_length
 
-		try:
-			return (datetime.datetime.strptime(self.db.fetchone()[0], "%Y-%m-%d %H:%M:%S.%f"), self.db.fetchone()[1])
-		except:
-			return None
-	# get_page_last_accessed_by_browser_type
-
-	def page_exists(self, url, accessed=None, timeseries_interval=None):
+	def get_client_list(self):
 		"""
-		checks if page exists at all, regardless of number of occurances
-		postgres has an EXISTS query built-in, whereas sqlite does not
+		Returns all active clients in our page table.
 		"""
-		if timeseries_interval:
-			self.db.execute("""
-				SELECT EXISTS(
-					SELECT 
-						start_url_md5 
-					FROM 
-						page 
-					WHERE 
-						start_url_md5 = ?
-					AND
-						accessed >= (NOW() - INTERVAL '? MINUTES')
-				)
-			""", (self.md5_text(url),timeseries_interval))
-		elif accessed:
-			self.db.execute("""
-				SELECT EXISTS(
-					SELECT 
-						start_url_md5 
-					FROM 
-						page 
-					WHERE 
-						start_url_md5 = ?
-					AND
-						accessed = ?
-				)
-			""", (self.md5_text(url),accessed))	
-		else:
-			self.db.execute("""
-				SELECT EXISTS(
-					SELECT 
-						start_url_md5 
-					FROM 
-						page 
-					WHERE 
-						start_url_md5 = ?
-				)
-			""", (self.md5_text(url),))
-		return self.db.fetchone()[0]
-	# page_exists
-	
-	def get_all_pages_exist(self, timeseries_interval=None):
-		"""
-		Get list of all pages that have been scanned, timeseries_interval
-			allows to restrict to pages in a certain timeframe.
-		"""
-		if timeseries_interval:
-			self.db.execute("""
-				SELECT 
-					start_url
-				FROM 
-					page 
-				WHERE 
-					accessed >= (NOW() - INTERVAL '? MINUTES')
-			""", (timeseries_interval))
-		else:
-			self.db.execute("""
-				SELECT 
-					start_url
-				FROM 
-					page 
-			""")
+		self.db.execute('SELECT DISTINCT client_id FROM page ORDER BY client_id ASC')
 		return self.db.fetchall()
-	# get_all_pages_exist
-
+	# get_client_list
+	
 	def add_task_to_queue(self,target,task):
 		"""
 		We have a queue of tasks which are defined by a url, the task type ('get_scan',
@@ -494,108 +618,122 @@ class SQLiteDriver:
 					target_md5,
 					task
 				) VALUES (
-					?,
-					?, 
-					?
+					%s,
+					MD5(%s), 
+					%s
 				) 
 				ON CONFLICT DO NOTHING
 			""", (
 					target,
-					self.md5_text(target),
+					target,
 					task
 				)
 		)
 		self.db_conn.commit()
 	# add_task_to_queue
 
-	def get_task_queue_length(self, task=None, unlocked_only=None, max_attempts = 0):
-			"""
-			How many pages in the queue.
-			"""
-			if task and unlocked_only:
-					self.db.execute("""
-						SELECT COUNT(*) FROM task_queue 
-						WHERE locked = FALSE 
-						AND attempts < ?
-						AND task = ?
-						AND failed IS FALSE
-					""", (max_attempts,task))
-			elif unlocked_only:
-					self.db.execute("""
-						SELECT COUNT(*) FROM task_queue 
-						WHERE locked = FALSE 
-						AND attempts < ?
-						AND failed IS FALSE
-					""", (max_attempts,))
-			elif task:
-					self.db.execute("""
-						SELECT COUNT(*) FROM task_queue 
-						WHERE task = ?
-						AND failed IS FALSE
-					""", (task,))
-			else:
-					self.db.execute("""
-						SELECT COUNT(*) FROM task_queue WHERE failed IS FALSE
-					""")
-			
-			return self.db.fetchone()[0]
-	# get_task_queue_length
-
 	def get_task_from_queue(self, max_attempts=None, client_id=None):
 		"""
 		Return the next task, while updating the attempt count and marking
 			which machine has taken the task.  Can filter on attempt number.
 		"""
-
-		# kludge to make sure two processes don't try to do the same page
-		#	note this is handled better with postgres
-		time.sleep(random.randint(50, 100)/100)
-		
-		if max_attempts:
+		if max_attempts and client_id:
 			self.db.execute("""
-				SELECT id, target, task, attempts
+				UPDATE task_queue 
+				SET 
+					locked = TRUE,
+					client_id = %s,
+					modified = NOW(),
+					attempts = attempts + 1
+				WHERE id = (
+					SELECT id
 					FROM task_queue
 					WHERE locked IS NOT TRUE
 					AND failed IS NOT TRUE
-					AND attempts < ?
+					AND attempts < %s
 					ORDER BY attempts
+					FOR UPDATE SKIP LOCKED
 					LIMIT 1
+				)
+				RETURNING 
+					target, 
+					task
+			""", (client_id,max_attempts,))
+		elif max_attempts:
+			self.db.execute("""
+				UPDATE task_queue 
+				SET 
+					locked = TRUE,
+					modified = NOW(),
+					attempts = attempts + 1
+				WHERE id = (
+					SELECT id
+					FROM task_queue
+					WHERE locked IS NOT TRUE
+					AND failed IS NOT TRUE
+					AND attempts < %s
+					ORDER BY attempts
+					FOR UPDATE SKIP LOCKED
+					LIMIT 1
+				)
+				RETURNING 
+					target, 
+					task
 			""", (max_attempts,))
+		elif client_id:
+			self.db.execute("""
+				UPDATE task_queue 
+				SET 
+					locked = TRUE,
+					client_id = %s,
+					modified = NOW(),
+					attempts = attempts + 1
+				WHERE id = (
+					SELECT id
+					FROM task_queue
+					WHERE locked IS NOT TRUE
+					AND failed IS NOT TRUE
+					ORDER BY attempts
+					FOR UPDATE SKIP LOCKED
+					LIMIT 1
+				)
+				RETURNING 
+					target, 
+					task
+			""", (client_id,))
 		else:
 			self.db.execute("""
-				SELECT id, target, task, attempts
+				UPDATE task_queue 
+				SET 
+					locked = TRUE,
+					modified = NOW(),
+					attempts = attempts + 1
+				WHERE id = (
+					SELECT id
 					FROM task_queue
 					WHERE locked IS NOT TRUE
 					AND failed IS NOT TRUE
 					ORDER BY attempts
+					FOR UPDATE SKIP LOCKED
 					LIMIT 1
+				)
+				RETURNING 
+					target, 
+					task
 			""")
 		
 		# return result or None
 		try:
-			task_id, target, task, attempts = self.db.fetchone()
-			self.lock_task(task_id)
-			self.increment_task_attempts(task_id, attempts)
-			return target, task
+			return self.db.fetchone()
 		except:
 			return None	
 	# get_task_from_queue
-
-	def lock_task(self, task_id):
-		self.db.execute("UPDATE task_queue SET locked = TRUE where id = ?", (task_id,))
-		self.db_conn.commit()
-	# lock_task
-
-	def increment_task_attempts(self, task_id, attempts):
-		self.db.execute("UPDATE task_queue SET attempts = ? where id = ?", (attempts+1, task_id))
-		self.db_conn.commit()
-	# increment_task_attempts
-
+	
 	def remove_task_from_queue(self,target,task):
 		"""
 		If a task is successfull we remove it from the queue.
 		"""
-		self.db.execute('DELETE FROM task_queue WHERE target_md5 = ? AND task = ?', (self.md5_text(target),task))
+		self.db.execute('DELETE FROM task_queue WHERE target_md5 = MD5(%s) AND task = %s', (target,task))
 		self.db_conn.commit()
 	# remove_task_from_queue
 
@@ -603,7 +741,7 @@ class SQLiteDriver:
 		"""
 		If a task is not successfull we unlock it so it may be attempted again.
 		"""
-		self.db.execute('UPDATE task_queue SET locked = FALSE WHERE target_md5 = ? AND task = ?', (self.md5_text(target),task))
+		self.db.execute('UPDATE task_queue SET locked = FALSE WHERE target_md5 = MD5(%s) AND task = %s', (target,task))
 		self.db_conn.commit()
 	# unlock_task_in_queue
 
@@ -622,7 +760,7 @@ class SQLiteDriver:
 		"""
 		Task will no longer be attempted.
 		"""
-		self.db.execute('UPDATE task_queue SET failed = true WHERE target_md5 = ? AND task = ?', (self.md5_text(target),task))
+		self.db.execute('UPDATE task_queue SET failed = true WHERE target_md5 = MD5(%s) AND task = %s', (target,task))
 		self.db_conn.commit()
 	# set_task_as_failed
 
@@ -641,12 +779,12 @@ class SQLiteDriver:
 				task,
 				task_result
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)""", 
 			(
 				result['client_id'],
@@ -710,7 +848,7 @@ class SQLiteDriver:
 		Once a result is successfully stored we are passed
 			the result_id and we delete it.
 		"""
-		self.db.execute('DELETE FROM result_queue WHERE id = ?', (result_id,))
+		self.db.execute('DELETE FROM result_queue WHERE id = %s', (result_id,))
 		self.db_conn.commit()
 	# remove_result_from_queue
 
@@ -718,7 +856,7 @@ class SQLiteDriver:
 		"""
 		If we were unable to store a result we unlock it.
 		"""
-		self.db.execute('UPDATE result_queue SET locked = FALSE WHERE id = ?', (result_id,))
+		self.db.execute('UPDATE result_queue SET locked = FALSE WHERE id = %s', (result_id,))
 		self.db_conn.commit()
 	# unlock_result_in_queue
 
@@ -726,7 +864,7 @@ class SQLiteDriver:
 		"""
 		see when the page was last accessed, if the page is not in the db yet, this will return none
 		"""
-		self.db.execute('SELECT accessed FROM page WHERE start_url_md5 = ? ORDER BY accessed DESC LIMIT 1', (self.md5_text(url),))
+		self.db.execute('SELECT accessed FROM page WHERE start_url_md5 = MD5(%s) ORDER BY accessed DESC LIMIT 1', (url,))
 		
 		try:
 			return self.db.fetchone()
@@ -741,15 +879,84 @@ class SQLiteDriver:
 		if no browser is specified just return the last time it was accessed
 		"""
 		if browser_type == None:
-			self.db.execute('SELECT accessed,browser_type FROM page WHERE start_url_md5 = ? ORDER BY accessed DESC LIMIT 1', (self.md5_text(url),))
+			self.db.execute('SELECT accessed,browser_type FROM page WHERE start_url_md5 = MD5(%s) ORDER BY accessed DESC LIMIT 1', (url,))
 		else:
-			self.db.execute('SELECT accessed,browser_type FROM page WHERE start_url_md5 = ? AND browser_type = ? ORDER BY accessed DESC LIMIT 1', (self.md5_text(url),browser_type))
+			self.db.execute('SELECT accessed,browser_type FROM page WHERE start_url_md5 = MD5(%s) AND browser_type = %s ORDER BY accessed DESC LIMIT 1', (url,browser_type))
 
 		try:
 			return self.db.fetchone()
 		except:
 			return None
 	# get_page_last_accessed_by_browser_type
+
+	def page_exists(self, url, accessed=None, timeseries_interval=None):
+		"""
+		checks if page exists at all, regardless of number of occurances
+		postgres has an EXISTS query built-in, whereas sqlite does not
+		"""
+		if timeseries_interval:
+			self.db.execute("""
+				SELECT EXISTS(
+					SELECT 
+						start_url_md5 
+					FROM 
+						page 
+					WHERE 
+						start_url_md5 = MD5(%s) 
+					AND
+						accessed >= (NOW() - INTERVAL '%s MINUTES')
+				)
+			""", (url,timeseries_interval))
+		elif accessed:
+			self.db.execute("""
+				SELECT EXISTS(
+					SELECT 
+						start_url_md5 
+					FROM 
+						page 
+					WHERE 
+						start_url_md5 = MD5(%s) 
+					AND
+						accessed = %s
+				)
+			""", (url,accessed))	
+		else:
+			self.db.execute("""
+				SELECT EXISTS(
+					SELECT 
+						start_url_md5 
+					FROM 
+						page 
+					WHERE 
+						start_url_md5 = MD5(%s)
+				)
+			""", (url,))
+		return self.db.fetchone()[0]
+	# page_exists
+
+	def get_all_pages_exist(self, timeseries_interval=None):
+		"""
+		Get list of all pages that have been scanned, timeseries_interval
+			allows to restrict to pages in a certain timeframe.
+		"""
+		if timeseries_interval:
+			self.db.execute("""
+				SELECT 
+					start_url
+				FROM 
+					page 
+				WHERE 
+					accessed >= (NOW() - INTERVAL '%s MINUTES')
+			""", (timeseries_interval))
+		else:
+			self.db.execute("""
+				SELECT 
+					start_url
+				FROM 
+					page 
+			""")
+		return self.db.fetchall()
+	# get_all_pages_exist
 
 	def crawl_exists(self, target, timeseries_interval=None):
 		"""
@@ -764,11 +971,11 @@ class SQLiteDriver:
 					FROM 
 						page 
 					WHERE 
-						crawl_id = ?
+						crawl_id = MD5(%s) 
 					AND
-						accessed >= (NOW() - INTERVAL '? MINUTES')
+						accessed >= (NOW() - INTERVAL '%s MINUTES')
 				)
-			""", (self.md5_text(target),timeseries_interval))
+			""", (target,timeseries_interval))
 		else:
 			self.db.execute("""
 				SELECT EXISTS(
@@ -777,9 +984,9 @@ class SQLiteDriver:
 					FROM 
 						page 
 					WHERE 
-						crawl_id = ?
+						crawl_id = MD5(%s)
 				)
-			""", (self.md5_text(target),))
+			""", (target,))
 		return self.db.fetchone()[0]
 	# crawl_exists
 
@@ -800,35 +1007,35 @@ class SQLiteDriver:
 				tld,
 				domain_owner_id
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?, 
-				?,
-				?,
-				?
+				MD5(%s), 
+				%s,
+				MD5(%s), 
+				%s,
+				MD5(%s), 
+				%s, 
+				MD5(%s), 
+				%s,
+				%s
 			) ON CONFLICT DO NOTHING""", 
 			(
-				self.md5_text(domain['fqdn']),
 				domain['fqdn'], 
-				self.md5_text(domain['domain']), 
+				domain['fqdn'],
 				domain['domain'], 
-				self.md5_text(domain['pubsuffix']), 
+				domain['domain'], 
 				domain['pubsuffix'], 
-				self.md5_text(domain['tld']),
+				domain['pubsuffix'], 
 				domain['tld'], 
+				domain['tld'],
 				domain['domain_owner_id']
 			)
 		)
 		self.db_conn.commit()
-		self.db.execute("SELECT id FROM domain WHERE fqdn_md5 = ?", (self.md5_text(domain['fqdn']),))
+		self.db.execute("SELECT id FROM domain WHERE fqdn_md5 = MD5(%s)", (domain['fqdn'],))
 		return self.db.fetchone()[0]
 	# add_domain
 
 	def add_domain_ip_addr(self, domain_id, ip_addr):
-		self.db.execute("INSERT INTO domain_ip_addr (domain_id,ip_addr) VALUES (?,?) ON CONFLICT DO NOTHING", (domain_id, ip_addr))
+		self.db.execute("INSERT INTO domain_ip_addr (domain_id,ip_addr) VALUES (%s,%s) ON CONFLICT DO NOTHING", (domain_id, ip_addr))
 		self.db_conn.commit()
 	# add_domain_ip_addr
 
@@ -871,37 +1078,37 @@ class SQLiteDriver:
 				crawl_sequence,
 				accessed
 		) VALUES (
-				?, 
-				?, 
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?, 
-				?, 
-				?,
-				?, 
-				?, 
-				?,
-				?, 
-				?,
-				?, 
-				?, 
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
-		)""",(
+				%s, 
+				%s, 
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				MD5(%s), 
+				%s, 
+				%s,
+				MD5(%s), 
+				%s, 
+				%s,
+				%s, 
+				%s,
+				%s, 
+				%s, 
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				MD5(%s),
+				%s,
+				%s,
+				%s
+		) RETURNING id""",(
 			page['browser_type'], 
 			page['browser_version'], 
 			page['browser_prewait'],
@@ -911,10 +1118,10 @@ class SQLiteDriver:
 			page['title'], 
 			page['meta_desc'], 
 			page['lang'], 
-			self.md5_text(page['start_url']), 
+			page['start_url'], 
 			page['start_url'], 
 			page['start_url_domain_id'],
-			self.md5_text(page['final_url']), 
+			page['final_url'], 
 			page['final_url'], 
 			page['final_url_domain_id'],
 			page['is_ssl'], 
@@ -928,14 +1135,13 @@ class SQLiteDriver:
 			page['page_text_id'],
 			page['screen_shot_md5'],
 			page['page_source_md5'],
-			self.md5_text(page['crawl_id']),
+			page['crawl_id'],
 			page['crawl_timestamp'],
 			page['crawl_sequence'],
 			page['accessed']
 		))
-		
 		# returns id of row we just entered
-		return self.db.lastrowid
+		return self.db.fetchone()[0]
 	# add_page
 
 	def add_dom_storage(self, dom_storage):
@@ -954,13 +1160,13 @@ class SQLiteDriver:
 				value,
 				is_3p
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)""",
 			(	
 				dom_storage['page_id'],
@@ -999,21 +1205,21 @@ class SQLiteDriver:
 				value,
 				is_set_by_response
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)""",
 			(
 				cookie['page_id'],
@@ -1055,21 +1261,22 @@ class SQLiteDriver:
 				is_policy,
 				domain_id
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				MD5(%s),
+				%s,
+				MD5(%s),
+				%s,
+				%s,
+				%s
 			) 
 			ON CONFLICT DO NOTHING
+			RETURNING id
 			""",
 			(	
 				link['url'], 
-				self.md5_text(link['url']),
+				link['url'],
 				link['text'], 
-				self.md5_text(link['text']),
+				link['text'],
 				link['is_internal'], 
 				link['is_policy'],
 				link['domain_id']
@@ -1077,8 +1284,14 @@ class SQLiteDriver:
 		)
 		self.db_conn.commit()
 
-		self.db.execute("SELECT id FROM link WHERE url_md5 = ? and text_md5 = ?", (self.md5_text(link['url']),self.md5_text(link['text'])))
-		return self.db.fetchone()[0]
+		# if a link was added below will work, otherwise
+		#	if there was a conflict this would fail and
+		#	we search for it
+		try:
+			return self.db.fetchone()[0]
+		except:
+			self.db.execute("SELECT id FROM link WHERE url_md5 = MD5(%s) and text_md5 = MD5(%s)", (link['url'],link['text']))
+			return self.db.fetchone()[0]
 	# add_link
 
 	def join_link_to_page(self,page_id,link_id):
@@ -1092,8 +1305,8 @@ class SQLiteDriver:
 				page_id, 
 				link_id
 			) VALUES (
-				?,
-				?
+				%s,
+				%s
 			) ON CONFLICT DO NOTHING""", 
 			(
 				page_id, 
@@ -1114,10 +1327,10 @@ class SQLiteDriver:
 				type,
 				is_base64
 			) VALUES (
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s
 			) ON CONFLICT DO NOTHING""", 
 			(
 				file['md5'],
@@ -1155,20 +1368,20 @@ class SQLiteDriver:
 				valid_from,
 				valid_to
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				MD5(%s),
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			) ON CONFLICT DO NOTHING""", 
 			(
-				self.md5_text(lookup_string),
+				lookup_string,
 				security_details['certificateTransparencyCompliance'],
 				security_details['cipher'],
 				security_details['issuer'],
@@ -1187,8 +1400,8 @@ class SQLiteDriver:
 		self.db.execute("""
 			SELECT id 
 			FROM security_details 
-			WHERE lookup_md5 = ?
-		""", (self.md5_text(lookup_string),))
+			WHERE lookup_md5 = MD5(%s)
+		""", (lookup_string,))
 		return self.db.fetchone()[0]
 	# add_security_details
 
@@ -1230,45 +1443,45 @@ class SQLiteDriver:
 				timestamp, 
 				type
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				MD5(%s),
+				%s,
+				MD5(%s),
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)
 			""", 
 			(
 				request['page_id'],
 				request['domain_id'],
 				request['url'],
-				self.md5_text(request['url']),
+				request['url'],
 				request['base_url'],
-				self.md5_text(request['base_url']),
+				request['base_url'],
 				request['request_id'],
 				request['document_url'],
 				request['extension'],
@@ -1339,44 +1552,44 @@ class SQLiteDriver:
 				type,
 				url
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
-			)
+				%s,
+				MD5(%s),
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
+			) RETURNING id
 			""", 
 			(
 				response['base_url'],
-				self.md5_text(response['base_url']),
+				response['base_url'],
 				response['extension'],
 				response['request_id'],
 				response['connection_reused'],
@@ -1412,7 +1625,7 @@ class SQLiteDriver:
 		)
 
 		# returns id of row we just entered
-		return self.db.lastrowid
+		return self.db.fetchone()[0]
 	# add_response
 
 	def add_response_extra_header(self,response_extra_header):
@@ -1428,11 +1641,11 @@ class SQLiteDriver:
 				headers,
 				blocked_cookies
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)
 			""", 
 			(
@@ -1459,11 +1672,11 @@ class SQLiteDriver:
 				headers,
 				associated_cookies
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)
 			""", 
 			(
@@ -1489,12 +1702,12 @@ class SQLiteDriver:
 				is_3p,
 				url
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?
-			)
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
+			) RETURNING id
 			""", 
 			(
 				websocket['page_id'],
@@ -1506,7 +1719,7 @@ class SQLiteDriver:
 		)
 
 		# returns id of row we just entered
-		return self.db.lastrowid
+		return self.db.fetchone()[0]
 	# add_websocket
 
 	def add_websocket_event(self, websocket_event):
@@ -1522,11 +1735,11 @@ class SQLiteDriver:
 				event_type,
 				payload
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)
 			""", 
 			(
@@ -1554,12 +1767,12 @@ class SQLiteDriver:
 				data,
 				timestamp
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)
 			""", 
 			(
@@ -1586,23 +1799,23 @@ class SQLiteDriver:
 				word_count,
 				readability_source_md5
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				to_tsvector(%s),
+				MD5(%s),
+				%s,
+				%s
 			) ON CONFLICT DO NOTHING""",
 			(
 				page_text['text'],
-				None,
-				self.md5_text(page_text['text']),
+				page_text['text'],
+				page_text['text'],
 				page_text['word_count'],
 				page_text['readability_source_md5']
 			)
 		)
 
 		# return id of record with this readability_source_md5 and text_md5
-		self.db.execute("SELECT id FROM page_text WHERE text_md5 = ?", (self.md5_text(page_text['text']),))
+		self.db.execute("SELECT id FROM page_text WHERE text_md5 = MD5(%s)", (page_text['text'],))
 	
 		return self.db.fetchone()[0]
 	# add_page_text
@@ -1618,10 +1831,10 @@ class SQLiteDriver:
 				target, 
 				msg
 			) VALUES (
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s
 			)""", 
 			(
 				error['client_id'], 
@@ -1650,14 +1863,14 @@ class SQLiteDriver:
 				is_websocket,
 				is_domstorage
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)""", 
 			(
 				lookup_item['page_id'],
@@ -1690,17 +1903,17 @@ class SQLiteDriver:
 				is_websocket,
 				is_domstorage
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				MD5(%s),
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			)""", 
 			(
-				self.md5_text(lookup_item['crawl_id']),
+				lookup_item['crawl_id'],
 				lookup_item['domain'],
 				lookup_item['domain_owner_id'],
 				lookup_item['is_request'],
@@ -1731,10 +1944,10 @@ class SQLiteDriver:
 				name,
 				data
 			) VALUES (
-				?,
-				?,
-				?
-			)
+				%s,
+				%s,
+				%s
+			) RETURNING id
 			""", 
 			(
 				cluster['type'], 
@@ -1744,7 +1957,7 @@ class SQLiteDriver:
 		)
 
 		# returns id of row we just entered
-		return self.db.lastrowid
+		return self.db.fetchone()[0]
 	# add_cluster
 
 	def assign_cluster(self,page_id,cluster_id):
@@ -1756,8 +1969,8 @@ class SQLiteDriver:
 				page_id, 
 				cluster_id
 			) VALUES (
-				?,
-				?
+				%s,
+				%s
 			)""", 
 			(
 				page_id,
@@ -1807,7 +2020,7 @@ class SQLiteDriver:
 				uses,
 				notes,
 				country
-			) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""", 
+			) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", 
 			(	
 				domain_owner['id'],
 				domain_owner['parent_id'], 
@@ -1831,9 +2044,9 @@ class SQLiteDriver:
 		"""
 		link the domains to the owners
 		"""
-		self.db.execute('UPDATE domain SET domain_owner_id = ? WHERE domain_md5 = ?', (id, self.md5_text(domain)))
-		self.db.execute('UPDATE crawl_id_domain_lookup SET domain_owner_id = ? WHERE domain = ?', (id, domain))
-		self.db.execute('UPDATE page_id_domain_lookup SET domain_owner_id = ? WHERE domain = ?', (id, domain))
+		self.db.execute('UPDATE domain SET domain_owner_id = %s WHERE domain_md5 = MD5(%s)', (id, domain))
+		self.db.execute('UPDATE crawl_id_domain_lookup SET domain_owner_id = %s WHERE domain = %s', (id, domain))
+		self.db.execute('UPDATE page_id_domain_lookup SET domain_owner_id = %s WHERE domain = %s', (id, domain))
 		self.db_conn.commit()
 		return True
 	# update_domain_owner
@@ -1902,11 +2115,11 @@ class SQLiteDriver:
 			client_id.
 		"""
 		if is_ssl and client_id:
-			self.db.execute('SELECT COUNT(*) FROM page WHERE is_ssl = TRUE AND client_id = ?', (client_id,))
+			self.db.execute('SELECT COUNT(*) FROM page WHERE is_ssl = TRUE AND client_id = %s', (client_id,))
 		elif is_ssl:
 			self.db.execute('SELECT COUNT(*) FROM page WHERE is_ssl = TRUE')
 		elif client_id:
-			self.db.execute('SELECT COUNT(*) FROM page WHERE client_id = ?', (client_id,))
+			self.db.execute('SELECT COUNT(*) FROM page WHERE client_id = %s', (client_id,))
 		else:
 			self.db.execute('SELECT COUNT(*) FROM page')
 		return self.db.fetchone()[0]
@@ -1917,9 +2130,9 @@ class SQLiteDriver:
 		Return the number of pages added to db in the past seconds.
 		"""
 		if client_id:
-			self.db.execute("SELECT COUNT(*) FROM page WHERE stored >= (NOW() - INTERVAL '? seconds') AND client_id = ?", (interval_seconds,client_id))
+			self.db.execute("SELECT COUNT(*) FROM page WHERE stored >= (NOW() - INTERVAL '%s seconds') AND client_id = %s", (interval_seconds,client_id))
 		else:
-			self.db.execute("SELECT COUNT(*) FROM page WHERE stored >= (NOW() - INTERVAL '? seconds')", (interval_seconds,))
+			self.db.execute("SELECT COUNT(*) FROM page WHERE stored >= (NOW() - INTERVAL '%s seconds')", (interval_seconds,))
 		return self.db.fetchone()[0]
 	# get_recent_page_count
 
@@ -1927,7 +2140,7 @@ class SQLiteDriver:
 		"""
 		Return the number of pages added to db in the past seconds.
 		"""
-		self.db.execute("SELECT client_id,count(*) FROM page WHERE stored >= (NOW() - INTERVAL '? seconds') group by client_id", (interval_seconds,))
+		self.db.execute("SELECT client_id,count(*) FROM page WHERE stored >= (NOW() - INTERVAL '%s seconds') group by client_id", (interval_seconds,))
 		return self.db.fetchall()
 	# get_recent_page_count_by_client_id
 
@@ -1936,9 +2149,9 @@ class SQLiteDriver:
 		Return the number of pages added to db in the past seconds.
 		"""
 		if client_id:
-			self.db.execute("SELECT COUNT(*) FROM policy WHERE added >= (NOW() - INTERVAL '? seconds') AND client_id = ?", (interval_seconds,client_id))
+			self.db.execute("SELECT COUNT(*) FROM policy WHERE added >= (NOW() - INTERVAL '%s seconds') AND client_id = %s", (interval_seconds,client_id))
 		else:
-			self.db.execute("SELECT COUNT(*) FROM policy WHERE added >= (NOW() - INTERVAL '? seconds')", (interval_seconds,))
+			self.db.execute("SELECT COUNT(*) FROM policy WHERE added >= (NOW() - INTERVAL '%s seconds')", (interval_seconds,))
 		return self.db.fetchone()[0]
 	# get_recent_page_count
 
@@ -1946,7 +2159,7 @@ class SQLiteDriver:
 		"""
 		Return the number of pages added to db in the past seconds.
 		"""
-		self.db.execute("SELECT client_id, count(*) FROM policy WHERE added >= (NOW() - INTERVAL '? seconds') group by client_id", (interval_seconds,))
+		self.db.execute("SELECT client_id, count(*) FROM policy WHERE added >= (NOW() - INTERVAL '%s seconds') group by client_id", (interval_seconds,))
 		return self.db.fetchall()
 	# get_recent_policy_count_by_client_id
 
@@ -2219,7 +2432,7 @@ class SQLiteDriver:
 
 		# addtional filtering
 		if type == 'script': filters.append("request.type = 'script'")
-		if tld_filter: filters.append("page_domain.tld = '?'" % tld_filter)
+		if tld_filter: filters.append("page_domain.tld = '%s'" % tld_filter)
 		if is_ssl: filters.append("page.is_ssl = TRUE")
 
 		self.db.execute(self.build_filtered_query(query,filters))
@@ -2231,7 +2444,7 @@ class SQLiteDriver:
 		basic utility function, allows to filter on page tld
 		"""
 		if tld_filter:
-			self.db.execute('SELECT page.id FROM page JOIN domain ON page.final_url_domain_id = domain.id WHERE domain.tld = ?', (tld_filter,))
+			self.db.execute('SELECT page.id FROM page JOIN domain ON page.final_url_domain_id = domain.id WHERE domain.tld = %s', (tld_filter,))
 		else:
 			self.db.execute('SELECT page.id FROM page')
 		return self.db.fetchall()
@@ -2250,7 +2463,7 @@ class SQLiteDriver:
 				JOIN domain page_domain ON page.final_url_domain_id = page_domain.id
 				WHERE request.is_3p = TRUE
 				AND request_domain.domain_owner_id IS NOT NULL
-				AND page_domain.tld = ?
+				AND page_domain.tld = %s
 			""", (tld_filter,))
 		else:
 			self.db.execute("""
@@ -2314,7 +2527,7 @@ class SQLiteDriver:
 		"""
 
 		if tld_filter:
-			self.db.execute(query + ' AND page_domain.tld = ?', (tld_filter,))
+			self.db.execute(query + ' AND page_domain.tld = %s', (tld_filter,))
 		else:
 			self.db.execute(query)
 		return self.db.fetchall()
@@ -2339,11 +2552,11 @@ class SQLiteDriver:
 		"""
 
 		if tld_filter and request_type:
-			self.db.execute(base_query + ' AND page_domain.tld = ? AND request.type = ?', (tld_filter, request_type))
+			self.db.execute(base_query + ' AND page_domain.tld = %s AND request.type = %s', (tld_filter, request_type))
 		elif tld_filter:
-			self.db.execute(base_query + ' AND page_domain.tld = ?', (tld_filter,))
+			self.db.execute(base_query + ' AND page_domain.tld = %s', (tld_filter,))
 		elif request_type:
-			self.db.execute(base_query + ' AND request.type = ?', (request_type,))
+			self.db.execute(base_query + ' AND request.type = %s', (request_type,))
 		else:
 			self.db.execute(base_query)
 		return self.db.fetchall()
@@ -2587,7 +2800,7 @@ class SQLiteDriver:
 					ON page.final_url_domain_id = page_domain.id
 				WHERE request_domain.domain_owner_id IS NOT NULL
 				AND request.is_3p = TRUE
-				AND page_domain.tld = ?
+				AND page_domain.tld = %s
 			""", (tld_filter,))
 		else:
 			self.db.execute("""
@@ -2709,7 +2922,7 @@ class SQLiteDriver:
 			JOIN
 				domain request_domain ON request_domain.id = request.domain_id				
 			WHERE
-				page.start_url = ?
+				page.start_url = %s
 		'''
 
 		if only_3p:
@@ -2744,7 +2957,7 @@ class SQLiteDriver:
 			JOIN
 				domain cookie_domain ON cookie_domain.id = cookie.domain_id				
 			WHERE
-				page.start_url = ?
+				page.start_url = %s
 		'''
 
 		if only_3p:
@@ -2774,7 +2987,7 @@ class SQLiteDriver:
 		"""
 		Does what it says.
 		"""
-		self.db.execute('UPDATE domain SET ip_owner = ? WHERE ip_addr = ?', (ip_owner,ip_addr))
+		self.db.execute('UPDATE domain SET ip_owner = %s WHERE ip_addr = %s', (ip_owner,ip_addr))
 		self.db_conn.commit()
 	# update_site_host
 
@@ -2889,8 +3102,6 @@ class SQLiteDriver:
 		return self.db.fetchall()
 	# get_crawl_id_to_3p_domain_pairs
 
-
-
 	#------------#
 	# POLICYXRAY #
 	#------------#
@@ -2963,27 +3174,27 @@ class SQLiteDriver:
 				page_text_id,
 				page_source_md5
 			) VALUES (
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				MD5(%s),
+				%s,
+				MD5(%s),
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s,
+				%s
 			) ON CONFLICT DO NOTHING""",
 			(
 				policy['client_id'],
@@ -2992,9 +3203,9 @@ class SQLiteDriver:
 				policy['browser_version'],
 				policy['browser_prewait'],
 				policy['start_url'],
-				self.md5_text(policy['start_url']),
+				policy['start_url'],
 				policy['final_url'],
-				self.md5_text(policy['final_url']),
+				policy['final_url'],
 				policy['title'],
 				policy['meta_desc'],
 				policy['lang'],
@@ -3011,7 +3222,7 @@ class SQLiteDriver:
 		)
 
 		# return id of record with this start_url and accessed time
-		self.db.execute("SELECT id FROM policy WHERE start_url = ? AND page_text_id = ?", (policy['start_url'],policy['page_text_id']))
+		self.db.execute("SELECT id FROM policy WHERE start_url = %s AND page_text_id = %s", (policy['start_url'],policy['page_text_id']))
 	
 		return self.db.fetchone()[0]
 	# add_policy
@@ -3037,10 +3248,10 @@ class SQLiteDriver:
 				ON
 					page.id = page_link_junction.page_id
 				WHERE
-					link.url_md5 = ?
+					link.url_md5 = MD5(%s)
 				AND
 					link.is_internal IS TRUE
-			""", (self.md5_text(url),))
+			""", (url,))
 		else:
 			self.db.execute("""
 				SELECT
@@ -3056,8 +3267,8 @@ class SQLiteDriver:
 				ON
 					page.id = page_link_junction.page_id
 				WHERE
-					link.url_md5 = ?
-			""", (self.md5_text(url),))
+					link.url_md5 = MD5(%s)
+			""", (url,))
 		return self.db.fetchall()
 	# get_page_ids_from_link_url
 
@@ -3068,7 +3279,7 @@ class SQLiteDriver:
 		"""
 		self.db.execute("""
 			INSERT INTO page_policy_junction (policy_id, page_id)
-			VALUES (?,?)
+			VALUES (%s,%s)
 			ON CONFLICT DO NOTHING""", 
 			(policy_id, page_id)
 		)
@@ -3082,7 +3293,7 @@ class SQLiteDriver:
 		"""
 		self.db.execute("""
 			INSERT INTO crawl_policy_junction (policy_id, crawl_id)
-			VALUES (?,?)
+			VALUES (%s,%s)
 			ON CONFLICT DO NOTHING""", 
 			(policy_id, crawl_id)
 		)
@@ -3107,7 +3318,7 @@ class SQLiteDriver:
 		Return the total number of policies matching specified conditions.
 		"""
 		if policy_type:
-			self.db.execute('SELECT COUNT(*) FROM policy WHERE type = ?', (policy_type,))
+			self.db.execute('SELECT COUNT(*) FROM policy WHERE type = %s', (policy_type,))
 		else:
 			self.db.execute('SELECT COUNT(*) FROM policy')
 		return self.db.fetchone()[0]
@@ -3128,7 +3339,7 @@ class SQLiteDriver:
 				ON
 					policy.page_text_id = page_text.id
 				WHERE 
-					policy.type = ?
+					policy.type = %s
 			""", (policy_type,))
 		else:
 			self.db.execute("""
@@ -3151,10 +3362,10 @@ class SQLiteDriver:
 		self.db.execute("""
 			UPDATE policy
 			SET
-				fre_score 	= ?,
-				fk_score	= ?
+				fre_score 	= %s,
+				fk_score	= %s
 			WHERE
-				id 			= ?""", 
+				id 			= %s""", 
 			(fre_score, fk_score, policy_id)
 		)
 		self.db_conn.commit()
@@ -3166,7 +3377,7 @@ class SQLiteDriver:
 			policy type, ignores invalid scores (<0).
 		"""
 		if policy_type:
-			self.db.execute('SELECT AVG(fre_score) FROM policy WHERE fre_score > 0 AND type = ?', (policy_type,))
+			self.db.execute('SELECT AVG(fre_score) FROM policy WHERE fre_score > 0 AND type = %s', (policy_type,))
 		else:
 			self.db.execute('SELECT AVG(fre_score) FROM policy WHERE fre_score > 0')
 		return self.db.fetchone()[0]
@@ -3178,7 +3389,7 @@ class SQLiteDriver:
 			policy type, ignores invalid scores (<0).
 		"""
 		if policy_type:
-			self.db.execute('SELECT AVG(fk_score) FROM policy WHERE fk_score > 0 AND type = ?', (policy_type,))
+			self.db.execute('SELECT AVG(fk_score) FROM policy WHERE fk_score > 0 AND type = %s', (policy_type,))
 		else:
 			self.db.execute('SELECT AVG(fk_score) FROM policy WHERE fk_score > 0')
 		return self.db.fetchone()[0]
@@ -3284,7 +3495,7 @@ class SQLiteDriver:
 				page_id, policy_id, 
 				request_owner_id, disclosed,
 				disclosed_owner_id
-			) VALUES (?,?,?,?,?)
+			) VALUES (%s,%s,%s,%s,%s)
 			ON CONFLICT DO NOTHING""", 
 			(	page_id, policy_id, 
 				request_owner_id, disclosed,
@@ -3301,15 +3512,33 @@ class SQLiteDriver:
 			UPDATE crawl_id_domain_lookup
 			SET is_disclosed = TRUE
 			WHERE 
-				crawl_id = ?
+				crawl_id = %s
 			AND
-				domain_owner_id =?
+				domain_owner_id = %s
 		""", 
 			(	crawl_id,
 				domain_owner_id)
 		)
 		self.db_conn.commit()
 	# update_crawl_3p_domain_disclosure
+
+	def update_policy_request_disclosure(self, crawl_id, policy_id, domain_owner_id, disclosed, disclosed_owner_id):
+		"""
+		CREATE TABLE IF NOT EXISTS policy_request_disclosure(crawl_id TEXT,policy_id INTEGER REFERENCES policy(id),domain_owner_id TEXT REFERENCES domain_owner(id),disclosed BOOLEAN,disclosed_owner_id TEXT REFERENCES domain_owner(id),UNIQUE (crawl_id, domain_owner_id));
+		"""
+		self.db.execute("""
+			INSERT INTO policy_request_disclosure (
+				crawl_id, policy_id, 
+				domain_owner_id, disclosed,
+				disclosed_owner_id
+			) VALUES (%s,%s,%s,%s,%s)
+			ON CONFLICT DO NOTHING""", 
+			(	crawl_id, policy_id, 
+				domain_owner_id, disclosed,
+				disclosed_owner_id)
+		)
+		self.db_conn.commit()
+	# update_policy_request_disclosure
 	
 	def get_total_request_disclosure_count(self, disclosed=None, policy_type=None):
 		"""
@@ -3321,7 +3550,7 @@ class SQLiteDriver:
 				FROM policy_request_disclosure 
 				JOIN policy ON policy_request_disclosure.policy_id = policy.id
 				WHERE policy_request_disclosure.disclosed IS TRUE 
-				AND policy.type = ?
+				AND policy.type = %s
 			""", (policy_type,))
 		elif disclosed:
 			self.db.execute("SELECT COUNT(*) FROM policy_request_disclosure WHERE disclosed IS TRUE")
@@ -3330,7 +3559,7 @@ class SQLiteDriver:
 				SELECT COUNT(*) 
 				FROM policy_request_disclosure 
 				JOIN policy ON policy_request_disclosure.policy_id = policy.id
-				WHERE policy.type = ?
+				WHERE policy.type = %s
 			""", (policy_type,))
 		else:	
 			self.db.execute("SELECT COUNT(*) FROM policy_request_disclosure")
@@ -3402,12 +3631,12 @@ class SQLiteDriver:
 		"""
 
 		if policy_type:
-			query += " WHERE type = '"+policy_type+"' AND (page_text.text like '%"+substrings[0]+"%'"
+			query += " WHERE type = '"+policy_type+"' AND (page_text.text ilike '%"+substrings[0]+"%'"
 		else:
-			query += " WHERE (page_text.text like '%"+substrings[0]+"%'"
+			query += " WHERE (page_text.text ilike '%"+substrings[0]+"%'"
 
 		for substring in substrings[1:]:
-			query += " OR page_text.text like '%"+substring+"%'"
+			query += " OR page_text.text ilike '%"+substring+"%'"
 
 		# close conditional
 		query += ")"
@@ -3424,6 +3653,4 @@ class SQLiteDriver:
 		self.db.execute('SELECT DISTINCT type FROM policy')
 		return self.db.fetchall()
 	# get_available_policy_types
-
-	
-# SQLiteDriver
+# PostgreSQLDriver

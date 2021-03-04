@@ -3,32 +3,90 @@
 -- but for python sake they are read as very long single lines
 --
 -- kill old tables
-DROP TABLE IF EXISTS error;
-DROP TABLE IF EXISTS cookie;
-DROP TABLE IF EXISTS element;
-DROP TABLE IF EXISTS page;
-DROP TABLE IF EXISTS domain;
-DROP TABLE IF EXISTS domain_owner;
+--------------
+--- CONFIG ---
+--------------
+-- CREATE TABLE config(
+-- 	client_browser_type TEXT,
+-- 	client_prewait BIGINT,
+-- 	client_no_event_wait BIGINT,
+-- 	client_max_wait BIGINT,
+-- 	client_get_bodies BOOLEAN,
+-- 	client_get_bodies_b64 BOOLEAN,
+-- 	client_get_screen_shot BOOLEAN,
+-- 	client_get_text BOOLEAN,
+-- 	client_crawl_depth BIGINT,
+-- 	client_crawl_retries BIGINT,
+-- 	client_page_load_strategy TEXT,
+-- 	client_reject_redirects BOOLEAN,
+-- 	client_min_internal_links BIGINT,
+-- 	max_attempts BIGINT,
+-- 	modified TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+-- 	queue_results_only BOOLEAN,
+-- 	store_1p BOOLEAN,
+-- 	store_base64 BOOLEAN,
+-- 	store_files BOOLEAN,
+-- 	store_screen_shot BOOLEAN,
+-- 	store_source BOOLEAN,
+-- 	store_page_text BOOLEAN,
+-- 	store_links BOOLEAN,
+-- 	store_dom_storage BOOLEAN,
+-- 	store_responses BOOLEAN,
+-- 	store_request_xtra_headers BOOLEAN,
+-- 	store_response_xtra_headers BOOLEAN,
+-- 	store_requests BOOLEAN,
+-- 	store_websockets BOOLEAN,
+-- 	store_websocket_events BOOLEAN,
+-- 	store_event_source_msgs BOOLEAN,
+-- 	store_cookies BOOLEAN,
+-- 	store_security_details BOOLEAN,
+-- 	timeseries_enabled BOOLEAN,
+-- 	timeseries_interval BIGINT
+-- );
+CREATE TABLE config(client_browser_type TEXT,client_prewait BIGINT,client_no_event_wait BIGINT,client_max_wait BIGINT,client_get_bodies BOOLEAN,client_get_bodies_b64 BOOLEAN,client_get_screen_shot BOOLEAN,client_get_text BOOLEAN,client_crawl_depth BIGINT,client_crawl_retries BIGINT,client_page_load_strategy TEXT,client_reject_redirects BOOLEAN,client_min_internal_links BIGINT,max_attempts BIGINT,modified TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,queue_results_only BOOLEAN,store_1p BOOLEAN,store_base64 BOOLEAN,store_files BOOLEAN,store_screen_shot BOOLEAN,store_source BOOLEAN,store_page_text BOOLEAN,store_links BOOLEAN,store_dom_storage BOOLEAN,store_responses BOOLEAN,store_request_xtra_headers BOOLEAN,store_response_xtra_headers BOOLEAN,store_requests BOOLEAN,store_websockets BOOLEAN,store_websocket_events BOOLEAN,store_event_source_msgs BOOLEAN,store_cookies BOOLEAN,store_security_details BOOLEAN,timeseries_enabled BOOLEAN,timeseries_interval BIGINT);
+------------------
+--- TASK_QUEUE ---
+------------------
+-- CREATE TABLE task_queue(
+-- 	id INTEGER PRIMARY KEY,
+-- 	target TEXT,
+-- 	target_md5 TEXT,
+-- 	task TEXT,
+-- 	client_id TEXT,
+-- 	attempts BIGINT DEFAULT 0,
+-- 	locked BOOLEAN DEFAULT FALSE,
+-- 	failed BOOLEAN DEFAULT FALSE,
+-- 	added TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+-- 	modified TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+-- 	UNIQUE (target_md5, task)
+-- );
+CREATE TABLE task_queue(id INTEGER PRIMARY KEY,target TEXT,target_md5 TEXT,task TEXT,client_id TEXT,attempts BIGINT DEFAULT 0,locked BOOLEAN DEFAULT FALSE,failed BOOLEAN DEFAULT FALSE,added TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,modified TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,UNIQUE (target_md5, task));
 ---------------------
 --- DOMAIN OWNER  ---
 ---------------------
--- CREATE TABLE IF NOT EXISTS domain_owner(
--- 	id INTEGER PRIMARY KEY,
---	parent_id INTEGER,
+-- CREATE TABLE domain_owner(
+-- 	id TEXT PRIMARY KEY UNIQUE,
+-- 	parent_id TEXT,
 -- 	name TEXT,
---	aliases TEXT,
---	homepage_url TEXT,
---	privacy_policy_url TEXT,
+-- 	aliases TEXT,
+-- 	homepage_url TEXT,
+-- 	site_privacy_policy_urls TEXT,
+-- 	service_privacy_policy_urls TEXT,
+-- 	gdpr_statement_urls TEXT,
+-- 	terms_of_use_urls TEXT,
+-- 	platforms TEXT,
+-- 	uses TEXT,
 -- 	notes TEXT,
--- 	country TEXT,
--- )
-CREATE TABLE IF NOT EXISTS domain_owner(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,parent_id INTEGER,name TEXT,aliases TEXT,homepage_url TEXT,privacy_policy_url TEXT,notes TEXT,country TEXT);
+-- 	country TEXT
+-- );
+CREATE TABLE domain_owner(id TEXT PRIMARY KEY UNIQUE,parent_id TEXT,name TEXT,aliases TEXT,homepage_url TEXT,site_privacy_policy_urls TEXT,service_privacy_policy_urls TEXT,gdpr_statement_urls TEXT,terms_of_use_urls TEXT,platforms TEXT,uses TEXT,notes TEXT,country TEXT);
 --------------
 --- DOMAIN ---
 --------------
--- CREATE TABLE IF NOT EXISTS domain(
--- 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+-- CREATE TABLE domain(
+-- 	id INTEGER PRIMARY KEY,
 -- 	ip_addr TEXT,
+-- 	ip_owner TEXT,
 -- 	fqdn_md5 TEXT UNIQUE,
 -- 	fqdn TEXT,
 -- 	domain_md5 TEXT,
@@ -37,87 +95,423 @@ CREATE TABLE IF NOT EXISTS domain_owner(id INTEGER PRIMARY KEY AUTOINCREMENT NOT
 -- 	pubsuffix TEXT,
 -- 	tld_md5 TEXT,
 -- 	tld TEXT,
--- 	domain_owner_id INTEGER DEFAULT NULL REFERENCES domain_owner(id)
+-- 	is_tracker_domain BOOLEAN DEFAULT FALSE,
+-- 	domain_owner_id TEXT REFERENCES domain_owner(id)
 -- );
--- 
-CREATE TABLE IF NOT EXISTS domain(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,ip_addr TEXT,fqdn_md5 TEXT UNIQUE,fqdn TEXT,domain_md5 TEXT,domain TEXT,pubsuffix_md5 TEXT,pubsuffix TEXT,tld_md5 TEXT,tld TEXT,domain_owner_id INTEGER DEFAULT NULL REFERENCES domain_owner(id));
+CREATE TABLE domain(id INTEGER PRIMARY KEY,ip_addr TEXT,ip_owner TEXT,fqdn_md5 TEXT UNIQUE,fqdn TEXT,domain_md5 TEXT,domain TEXT,pubsuffix_md5 TEXT,pubsuffix TEXT,tld_md5 TEXT,tld TEXT,is_tracker_domain BOOLEAN DEFAULT FALSE,domain_owner_id TEXT REFERENCES domain_owner(id));
+----------------------
+--- DOMAIN_IP_ADDR ---
+----------------------
+-- CREATE TABLE domain_ip_addr(
+-- 	ip_addr TEXT,
+-- 	ip_owner TEXT,
+-- 	domain_id BIGSERIAL,
+-- 	UNIQUE (ip_addr, domain_id)
+-- );
+CREATE TABLE domain_ip_addr(ip_addr TEXT,ip_owner TEXT,domain_id BIGSERIAL,UNIQUE (ip_addr, domain_id));
+-----------------
+--- PAGE_TEXT ---
+-----------------
+-- CREATE TABLE page_text(
+-- 	id INTEGER PRIMARY KEY,
+-- 	readability_source_md5 TEXT,
+-- 	text TEXT,
+-- 	text_md5 TEXT NOT NULL,
+-- 	tokens TSVECTOR,
+-- 	word_count BIGINT,
+-- 	UNIQUE (readability_source_md5, text_md5)
+-- );
+CREATE TABLE page_text(id INTEGER PRIMARY KEY,readability_source_md5 TEXT,text TEXT,text_md5 TEXT NOT NULL,tokens TSVECTOR,word_count BIGINT,UNIQUE (readability_source_md5, text_md5));
 ------------
 --- PAGE ---
 ------------
--- CREATE TABLE IF NOT EXISTS page(
--- 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
---	browser_type TEXT,
---	browser_version TEXT,
---  browser_wait INTEGER,
+-- CREATE TABLE page(
+-- 	id INTEGER PRIMARY KEY,
+-- 	crawl_id TEXT,
+-- 	crawl_timestamp TIMESTAMPTZ,
+-- 	crawl_sequence BIGINT,
+-- 	client_id TEXT,
+-- 	client_timezone TEXT,
+-- 	client_ip TEXT,
+-- 	browser_type TEXT,
+-- 	browser_version TEXT,
+-- 	browser_prewait BIGINT,
+-- 	browser_no_event_wait BIGINT,
+-- 	browser_max_wait BIGINT,
+-- 	page_load_strategy TEXT,
 -- 	title TEXT,
 -- 	meta_desc TEXT,
+-- 	lang TEXT,
 -- 	start_url_md5 TEXT,
 -- 	start_url TEXT,
+-- 	start_url_domain_id BIGINT REFERENCES domain(id),
 -- 	final_url_md5 TEXT,
 -- 	final_url TEXT,
+-- 	final_url_domain_id BIGINT REFERENCES domain(id),
+-- 	page_domain_redirect BOOLEAN,
 -- 	is_ssl BOOLEAN,
--- 	source TEXT,
--- 	load_time INTEGER,
--- 	domain_id INTEGER REFERENCES domain(id),
--- 	accessed TEXT,
--- 	UNIQUE (accessed, start_url_md5),
+-- 	link_count_internal BIGINT,
+-- 	link_count_external BIGINT,
+-- 	load_time NUMERIC,
+-- 	page_text_id BIGINT,
+-- 	page_source_md5 TEXT,
+-- 	screen_shot_md5 TEXT,
+-- 	accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+-- 	stored TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+-- 	UNIQUE (accessed, start_url_md5)
 -- );
-CREATE TABLE IF NOT EXISTS page(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,browser_type TEXT,browser_version TEXT,browser_wait INTEGER,title TEXT,meta_desc TEXT,start_url_md5 TEXT,start_url TEXT,final_url_md5 TEXT,final_url TEXT,is_ssl BOOLEAN,source TEXT,load_time INTEGER,domain_id INTEGER REFERENCES domain(id),accessed TEXT,UNIQUE (accessed, start_url_md5));
+CREATE TABLE page(id INTEGER PRIMARY KEY,crawl_id TEXT,crawl_timestamp TIMESTAMPTZ,crawl_sequence BIGINT,client_id TEXT,client_timezone TEXT,client_ip TEXT,browser_type TEXT,browser_version TEXT,browser_prewait BIGINT,browser_no_event_wait BIGINT,browser_max_wait BIGINT,page_load_strategy TEXT,title TEXT,meta_desc TEXT,lang TEXT,start_url_md5 TEXT,start_url TEXT,start_url_domain_id BIGINT REFERENCES domain(id),final_url_md5 TEXT,final_url TEXT,final_url_domain_id BIGINT REFERENCES domain(id),page_domain_redirect BOOLEAN,is_ssl BOOLEAN,link_count_internal BIGINT,link_count_external BIGINT,load_time NUMERIC,page_text_id BIGINT,page_source_md5 TEXT,screen_shot_md5 TEXT,accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,stored TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,UNIQUE (accessed, start_url_md5));
 ---------------
---- ELEMENT ---
+--- CLUSTER ---
 ---------------
--- CREATE TABLE IF NOT EXISTS element(
--- 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
--- 	page_id INTEGER REFERENCES page(id),
--- 	full_url_md5 TEXT,
--- 	full_url TEXT,
--- 	element_url_md5 TEXT,
--- 	element_url TEXT,
+-- CREATE TABLE cluster(
+-- 	id INTEGER PRIMARY KEY,
+-- 	type TEXT,
+-- 	name TEXT,
+-- 	data TEXT
+-- );
+CREATE TABLE cluster(id INTEGER PRIMARY KEY,type TEXT,name TEXT,data TEXT);
+--------------------------
+--- PAGE_CLUSTER_JUNCTION ---
+--------------------------
+-- CREATE TABLE page_cluster_junction(
+-- 	page_id BIGINT,
+-- 	cluster_id BIGINT,
+-- 	UNIQUE (page_id, link_id)
+-- );
+CREATE TABLE page_cluster_junction(page_id BIGINT,cluster_id BIGINT,UNIQUE (page_id, cluster_id));
+------------------------
+--- SECURITY_DETAILS ---
+------------------------
+-- CREATE TABLE security_details(
+-- 	id INTEGER PRIMARY KEY,
+-- 	lookup_md5 TEXT,
+-- 	cert_transparency_compliance TEXT,
+-- 	cipher TEXT,
+-- 	issuer TEXT,
+-- 	key_exchange TEXT,
+-- 	protocol TEXT,
+-- 	san_list TEXT,
+-- 	signed_cert_timestamp_list TEXT,
+-- 	subject_name TEXT,
+-- 	valid_from BIGINT,
+-- 	valid_to BIGINT,
+-- 	UNIQUE(lookup_md5)
+-- );
+CREATE TABLE security_details(id INTEGER PRIMARY KEY,lookup_md5 TEXT,cert_transparency_compliance TEXT,cipher TEXT,issuer TEXT,key_exchange TEXT,protocol TEXT,san_list TEXT,signed_cert_timestamp_list TEXT,subject_name TEXT,valid_from BIGINT,valid_to BIGINT,UNIQUE(lookup_md5));
+----------------
+--- RESPONSE ---
+----------------
+-- CREATE TABLE response(
+-- 	id INTEGER PRIMARY KEY,
+-- 	page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,
+-- 	domain_id BIGINT REFERENCES domain(id),
+-- 	security_details_id BIGINT REFERENCES security_details(id),
+-- 	base_url TEXT,
+-- 	base_url_md5 TEXT,
+-- 	extension TEXT,
+-- 	internal_request_id TEXT,
+-- 	connection_reused BOOLEAN,
+-- 	cookies_sent TEXT,
+-- 	cookies_set TEXT,
+-- 	file_md5 TEXT,
+-- 	final_data_length BIGINT,
+-- 	from_disk_cache BOOLEAN,
+-- 	from_prefetch_cache BOOLEAN,
+-- 	from_service_worker BOOLEAN,
 -- 	is_3p BOOLEAN,
 -- 	is_ssl BOOLEAN,
--- 	received BOOLEAN,
--- 	referer  TEXT,
--- 	page_domain_in_referer BOOLEAN,
---  start_time_offset INTEGER,
--- 	load_time INTEGER,
--- 	status TEXT,
--- 	status_text TEXT,
--- 	content_type TEXT,
--- 	body_size INTEGER,
+-- 	is_data BOOLEAN,
+-- 	mime_type TEXT,
+-- 	page_domain_in_headers BOOLEAN,
+-- 	protocol TEXT,
+-- 	referer TEXT,
+-- 	remote_ip_address TEXT,
+-- 	remote_port TEXT,
 -- 	request_headers TEXT,
 -- 	response_headers TEXT,
--- 	extension TEXT,
+-- 	security_state TEXT,
+-- 	status TEXT,
+-- 	status_text TEXT,
+-- 	timestamp TIMESTAMPTZ,
+-- 	timing TEXT,
 -- 	type TEXT,
--- 	args TEXT,
--- 	domain_id INTEGER REFERENCES domain(id)
+-- 	url TEXT
 -- );
-CREATE TABLE IF NOT EXISTS element(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,page_id INTEGER REFERENCES page(id),full_url_md5 TEXT,full_url TEXT,element_url_md5 TEXT,element_url TEXT,is_3p BOOLEAN,is_ssl BOOLEAN,received BOOLEAN,referer TEXT,page_domain_in_referer BOOLEAN,start_time_offset INTEGER,load_time INTEGER,status TEXT,status_text TEXT,content_type TEXT,body_size INTEGER,request_headers TEXT,response_headers TEXT,extension TEXT,type TEXT,args TEXT,domain_id INTEGER REFERENCES domain(id));
+CREATE TABLE response(id INTEGER PRIMARY KEY,page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,domain_id BIGINT REFERENCES domain(id),security_details_id BIGINT REFERENCES security_details(id),base_url TEXT,base_url_md5 TEXT,extension TEXT,internal_request_id TEXT,connection_reused BOOLEAN,cookies_sent TEXT,cookies_set TEXT,file_md5 TEXT,final_data_length BIGINT,from_disk_cache BOOLEAN,from_prefetch_cache BOOLEAN,from_service_worker BOOLEAN,is_3p BOOLEAN,is_ssl BOOLEAN,is_data BOOLEAN,mime_type TEXT,page_domain_in_headers BOOLEAN,protocol TEXT,referer TEXT,remote_ip_address TEXT,remote_port TEXT,request_headers TEXT,response_headers TEXT,security_state TEXT,status TEXT,status_text TEXT,timestamp TIMESTAMPTZ,timing TEXT,type TEXT,url TEXT);
+------------------------------
+--- RESPONSE_EXTRA_HEADERS ---
+------------------------------
+-- CREATE TABLE response_extra_headers(
+-- 	id INTEGER PRIMARY KEY,
+-- 	page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,
+-- 	internal_request_id TEXT,
+-- 	cookies_set TEXT,
+-- 	headers TEXT,
+-- 	blocked_cookies TEXT
+-- );
+CREATE TABLE response_extra_headers(id INTEGER PRIMARY KEY,page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,internal_request_id TEXT,cookies_set TEXT,headers TEXT,blocked_cookies TEXT);
+---------------
+--- REQUEST ---
+---------------
+-- CREATE TABLE request(
+-- 	id INTEGER PRIMARY KEY,
+-- 	page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,
+-- 	domain_id BIGINT REFERENCES domain(id),
+-- 	base_url TEXT,
+-- 	base_url_md5 TEXT,
+-- 	internal_request_id TEXT,
+-- 	document_url TEXT,
+-- 	extension TEXT,
+-- 	file_md5 TEXT,
+-- 	full_url TEXT,
+-- 	full_url_md5 TEXT,
+-- 	has_user_gesture TEXT,
+-- 	headers TEXT,
+-- 	initial_priority TEXT,
+-- 	initiator TEXT,
+-- 	is_3p BOOLEAN,
+-- 	is_data BOOLEAN,
+-- 	is_link_preload BOOLEAN,
+-- 	is_ssl BOOLEAN,
+-- 	load_finished BOOLEAN,
+-- 	loader_id TEXT,
+-- 	method TEXT,
+-- 	page_domain_in_headers BOOLEAN,
+-- 	post_data TEXT,
+-- 	get_data TEXT,
+-- 	redirect_response_url TEXT,
+-- 	referer TEXT,
+-- 	referrer_policy TEXT,
+-- 	response_received BOOLEAN,
+-- 	timestamp TIMESTAMPTZ,
+-- 	type TEXT
+-- );
+CREATE TABLE request(id INTEGER PRIMARY KEY,page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,domain_id BIGINT REFERENCES domain(id),base_url TEXT,base_url_md5 TEXT,internal_request_id TEXT,document_url TEXT,extension TEXT,file_md5 TEXT,full_url TEXT,full_url_md5 TEXT,has_user_gesture TEXT,headers TEXT,initial_priority TEXT,initiator TEXT,is_3p BOOLEAN,is_data BOOLEAN,is_link_preload BOOLEAN,is_ssl BOOLEAN,load_finished BOOLEAN,loader_id TEXT,method TEXT,page_domain_in_headers BOOLEAN,post_data TEXT,get_data TEXT,redirect_response_url TEXT,referer TEXT,referrer_policy TEXT,response_received BOOLEAN,timestamp TIMESTAMPTZ,type TEXT);
+-----------------------------
+--- REQUEST_EXTRA_HEADERS ---
+-----------------------------
+-- CREATE TABLE request_extra_headers(
+-- 	id INTEGER PRIMARY KEY,
+-- 	page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,
+-- 	internal_request_id TEXT,
+-- 	cookies_sent TEXT,
+-- 	headers TEXT,
+-- 	associated_cookies TEXT
+-- );
+CREATE TABLE request_extra_headers(id INTEGER PRIMARY KEY,page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,internal_request_id TEXT,cookies_sent TEXT,headers TEXT,associated_cookies TEXT);
+------------------
+--- WEBSOCKETS ---
+------------------
+-- CREATE TABLE websocket(
+-- 	id INTEGER PRIMARY KEY,
+-- 	page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,
+-- 	domain_id BIGINT REFERENCES domain(id),
+-- 	initiator TEXT,
+-- 	is_3p BOOLEAN,
+-- 	url TEXT
+-- );
+CREATE TABLE websocket(id INTEGER PRIMARY KEY,page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,domain_id BIGINT REFERENCES domain(id),initiator TEXT,is_3p BOOLEAN,url TEXT);
+------------------------
+--- WEBSOCKET EVENTS ---
+------------------------
+-- CREATE TABLE websocket_event(
+-- 	id INTEGER PRIMARY KEY,
+-- 	page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,
+-- 	websocket_id BIGINT REFERENCES websocket(id),
+-- 	timestamp TIMESTAMPTZ,
+-- 	event_type TEXT,
+-- 	payload TEXT
+-- );
+CREATE TABLE websocket_event(id INTEGER PRIMARY KEY,page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,websocket_id BIGINT REFERENCES websocket(id),timestamp TIMESTAMPTZ,event_type TEXT,payload TEXT);
+------------------------
+--- EVENT_SOURCE_MSG ---
+------------------------
+-- CREATE TABLE event_source_msg(
+-- 	id INTEGER PRIMARY KEY,
+-- 	page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,
+-- 	internal_request_id TEXT,
+-- 	event_name TEXT,
+-- 	event_id TEXT,
+-- 	data TEXT,
+-- 	timestamp TIMESTAMPTZ
+-- );
+CREATE TABLE event_source_msg(id INTEGER PRIMARY KEY,page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,internal_request_id TEXT,event_name TEXT,event_id TEXT,data TEXT,timestamp TIMESTAMPTZ);
 --------------
 --- COOKIE ---
 --------------
--- CREATE TABLE IF NOT EXISTS cookie(
--- 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
--- 	page_id INTEGER REFERENCES page(id),
--- 	name TEXT,
--- 	secure TEXT,
--- 	path TEXT,
+-- CREATE TABLE cookie(
+-- 	id INTEGER PRIMARY KEY,
+-- 	page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,
+-- 	domain_id BIGINT REFERENCES domain(id),
 -- 	domain TEXT,
--- 	httponly TEXT,
--- 	expiry TEXT,
--- 	value TEXT,
+-- 	expires_text TEXT,
+-- 	expires_timestamp TIMESTAMPTZ,
+-- 	http_only BOOLEAN,
 -- 	is_3p BOOLEAN,
--- 	captured TEXT,
--- 	domain_id INTEGER,
+-- 	is_1p_3p BOOLEAN,
+-- 	name TEXT,
+-- 	path TEXT,
+-- 	same_site TEXT,
+-- 	secure BOOLEAN,
+-- 	session BOOLEAN,
+-- 	size BIGINT,
+-- 	value TEXT,
+-- 	is_set_by_response BOOLEAN
 -- );
-CREATE TABLE IF NOT EXISTS cookie(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL REFERENCES page(id),page_id INTEGER,name TEXT,secure TEXT,path TEXT,domain TEXT,httponly TEXT,expiry TEXT,value TEXT,is_3p BOOLEAN,captured TEXT,domain_id INTEGER REFERENCES domain(id));
+CREATE TABLE cookie(id INTEGER PRIMARY KEY,page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,domain_id BIGINT REFERENCES domain(id),domain TEXT,expires_text TEXT,expires_timestamp TIMESTAMPTZ,http_only BOOLEAN,is_3p BOOLEAN,is_1p_3p BOOLEAN,name TEXT,path TEXT,same_site TEXT,secure BOOLEAN,session BOOLEAN,size BIGINT,value TEXT,is_set_by_response BOOLEAN);
+-------------------
+--- DOM_STORAGE ---
+-------------------
+-- CREATE TABLE dom_storage(
+-- 	id INTEGER PRIMARY KEY,
+-- 	page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,
+-- 	domain_id BIGINT REFERENCES domain(id),
+-- 	security_origin TEXT,
+-- 	is_local_storage BOOLEAN,
+-- 	key TEXT,
+-- 	value TEXT,
+-- 	is_3p BOOLEAN
+-- );
+CREATE TABLE dom_storage(id INTEGER PRIMARY KEY,page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,domain_id BIGINT REFERENCES domain(id),security_origin TEXT,is_local_storage BOOLEAN,key TEXT,value TEXT,is_3p BOOLEAN);
 -------------
 --- ERROR ---
 -------------
--- CREATE TABLE IF NOT EXISTS error(
--- 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
--- 	url TEXT NOT NULL,
+-- CREATE TABLE error(
+-- 	id INTEGER PRIMARY KEY,
+-- 	client_id TEXT NOT NULL,
+-- 	target TEXT NOT NULL,
+-- 	task TEXT NOT NULL,
 -- 	msg TEXT NOT NULL,
--- 	timestamp TEXT NOT NULL,
---  UNIQUE (url, msg)
+-- 	timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 -- );
-CREATE TABLE IF NOT EXISTS error(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,url TEXT NOT NULL,msg TEXT NOT NULL,timestamp TEXT NOT NULL,UNIQUE (url, msg));
+CREATE TABLE error(id INTEGER PRIMARY KEY,client_id TEXT NOT NULL,target TEXT NOT NULL,task TEXT NOT NULL,msg TEXT NOT NULL,timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP);
+------------
+--- LINK ---
+------------
+-- CREATE TABLE link(
+-- 	id INTEGER PRIMARY KEY,
+-- 	url TEXT,
+-- 	url_md5 TEXT,
+-- 	text TEXT,
+-- 	text_md5 TEXT,
+-- 	is_policy BOOLEAN,
+-- 	is_internal BOOLEAN,
+-- 	domain_id BIGINT REFERENCES domain(id),
+-- 	UNIQUE (url_md5, text_md5)
+-- );
+CREATE TABLE link(id INTEGER PRIMARY KEY,url TEXT,url_md5 TEXT,text TEXT,text_md5 TEXT,is_policy BOOLEAN,is_internal BOOLEAN,domain_id BIGINT REFERENCES domain(id),UNIQUE (url_md5, text_md5));
+--------------------------
+--- PAGE_LINK_JUNCTION ---
+--------------------------
+-- CREATE TABLE page_link_junction(
+-- 	page_id BIGINT,
+-- 	link_id BIGINT,
+-- 	UNIQUE (page_id, link_id)
+-- );
+CREATE TABLE page_link_junction(page_id BIGINT,link_id BIGINT,UNIQUE (page_id, link_id));
+--------------
+--- POLICY ---
+--------------
+-- CREATE TABLE policy(
+-- 	id INTEGER PRIMARY KEY,
+-- 	client_id TEXT,
+-- 	client_timezone TEXT,
+-- 	client_ip TEXT,
+-- 	browser_type TEXT,
+-- 	browser_version TEXT,
+-- 	browser_prewait BIGINT,
+-- 	start_url TEXT,
+-- 	start_url_md5 TEXT,
+-- 	final_url TEXT,
+-- 	final_url_md5 TEXT,
+-- 	title TEXT,
+-- 	meta_desc TEXT,
+-- 	lang TEXT,
+-- 	fk_score NUMERIC,
+-- 	fre_score NUMERIC,
+-- 	type TEXT,
+-- 	match_term TEXT,
+-- 	match_text TEXT,
+-- 	match_text_type TEXT,
+-- 	confidence BIGINT DEFAULT 0,
+-- 	page_text_id BIGINT,
+-- 	page_source_md5 TEXT,
+-- 	accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+-- 	added TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+-- 	UNIQUE (start_url_md5, page_text_id)
+-- );
+CREATE TABLE policy(id INTEGER PRIMARY KEY,client_id TEXT,client_timezone TEXT,client_ip TEXT,browser_type TEXT,browser_version TEXT,browser_prewait BIGINT,start_url TEXT,start_url_md5 TEXT,final_url TEXT,final_url_md5 TEXT,title TEXT,meta_desc TEXT,lang TEXT,fk_score NUMERIC,fre_score NUMERIC,type TEXT,match_term TEXT,match_text TEXT,match_text_type TEXT,confidence BIGINT DEFAULT 0,page_text_id BIGINT,page_source_md5 TEXT,accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,added TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,UNIQUE (start_url_md5, page_text_id));
+----------------------------
+--- PAGE_POLICY_JUNCTION ---
+----------------------------
+-- CREATE TABLE page_policy_junction(
+-- 	page_id BIGINT,
+-- 	policy_id BIGINT,
+-- 	accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+-- 	UNIQUE (page_id, policy_id, accessed)
+-- );
+CREATE TABLE page_policy_junction(page_id BIGINT,policy_id BIGINT,accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,UNIQUE (page_id, policy_id, accessed));
+-----------------------------
+--- CRAWL_POLICY_JUNCTION ---
+-----------------------------
+-- CREATE TABLE crawl_policy_junction(
+-- 	crawl_id BIGINT,
+-- 	policy_id BIGINT,
+-- 	accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+-- 	UNIQUE (crawl_id, policy_id, accessed)
+-- );
+CREATE TABLE crawl_policy_junction(crawl_id BIGINT,policy_id BIGINT,accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,UNIQUE (crawl_id, policy_id, accessed));
+---------------------------------
+--- POLICY_REQUEST_DISCLOSURE ---
+---------------------------------
+-- CREATE TABLE policy_request_disclosure(
+-- 	page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,
+-- 	policy_id BIGINT REFERENCES policy(id),
+-- 	request_owner_id TEXT REFERENCES domain_owner(id),
+-- 	disclosed BOOLEAN,
+-- 	disclosed_owner_id TEXT REFERENCES domain_owner(id),
+-- 	UNIQUE (page_id, request_owner_id)
+-- );
+CREATE TABLE policy_request_disclosure(page_id BIGINT REFERENCES page(id) ON DELETE CASCADE,policy_id BIGINT REFERENCES policy(id),request_owner_id TEXT REFERENCES domain_owner(id),disclosed BOOLEAN,disclosed_owner_id TEXT REFERENCES domain_owner(id),UNIQUE (page_id, request_owner_id));
+------------
+--- FILE ---
+------------
+-- CREATE TABLE file(
+-- 	md5 TEXT UNIQUE PRIMARY KEY,
+-- 	body TEXT,
+-- 	type TEXT,
+-- 	is_base64 BOOLEAN,
+-- 	accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+-- );
+CREATE TABLE file(md5 TEXT UNIQUE PRIMARY KEY,body TEXT,type TEXT,is_base64 BOOLEAN,accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP);
+------------------------------
+--- CRAWL_ID_DOMAIN_LOOKUP ---
+------------------------------
+-- CREATE TABLE IF NOT EXISTS crawl_id_domain_lookup(
+-- 	crawl_id TEXT,
+-- 	domain TEXT,
+-- 	domain_owner_id TEXT,
+-- 	is_request BOOLEAN DEFAULT FALSE,
+-- 	is_response BOOLEAN DEFAULT FALSE,
+-- 	is_cookie BOOLEAN DEFAULT FALSE,
+-- 	is_websocket BOOLEAN DEFAULT FALSE,
+-- 	is_domstorage BOOLEAN DEFAULT FALSE,
+-- 	is_disclosed BOOLEAN DEFAULT FALSE
+-- );
+CREATE TABLE IF NOT EXISTS crawl_id_domain_lookup(crawl_id TEXT,domain TEXT,domain_owner_id TEXT,is_request BOOLEAN DEFAULT FALSE,is_response BOOLEAN DEFAULT FALSE,is_cookie BOOLEAN DEFAULT FALSE,is_websocket BOOLEAN DEFAULT FALSE,is_domstorage BOOLEAN DEFAULT FALSE,is_disclosed BOOLEAN DEFAULT FALSE);
+-----------------------------
+--- PAGE_ID_DOMAIN_LOOKUP ---
+-----------------------------
+-- CREATE TABLE IF NOT EXISTS page_id_domain_lookup(
+-- 	page_id BIGINT,
+-- 	domain TEXT,
+-- 	domain_owner_id TEXT,
+-- 	is_request BOOLEAN DEFAULT FALSE,
+-- 	is_response BOOLEAN DEFAULT FALSE,
+-- 	is_cookie BOOLEAN DEFAULT FALSE,
+-- 	is_websocket BOOLEAN DEFAULT FALSE,
+-- 	is_domstorage BOOLEAN DEFAULT FALSE,
+-- 	is_disclosed BOOLEAN DEFAULT FALSE
+-- );
+CREATE TABLE IF NOT EXISTS page_id_domain_lookup(page_id BIGINT,domain TEXT,domain_owner_id TEXT,is_request BOOLEAN DEFAULT FALSE,is_response BOOLEAN DEFAULT FALSE,is_cookie BOOLEAN DEFAULT FALSE,is_websocket BOOLEAN DEFAULT FALSE,is_domstorage BOOLEAN DEFAULT FALSE,is_disclosed BOOLEAN DEFAULT FALSE);

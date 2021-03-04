@@ -1,0 +1,4 @@
+lxml==4.6.2
+psycopg2-binary==2.8.6
+textstat==0.7.0
+websocket-client==0.57.0

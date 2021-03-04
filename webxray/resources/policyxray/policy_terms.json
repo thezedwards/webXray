@@ -1,0 +1,307 @@
+[
+	{
+		"lang"				: "en",
+		"policy_link_terms"	: [
+			"ad choices", 
+			"adchoices",
+			"advertising",
+			"cookie",
+			"gdpr",
+			"interest based", 
+			"interest-based", 
+			"legal",
+			"polic",
+			"privacy",
+			"terms",
+			"do not sell"
+		],
+		"privacy_policy_verification_terms" : [	
+			"privacy polic",
+			"privacy noti",
+			"privacy statement",
+			"privacy center",
+			"data protection policy",
+			"privacy information"
+		],
+		"terms_of_service_verification_terms"	: [	
+			"terms of service", 
+			"terms of use",
+			"conditions of service", 
+			"conditions of use",
+			"terms and conditions", 
+			"terms & conditions",
+			"legal noti", 
+			"legal polic", 
+			"legal info", 
+			"legal statement", 
+			"user agreement", 
+			"terms conditions", 
+			"terms and policies", 
+			"terms & policies",
+			"terms and service",
+			"terms & service"
+		],
+		"cookie_policy_verification_terms" 	: [	
+			"cookies polic",
+			"cookie polic", 
+			"cookie info",
+			"cookies info",
+			"cookie noti",
+			"cookies noti",
+			"cookie statement"
+		],
+		"ad_choices_verification_terms" 		: [	
+			"adchoices", 
+			"ad choices", 
+			"interest-based ads", 
+			"interest based ads", 
+			"advertising polic", 
+			"online behavioral advertising", 
+			"targeted ads", 
+			"tailored ads",
+			"ad noti", 
+			"advertising noti"
+		],
+		"gdpr_statement_verification_terms"	: [	
+			"general data protection regulation",
+			"gdpr commitment", 
+			"gdpr statement", 
+			"gdpr notice", 
+			"gdpr polic"
+		],
+		"ccpa_statement_verification_terms" : [
+			"do not sell",
+			"california privacy"
+		]
+	},
+	{
+		"lang"				: "de",
+		"policy_link_terms"		: [
+			"datenschutz",
+			"datenschutzbestimmungen",
+			"datenschutzerklärung",
+			"datenschutzerklarung",
+			"nutzungsbedingungen"
+		],
+		"privacy_policy_verification_terms" 	: [
+			"datenschutz",
+			"datenschutzbestimmungen",
+			"datenschutzerklärung",
+			"datenschutzerklarung"
+		],
+		"terms_of_service_verification_terms"	: [
+			"nutzungsbedingungen"
+		],
+		"cookie_policy_verification_terms" 		: [],
+		"ad_choices_verification_terms" 		: [],
+		"gdpr_statement_verification_terms"		: [],
+		"ccpa_statement_verification_terms" 	: []
+	},
+	{
+		"lang"				: "es",
+		"policy_link_terms"		: [
+			"privacidad",
+			"términos legales",
+			"terminos legales",
+			"términos y condiciones de uso",
+			"terminos y condiciones de uso",
+			"condiciones de uso",
+			"política de privacidad",
+			"politica de privacidad",
+			"aviso legal",
+			"política de cookies",
+			"politica de cookies"
+		],
+		"privacy_policy_verification_terms" 	: [
+			"política de privacidad",
+			"politica de privacidad"
+		],
+		"terms_of_service_verification_terms"	: [
+			"aviso legal",
+			"términos legales",
+			"terminos legales",
+			"términos y condiciones de uso",
+			"terminos y condiciones de uso",
+			"condiciones de uso"
+		],
+		"cookie_policy_verification_terms" 		: [
+			"política de cookies",
+			"politica de cookies"
+		],
+		"ad_choices_verification_terms" 		: [],
+		"gdpr_statement_verification_terms"		: [],
+		"ccpa_statement_verification_terms" 	: []
+	},
+	{
+		"lang"				: "fi",
+		"policy_link_terms"		: [
+			"tietosuojaseloste",
+			"tietosuojalausekkeesta",
+			"tietosuoja",
+			"käyttöehdot",
+			"kayttoehdot"
+		],
+		"privacy_policy_verification_terms" 	: [],
+		"terms_of_service_verification_terms"	: [],
+		"cookie_policy_verification_terms" 		: [],
+		"ad_choices_verification_terms" 		: [],
+		"gdpr_statement_verification_terms"		: [],
+		"ccpa_statement_verification_terms" 	: []
+	},
+	{
+		"lang"				: "fr",
+		"policy_link_terms"		: [
+			"politique de confidentialité",
+			"confidentialité et conditions",
+			"conditions d’utilisation",
+			"données personnelles"
+		],
+		"privacy_policy_verification_terms" 	: [
+			"politique de confidentialité",
+			"confidentialité et conditions"
+		],
+		"terms_of_service_verification_terms"	: [
+			"conditions d’utilisation"
+		],
+		"cookie_policy_verification_terms" 		: [],
+		"ad_choices_verification_terms" 		: [],
+		"gdpr_statement_verification_terms"		: [],
+		"ccpa_statement_verification_terms" 	: []
+	},
+	{
+		"lang"				: "id",
+		"policy_link_terms"		: [
+			"kode etik",
+			"kebijakan privasi",
+			"kebijakan tentang privasi",
+			"kerahasiaan pribadi"
+		],
+		"privacy_policy_verification_terms" 	: [],
+		"terms_of_service_verification_terms"	: [],
+		"cookie_policy_verification_terms" 		: [],
+		"ad_choices_verification_terms" 		: [],
+		"gdpr_statement_verification_terms"		: [],
+		"ccpa_statement_verification_terms" 	: []
+	},
+	{
+		"lang"				: "it",
+		"policy_link_terms"		: [
+			"condizioni",
+			"termini e normative",
+			"condizioni generali",
+			"trattamento dati",
+			"dati personali",
+			"informativa privacy",
+			"informativa dati personali"
+		],
+		"privacy_policy_verification_terms" 	: [],
+		"terms_of_service_verification_terms"	: [],
+		"cookie_policy_verification_terms" 		: [],
+		"ad_choices_verification_terms" 		: [],
+		"gdpr_statement_verification_terms"		: [],
+		"ccpa_statement_verification_terms" 	: []
+	},	
+	{
+		"lang"				: "pl",
+		"policy_link_terms"		: [
+			"polityka prywatności",
+			"polityka prywatnosci",
+			"ochrona prywatności",
+			"ochrona prywatnosci",
+			"regulamin"
+		],
+		"privacy_policy_verification_terms" 	: [],
+		"terms_of_service_verification_terms"	: [],
+		"cookie_policy_verification_terms" 		: [],
+		"ad_choices_verification_terms" 		: [],
+		"gdpr_statement_verification_terms"		: [],
+		"ccpa_statement_verification_terms" 	: []
+	},
+	{
+		"lang"				: "ru",
+		"policy_link_terms"		: [
+			"политика конфиденциальности",
+			"политика использования данных",
+			"условия использования"
+		],
+		"privacy_policy_verification_terms" 	: [],
+		"terms_of_service_verification_terms"	: [],
+		"cookie_policy_verification_terms" 		: [],
+		"ad_choices_verification_terms" 		: [],
+		"gdpr_statement_verification_terms"		: [],
+		"ccpa_statement_verification_terms" 	: []
+	},
+	{
+		"lang"				: "zh",
+		"policy_link_terms"		: [
+			"个人信息",
+			"使用协议",
+			"共享",
+			"声明",
+			"宣言",
+			"广告",
+			"承诺",
+			"披露",
+			"政策",
+			"服务协议",
+			"权限",
+			"条件",
+			"条例",
+			"条款",
+			"法律",
+			"用户协议",
+			"申明",
+			"转让",
+			"隐私",
+			"隐私保护",
+			"隐私保护平台",
+			"隐私政策",
+			"隐私权",
+			"隐私权保护",
+			"隐私权政策",
+			"隐私条款"
+		],
+		"privacy_policy_verification_terms" : [	
+			"隐私政策", 
+			"隐私申明",
+			"隐私权申明",
+			"隐私条款",
+			"隐私与cookie",
+			"隐私政策",
+			"隐私权政策",
+			"隐私中心",
+			"隐私保护",
+			"隐私权保护"
+		],
+		"terms_of_service_verification_terms"	: [	
+			"服务协议",
+			"服务协议",
+			"服务条款",
+			"使用条款",
+			"用户协议"
+		],
+		"cookie_policy_verification_terms" 	: [	
+			"cookies策略",
+			"cookies策略",
+			"cookies政策"
+		],
+		"ad_choices_verification_terms" 		: [	
+			"基于兴趣的广告"
+		],
+		"gdpr_statement_verification_terms"		: [],
+		"ccpa_statement_verification_terms" 	: []
+	},
+	{
+		"lang"				: "cat",
+		"policy_link_terms"		: [
+			"politico de privacitat",
+			"político de privacitat"
+		],
+		"privacy_policy_verification_terms" 	: [],
+		"terms_of_service_verification_terms"	: [],
+		"cookie_policy_verification_terms" 		: [],
+		"ad_choices_verification_terms" 		: [],
+		"gdpr_statement_verification_terms"		: [],
+		"ccpa_statement_verification_terms" 	: []
+	}
+]
